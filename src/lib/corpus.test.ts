@@ -1,5 +1,5 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { join } from "node:path";
+import { join, sep } from "node:path";
 
 /**
  * Guards the round-trip corpus itself (WP-0.6). The round-trip assertions arrive with the
@@ -16,7 +16,13 @@ function walk(dir: string, out: string[] = []): string[] {
   for (const name of readdirSync(dir)) {
     const p = join(dir, name);
     if (statSync(p).isDirectory()) walk(p, out);
-    else if (name.endsWith(".md")) out.push(p.slice(ROOT.length + 1));
+    else if (name.endsWith(".md"))
+      out.push(
+        p
+          .slice(ROOT.length + 1)
+          .split(sep)
+          .join("/"),
+      );
   }
   return out;
 }
