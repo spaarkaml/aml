@@ -24,6 +24,11 @@ export const commands = {
 	entryCreateFolder: (path: string) => typedError<null, FolioError>(__TAURI_INVOKE("entry_create_folder", { path })),
 	entryRename: (from: string, to: string) => typedError<null, FolioError>(__TAURI_INVOKE("entry_rename", { from, to })),
 	entryTrash: (path: string) => typedError<null, FolioError>(__TAURI_INVOKE("entry_trash", { path })),
+	assetWrite: (notePath: string, fileName: string, dataBase64: string) => typedError<AssetInfo, FolioError>(__TAURI_INVOKE("asset_write", { notePath, fileName, dataBase64 })),
+	/**  Absolute path of a note-relative asset reference, for `convertFileSrc` in the UI. */
+	assetResolve: (notePath: string, target: string) => typedError<string, FolioError>(__TAURI_INVOKE("asset_resolve", { notePath, target })),
+	/**  Copies a file chosen in the native dialog into the note's assets folder. */
+	assetImport: (notePath: string, source: string) => typedError<AssetInfo, FolioError>(__TAURI_INVOKE("asset_import", { notePath, source })),
 };
 
 /** Events */
@@ -42,6 +47,15 @@ export type AppInfo = {
 	platform: string,
 	arch: string,
 	debug: boolean,
+};
+
+export type AssetInfo = {
+	/**  Folio-relative path of the stored file. */
+	path: string,
+	/**  Path to write into the note (relative to the note's directory, forward slashes). */
+	markdownPath: string,
+	absolute: string,
+	size: number,
 };
 
 export type EntryKind = "folder" | "note" | "file";

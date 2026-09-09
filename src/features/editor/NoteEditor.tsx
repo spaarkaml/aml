@@ -4,7 +4,9 @@ import type { PmNode } from "@/lib/markdown";
 import { setActiveEditor } from "./editorRef";
 import { amlExtensions } from "./extensions";
 import styles from "./NoteEditor.module.css";
+import { handleDrop, handlePaste } from "./paste";
 import { useEditorStore } from "./store";
+import { TableMenu } from "./TableMenu";
 
 export function NoteEditor() {
   const path = useEditorStore((s) => s.path);
@@ -21,7 +23,11 @@ export function NoteEditor() {
   // (extensions, editorProps, callbacks) would churn the view while the user types.
   const extensions = useMemo(() => amlExtensions(), []);
   const editorProps = useMemo(
-    () => ({ attributes: { class: styles.prose ?? "", spellcheck: "false", lang: "en-AU" } }),
+    () => ({
+      attributes: { class: styles.prose ?? "", spellcheck: "false", lang: "en-AU" },
+      handlePaste,
+      handleDrop,
+    }),
     [],
   );
   const onUpdate = useCallback(
@@ -29,17 +35,22 @@ export function NoteEditor() {
     [changed],
   );
 
+  // The editor is (re)created with its content whenever the note or its on-disk version
+  // changes. Loading content after mount (setContent in an effect) proved racy: it could
+  // land after the user's first click and move the caret. No timer-based autofocus either.
+  // `initial` is frozen per (path, docVersion): the live `doc` changes on every keystroke and
+  // must not be handed to Tiptap as `content` or it would reset the view while typing.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: docVersion is the reload signal; doc is read only when it changes
+  const initial = useMemo(() => doc, [path, docVersion]);
   const editor = useEditor(
     {
       extensions,
-      content: null,
-      // No autofocus option: Tiptap applies it on a timer, which can yank the caret to the
-      // start after the user has already clicked. We focus synchronously after loading below.
+      content: initial,
       autofocus: false,
       editorProps,
       onUpdate,
     },
-    [path],
+    [path, docVersion],
   );
 
   useEffect(() => {
@@ -47,13 +58,12 @@ export function NoteEditor() {
     return () => setActiveEditor(null);
   }, [editor]);
 
-  // Load on open and on every reload from disk; never on ordinary re-renders.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: `doc` is deliberately read without being a dependency — docVersion is the reload signal
+  // Focus once per editor instance, after EditorContent has mounted the view (child effects
+  // run first). Focusing earlier — in `onCreate` or a layout effect, before the view is in
+  // the document — left ProseMirror ignoring later mouse selections.
   useEffect(() => {
-    if (!editor || !doc) return;
-    editor.commands.setContent(doc, { emitUpdate: false });
-    editor.commands.focus("start", { scrollIntoView: false });
-  }, [editor, docVersion]);
+    editor?.commands.focus("start", { scrollIntoView: false });
+  }, [editor]);
 
   if (!path) return null;
 
@@ -79,6 +89,7 @@ export function NoteEditor() {
           {error}
         </div>
       ) : null}
+      {editor ? <TableMenu editor={editor} /> : null}
       <EditorContent editor={editor} className={styles.content} />
     </div>
   );

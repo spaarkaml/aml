@@ -4,6 +4,12 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### WP-1.3 — Images, tables, footnotes, properties (2026-09-10)
+- Assets: `asset_write` / `asset_import` / `asset_resolve` commands; per-top-level-folder `assets/`; asset protocol scoped to the Folio; paste/drop images into the editor; `AmlImage` node view.
+- Table toolbar (rows/cols/header/delete) and "Insert Table"; "Insert Footnote" (⌘⌥F).
+- Properties panel: typed front-matter fields, add/remove, YAML mode; edits go through the guarded front-matter node.
+- Editor stability: content frozen at creation per note version; focus after mount; palette commands run after the palette closes.
+
 ### WP-1.2 — Editor spike (2026-09-09)
 - `src/lib/markdown`: remark-based parse, canonical serialiser with conservative escaping, AML inline syntax, mdast⇄ProseMirror bridge with verbatim Raw nodes. 48-file corpus AST-equal + idempotent.
 - Tiptap 3 editor with AML nodes (front matter, raw block/inline, wiki link/embed, tag, cite, footnotes), list `spread`, code `meta`, table `align`.

@@ -17,8 +17,10 @@ describe("CommandPalette", () => {
     expect(screen.getByText("Take Snapshot")).toBeInTheDocument();
     expect(screen.queryByText("Toggle Layout")).not.toBeInTheDocument();
     fireEvent.keyDown(input, { key: "Enter" });
-    expect(ran).toEqual(["snap"]);
     expect(usePaletteStore.getState().open).toBe(false);
+    // Commands run on the next tick, after the palette has unmounted.
+    await new Promise((r) => setTimeout(r, 0));
+    expect(ran).toEqual(["snap"]);
     off();
   });
 

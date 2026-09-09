@@ -4,7 +4,11 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use tauri::{AppHandle, Manager, State};
 
-use crate::folio::{watch, Folio, FolioError, FolioInfo, NoteContent, NoteMeta, Result, TreeNode};
+use base64::Engine;
+
+use crate::folio::{
+    watch, AssetInfo, Folio, FolioError, FolioInfo, NoteContent, NoteMeta, Result, TreeNode,
+};
 use crate::state::AppState;
 
 const RECENT_FILE: &str = "recent-folios.json";
@@ -68,6 +72,10 @@ fn remember(app: &AppHandle, folio: &Folio) -> Result<()> {
 
 fn install(app: &AppHandle, state: &State<AppState>, folio: Folio) -> Result<FolioInfo> {
     let watcher = watch::start(app.clone(), &folio)?;
+    // Let the webview display images from inside this Folio via the asset protocol.
+    app.asset_protocol_scope()
+        .allow_directory(folio.root(), true)
+        .map_err(|e| FolioError::Io(e.to_string()))?;
     let info = folio.info();
     remember(app, &folio)?;
     *state
@@ -179,4 +187,39 @@ pub fn entry_rename(state: State<AppState>, from: String, to: String) -> Result<
 #[specta::specta]
 pub fn entry_trash(state: State<AppState>, path: String) -> Result<()> {
     with_folio(&state, |f| f.trash(&path))
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn asset_write(
+    state: State<AppState>,
+    note_path: String,
+    file_name: String,
+    data_base64: String,
+) -> Result<AssetInfo> {
+    let bytes = base64::engine::general_purpose::STANDARD
+        .decode(data_base64.as_bytes())
+        .map_err(|e| FolioError::Io(format!("bad base64: {e}")))?;
+    with_folio(&state, |f| f.write_asset(&note_path, &file_name, &bytes))
+}
+
+/// Absolute path of a note-relative asset reference, for `convertFileSrc` in the UI.
+#[tauri::command]
+#[specta::specta]
+pub fn asset_resolve(state: State<AppState>, note_path: String, target: String) -> Result<String> {
+    with_folio(&state, |f| {
+        f.resolve_from_note(&note_path, &target)
+            .map(|p| p.display().to_string())
+    })
+}
+
+/// Copies a file chosen in the native dialog into the note's assets folder.
+#[tauri::command]
+#[specta::specta]
+pub fn asset_import(
+    state: State<AppState>,
+    note_path: String,
+    source: String,
+) -> Result<AssetInfo> {
+    with_folio(&state, |f| f.import_asset(&note_path, Path::new(&source)))
 }

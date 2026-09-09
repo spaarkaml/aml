@@ -41,7 +41,9 @@ export function CommandPalette() {
   const runAt = (i: number) => {
     const cmd = results[i];
     setOpen(false);
-    if (cmd) cmd.run();
+    // Run after React has unmounted the palette so a command that focuses the editor
+    // is not immediately blurred by the input going away.
+    if (cmd) setTimeout(() => cmd.run(), 0);
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

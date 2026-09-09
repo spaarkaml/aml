@@ -100,6 +100,26 @@ export function installDevMocks(): void {
         notes.set(path, { text: String(a.text), mtime });
         return { path, mtime, size: String(a.text).length };
       }
+      case "asset_write": {
+        const name = String(a.fileName);
+        return {
+          path: `assets/20260910-000000-${name}`,
+          markdownPath: `assets/20260910-000000-${name}`,
+          absolute: `/mock/assets/${name}`,
+          size: 1,
+        };
+      }
+      case "asset_import": {
+        const name = String(a.source).split("/").pop() ?? "image.png";
+        return {
+          path: `assets/20260910-000000-${name}`,
+          markdownPath: `assets/20260910-000000-${name}`,
+          absolute: `/mock/assets/${name}`,
+          size: 1,
+        };
+      }
+      case "asset_resolve":
+        return `/mock/${String(a.target)}`;
       case "plugin:event|listen":
         return 1;
       case "plugin:event|unlisten":

@@ -25,6 +25,9 @@ fn specta_builder() -> Builder<tauri::Wry> {
             commands::folio::entry_create_folder,
             commands::folio::entry_rename,
             commands::folio::entry_trash,
+            commands::folio::asset_write,
+            commands::folio::asset_resolve,
+            commands::folio::asset_import,
         ])
         .events(collect_events![folio::watch::FolioChanged])
 }

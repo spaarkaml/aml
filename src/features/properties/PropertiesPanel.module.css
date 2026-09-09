@@ -1,0 +1,97 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--aml-space-2);
+  font-size: 12px;
+}
+
+.empty {
+  opacity: 0.6;
+  margin: 0;
+}
+
+.list {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--aml-space-1);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  gap: var(--aml-space-2);
+  align-items: center;
+}
+
+.key {
+  color: var(--aml-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.value {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.input {
+  flex-grow: 1;
+  min-width: 0;
+  font: inherit;
+  color: var(--aml-text);
+  background: var(--aml-surface);
+  border: 1px solid transparent;
+  border-radius: 3px;
+  padding: 2px 6px;
+}
+
+.input:hover,
+.input:focus {
+  border-color: var(--aml-muted);
+  outline: none;
+}
+
+.remove,
+.small {
+  font: inherit;
+  color: var(--aml-primary);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  padding: 1px 5px;
+}
+
+.remove {
+  opacity: 0;
+}
+
+.row:hover .remove {
+  opacity: 0.7;
+}
+
+.small {
+  border-color: var(--aml-muted);
+}
+
+.add {
+  display: flex;
+  gap: var(--aml-space-1);
+  margin-top: var(--aml-space-2);
+}
+
+.raw {
+  font-family: var(--aml-font-mono);
+  font-size: 11px;
+  min-height: 120px;
+  color: var(--aml-text);
+  background: var(--aml-surface);
+  border: 1px solid var(--aml-muted);
+  border-radius: 3px;
+  padding: 6px;
+  resize: vertical;
+}

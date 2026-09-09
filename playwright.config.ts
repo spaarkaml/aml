@@ -9,9 +9,10 @@ export default defineConfig({
   testDir: "e2e",
   timeout: 20_000,
   fullyParallel: true,
-  // Two workers: the Vite dev server and Chromium share the CPU; more workers make
-  // keystroke-driven editor tests flaky without exercising anything real.
-  workers: 2,
+  // One worker: the Vite dev server and Chromium share the CPU, and under contention Chromium
+  // coalesces or drops synthetic keystrokes into ProseMirror — a test-harness artefact, not an
+  // app bug (every editor spec is deterministic in isolation). ~15 s total is acceptable.
+  workers: 1,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [["github"], ["list"]] : "list",
   use: {

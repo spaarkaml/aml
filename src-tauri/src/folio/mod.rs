@@ -70,6 +70,18 @@ pub struct NoteMeta {
     pub size: u64,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct AssetInfo {
+    /// Folio-relative path of the stored file.
+    pub path: String,
+    /// Path to write into the note (relative to the note's directory, forward slashes).
+    pub markdown_path: String,
+    pub absolute: String,
+    #[specta(type = specta_typescript::Number)]
+    pub size: u64,
+}
+
 #[derive(Debug, Clone)]
 pub struct Folio {
     root: PathBuf,
@@ -253,6 +265,61 @@ impl Folio {
         Ok(())
     }
 
+    /// Stores an image/attachment for `note_rel` and returns the path to reference from the
+    /// note (relative to the note's directory). Assets live in `assets/` inside the note's
+    /// top-level folder, or `<Folio>/assets/` for notes at the root (Q12).
+    pub fn write_asset(&self, note_rel: &str, file_name: &str, bytes: &[u8]) -> Result<AssetInfo> {
+        let note_abs = self.resolve(note_rel)?;
+        let top = Path::new(note_rel)
+            .components()
+            .next()
+            .and_then(|c| match c {
+                Component::Normal(s) => Some(s.to_string_lossy().to_string()),
+                _ => None,
+            });
+        let assets_rel = match top {
+            Some(t) if Path::new(note_rel).components().count() > 1 => format!("{t}/assets"),
+            _ => "assets".to_string(),
+        };
+        let assets_abs = self.resolve(&assets_rel)?;
+        fs::create_dir_all(&assets_abs)?;
+        let safe_name = sanitise_file_name(file_name);
+        let stamp = chrono_stamp();
+        let stored = format!("{stamp}-{safe_name}");
+        let abs = assets_abs.join(&stored);
+        write_atomic(&abs, bytes)?;
+        let note_dir = note_abs.parent().unwrap_or(&self.root);
+        let rel_from_note = relative_path(note_dir, &abs);
+        Ok(AssetInfo {
+            path: format!("{assets_rel}/{stored}"),
+            markdown_path: rel_from_note,
+            absolute: abs.display().to_string(),
+            size: bytes.len() as u64,
+        })
+    }
+
+    /// Copies an existing file (picked in a dialog) into the assets folder for `note_rel`.
+    pub fn import_asset(&self, note_rel: &str, source: &Path) -> Result<AssetInfo> {
+        let bytes = fs::read(source)?;
+        let name = source
+            .file_name()
+            .map(|n| n.to_string_lossy().to_string())
+            .unwrap_or_else(|| "file".to_string());
+        self.write_asset(note_rel, &name, &bytes)
+    }
+
+    /// Absolute path for an asset referenced from a note (for display via the asset protocol).
+    pub fn resolve_from_note(&self, note_rel: &str, target: &str) -> Result<PathBuf> {
+        let note_abs = self.resolve(note_rel)?;
+        let base = note_abs.parent().unwrap_or(&self.root).to_path_buf();
+        let joined = base.join(target);
+        let normalised = normalise_lexically(&joined);
+        if !normalised.starts_with(&self.root) {
+            return Err(FolioError::InvalidPath(target.to_string()));
+        }
+        Ok(normalised)
+    }
+
     /// Moves an entry to the OS trash / recycle bin — never a hard delete.
     pub fn trash(&self, rel: &str) -> Result<()> {
         let abs = self.resolve(rel)?;
@@ -261,6 +328,98 @@ impl Folio {
         }
         trash::delete(&abs).map_err(|e| FolioError::Io(e.to_string()))
     }
+}
+
+fn sanitise_file_name(name: &str) -> String {
+    let base = Path::new(name)
+        .file_name()
+        .map(|n| n.to_string_lossy().to_string())
+        .unwrap_or_else(|| "file".to_string());
+    let cleaned: String = base
+        .chars()
+        .map(|c| {
+            if c.is_alphanumeric() || c == '.' || c == '-' || c == '_' {
+                c
+            } else {
+                '-'
+            }
+        })
+        .collect();
+    let mut collapsed = String::with_capacity(cleaned.len());
+    for c in cleaned.chars() {
+        if c == '-' && collapsed.ends_with('-') {
+            continue;
+        }
+        collapsed.push(c);
+    }
+    let trimmed = collapsed.trim_matches('-').to_lowercase();
+    if trimmed.is_empty() {
+        "file".to_string()
+    } else {
+        trimmed
+    }
+}
+
+fn chrono_stamp() -> String {
+    let secs = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|d| d.as_secs())
+        .unwrap_or(0);
+    // Civil date from epoch seconds (no chrono dependency needed).
+    let days = secs / 86_400;
+    let rem = secs % 86_400;
+    let (y, m, d) = civil_from_days(days as i64);
+    format!(
+        "{y:04}{m:02}{d:02}-{:02}{:02}{:02}",
+        rem / 3600,
+        (rem % 3600) / 60,
+        rem % 60
+    )
+}
+
+/// Howard Hinnant's algorithm: days since 1970-01-01 → (year, month, day).
+fn civil_from_days(z: i64) -> (i64, u32, u32) {
+    let z = z + 719_468;
+    let era = if z >= 0 { z } else { z - 146_096 } / 146_097;
+    let doe = (z - era * 146_097) as u64;
+    let yoe = (doe - doe / 1460 + doe / 36_524 - doe / 146_096) / 365;
+    let y = yoe as i64 + era * 400;
+    let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+    let mp = (5 * doy + 2) / 153;
+    let d = (doy - (153 * mp + 2) / 5 + 1) as u32;
+    let m = if mp < 10 { mp + 3 } else { mp - 9 } as u32;
+    (if m <= 2 { y + 1 } else { y }, m, d)
+}
+
+fn relative_path(from_dir: &Path, to: &Path) -> String {
+    let from: Vec<_> = from_dir.components().collect();
+    let target: Vec<_> = to.components().collect();
+    let common = from
+        .iter()
+        .zip(target.iter())
+        .take_while(|(a, b)| a == b)
+        .count();
+    let mut parts: Vec<String> = vec!["..".to_string(); from.len() - common];
+    parts.extend(
+        target[common..]
+            .iter()
+            .map(|c| c.as_os_str().to_string_lossy().to_string()),
+    );
+    parts.join("/")
+}
+
+fn normalise_lexically(p: &Path) -> PathBuf {
+    let mut out = PathBuf::new();
+    for c in p.components() {
+        match c {
+            Component::ParentDir => {
+                out.pop();
+            }
+            Component::CurDir => {}
+            other => out.push(other.as_os_str()),
+        }
+    }
+    out
 }
 
 fn same_path_case_insensitive(a: &Path, b: &Path) -> bool {
@@ -468,6 +627,38 @@ mod tests {
             .collect();
         assert!(leftovers.is_empty());
         assert_eq!(f.read_note("a.md").unwrap().text, "version 19");
+    }
+
+    #[test]
+    fn assets_are_stored_beside_the_top_level_folder() {
+        let (_d, f) = temp_folio();
+        f.create_folder("Thesis/chapters").unwrap();
+        f.write_note("Thesis/chapters/03.md", "x", None).unwrap();
+        let a = f
+            .write_asset("Thesis/chapters/03.md", "My Photo (1).PNG", b"png")
+            .unwrap();
+        assert!(a.path.starts_with("Thesis/assets/"));
+        assert!(a.path.ends_with("-my-photo-1-.png"), "{}", a.path);
+        assert_eq!(
+            a.markdown_path,
+            format!("../assets/{}", a.path.rsplit('/').next().unwrap())
+        );
+        assert_eq!(fs::read(f.root().join(&a.path)).unwrap(), b"png");
+        let root_asset = f.write_asset("Inbox.md", "cap.jpg", b"jpg").unwrap();
+        assert!(root_asset.path.starts_with("assets/"));
+        assert_eq!(root_asset.markdown_path, root_asset.path);
+        let resolved = f
+            .resolve_from_note("Thesis/chapters/03.md", &a.markdown_path)
+            .unwrap();
+        assert_eq!(resolved, f.root().join(&a.path));
+        assert!(f.resolve_from_note("Inbox.md", "../../etc/passwd").is_err());
+    }
+
+    #[test]
+    fn civil_dates() {
+        assert_eq!(civil_from_days(0), (1970, 1, 1));
+        assert_eq!(civil_from_days(10_957), (2000, 1, 1));
+        assert_eq!(civil_from_days(20_705), (2026, 9, 9));
     }
 
     #[test]

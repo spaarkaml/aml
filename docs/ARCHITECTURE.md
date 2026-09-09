@@ -28,7 +28,7 @@ Updated with every work package. If this file and the code disagree, the code is
 | `src-tauri/src/folio/` | Folio model, path safety, atomic writes (`mod.rs`), watcher (`watch.rs`), errors |
 | `src-tauri/src/state.rs` | `AppState { folio, watcher }` managed by Tauri |
 | `src/app/` | `App.tsx`, `commands.ts` (shell commands + `SHORTCUTS` table), `tokens.css`, `global.css`, `shell/` (Shell, TopBar, SidePanel, StatusBar) |
-| `src/features/<feature>/` | Feature folders: components, store, tests. Current: `commands`, `layout`, `appearance`, `folio` (store, Welcome, FolioTree, watcher events), `editor` (Tiptap extensions in `extensions/`, `NoteEditor.tsx`, store with debounced save/conflicts, `editorRef.ts`). No cross-feature imports except through `src/lib` |
+| `src/features/<feature>/` | Feature folders: components, store, tests. Current: `commands`, `layout`, `appearance`, `folio` (store, Welcome, FolioTree, watcher events), `editor` (Tiptap extensions in `extensions/`, `NoteEditor.tsx`, store with debounced save/conflicts, `editorRef.ts`, `assets.ts`/`paste.ts` for images, `TableMenu.tsx`, `footnotes.ts`), `properties` (front-matter panel + `frontmatter.ts` helpers). No cross-feature imports except through `src/lib` |
 | `src/lib/markdown/` | The markdown bridge: `mdast.ts` (parse + canonical serialise), `escape.ts`, `inline-syntax.ts` (wiki/tag/cite), `pm.ts` (mdast ⇄ ProseMirror JSON, Raw nodes), `index.ts` API |
 | `src/lib/` | `fuzzy.ts`, `platform.ts`, `wordcount.ts` |
 | `src/ipc/` | Generated bindings + `index.ts` re-export |
@@ -49,6 +49,9 @@ Updated with every work package. If this file and the code disagree, the code is
 | `note_read` | path | `NoteContent { path, text, mtime, size }` | folio |
 | `note_write` | path, text, expectedMtime? | `NoteMeta` (Conflict error if mtime moved) | folio |
 | `entry_create_note` / `entry_create_folder` / `entry_rename` / `entry_trash` | paths | — | folio |
+| `asset_write` | notePath, fileName, dataBase64 | `AssetInfo { path, markdownPath, absolute, size }` | folio |
+| `asset_import` | notePath, source (absolute) | `AssetInfo` | folio |
+| `asset_resolve` | notePath, target | absolute path (for `convertFileSrc`) | folio |
 
 Events: `folio-changed` → `FolioChanged { paths }` (debounced watcher).
 
@@ -59,6 +62,7 @@ All results are `{status:"ok",data}|{status:"error",error:FolioError}`; `FolioEr
 - **Folio:** `<root>/.aml/config.yaml`, `<root>/.aml/snapshots/`, `<root>/.stignore` (created by `Folio::create`). Everything else in the root is user content; dotfiles, `node_modules` and `.aml-tmp-*` are invisible to the tree.
 - **Per device (app-data dir):** `recent-folios.json`. Layout/appearance in webview localStorage.
 - **Writes** always go through `folio::write_atomic` (temp + fsync + rename).
+- **Assets:** `<top-level folder>/assets/YYYYMMDD-HHMMSS-<slug>.<ext>`; notes reference them relatively; displayed via the Tauri asset protocol (scope = Folio root, set on open).
 
 ## Quality tooling
 

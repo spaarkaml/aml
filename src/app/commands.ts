@@ -1,6 +1,8 @@
 import { useAppearanceStore } from "@/features/appearance/store";
 import { usePaletteStore } from "@/features/commands/paletteStore";
 import { type Command, commandRegistry } from "@/features/commands/registry";
+import { getActiveEditor } from "@/features/editor/editorRef";
+import { insertFootnote } from "@/features/editor/footnotes";
 import { useEditorStore } from "@/features/editor/store";
 import { useFolioStore } from "@/features/folio/store";
 import { useLayoutStore } from "@/features/layout/store";
@@ -35,6 +37,33 @@ export const SHELL_COMMANDS: Command[] = [
     shortcut: SHORTCUTS.save,
     global: true,
     run: () => void useEditorStore.getState().saveNow(),
+  },
+  {
+    id: "insert.table",
+    title: "Insert Table (3 × 3)",
+    group: "Insert",
+    run: () =>
+      getActiveEditor()
+        ?.chain()
+        .focus()
+        .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+        .run(),
+  },
+  {
+    id: "insert.footnote",
+    title: "Insert Footnote",
+    group: "Insert",
+    shortcut: "mod+alt+f",
+    run: () => {
+      const e = getActiveEditor();
+      if (e) insertFootnote(e);
+    },
+  },
+  {
+    id: "insert.image",
+    title: "Insert Image…",
+    group: "Insert",
+    run: () => void pickAndInsertImage(),
   },
   {
     id: "note.close",
@@ -113,4 +142,24 @@ export function registerShellCommands(): () => void {
     registered?.();
     registered = null;
   };
+}
+
+async function pickAndInsertImage(): Promise<void> {
+  const editor = getActiveEditor();
+  const notePath = useEditorStore.getState().path;
+  if (!editor || !notePath) return;
+  const { open } = await import("@tauri-apps/plugin-dialog");
+  const picked = await open({
+    multiple: false,
+    title: "Insert image",
+    filters: [{ name: "Images", extensions: ["png", "jpg", "jpeg", "gif", "webp", "svg"] }],
+  });
+  if (typeof picked !== "string") return;
+  const { commands } = await import("@/ipc");
+  const r = await commands.assetImport(notePath, picked);
+  if (r.status === "error") return;
+  const alt = (picked.split(/[\\/]/).pop() ?? "image")
+    .replace(/\.[a-z0-9]+$/i, "")
+    .replace(/[-_]+/g, " ");
+  editor.chain().focus().setImage({ src: r.data.markdownPath, alt }).run();
 }

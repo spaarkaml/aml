@@ -1,6 +1,5 @@
 import type { Extensions } from "@tiptap/core";
 import CodeBlock from "@tiptap/extension-code-block";
-import Image from "@tiptap/extension-image";
 import { BulletList, OrderedList, TaskItem, TaskList } from "@tiptap/extension-list";
 import { Table, TableCell, TableHeader, TableRow } from "@tiptap/extension-table";
 import StarterKit from "@tiptap/starter-kit";
@@ -15,6 +14,7 @@ import {
   WikiEmbed,
   WikiLink,
 } from "./aml-nodes";
+import { AmlImage } from "./image";
 
 /**
  * The AML editor schema. Node names and attrs must match src/lib/markdown/pm.ts.
@@ -61,7 +61,7 @@ export function amlExtensions(): Extensions {
     TableRow,
     TableHeader,
     TableCell,
-    Image.configure({ inline: true, allowBase64: false }),
+    AmlImage,
     FrontMatter,
     RawBlock,
     RawInline,

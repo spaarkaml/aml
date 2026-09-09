@@ -5,6 +5,7 @@ import { FolioTree } from "@/features/folio/FolioTree";
 import { useFolioStore } from "@/features/folio/store";
 import { useFolioEvents } from "@/features/folio/useFolioEvents";
 import { Welcome } from "@/features/folio/Welcome";
+import { PropertiesPanel } from "@/features/properties/PropertiesPanel";
 import { type AppInfo, commands } from "@/ipc";
 import styles from "./App.module.css";
 import { registerShellCommands } from "./commands";
@@ -28,9 +29,7 @@ export function App() {
       left={
         folio ? <FolioTree /> : <p className={styles.placeholder}>Open a Folio to browse it.</p>
       }
-      right={
-        <p className={styles.placeholder}>Outline, Backlinks and Properties arrive in Stage 2.</p>
-      }
+      right={<PropertiesPanel />}
     >
       {folio ? (
         notePath ? (

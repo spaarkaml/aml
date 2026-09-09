@@ -18,8 +18,7 @@ test.afterEach(async ({ page }, info) => {
       .locator(".ProseMirror")
       .innerHTML()
       .catch(() => "<no editor>");
-    // biome-ignore lint/suspicious/noConsole: diagnostic output on failure only
-    console.log(`[editor html on failure] ${html.replace(/\n/g, " ").slice(0, 1200)}`);
+    process.stdout.write(`[editor html on failure] ${html.replace(/\n/g, " ").slice(0, 1500)}\n`);
   }
 });
 
