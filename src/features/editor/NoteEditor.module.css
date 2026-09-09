@@ -1,0 +1,248 @@
+.page {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: auto;
+  padding: var(--aml-space-8) var(--aml-space-6);
+}
+
+.content {
+  width: min(70ch, 100%);
+}
+
+.banner {
+  width: min(70ch, 100%);
+  display: flex;
+  align-items: center;
+  gap: var(--aml-space-3);
+  font-size: 12px;
+  padding: var(--aml-space-2) var(--aml-space-3);
+  margin-bottom: var(--aml-space-4);
+  border: 1px solid var(--aml-accent);
+  border-radius: var(--aml-radius);
+  background: var(--aml-highlight);
+}
+
+.banner button {
+  font: inherit;
+  font-size: 12px;
+  color: var(--aml-primary);
+  border: 1px solid var(--aml-primary);
+  background: transparent;
+  border-radius: var(--aml-radius);
+  padding: 2px 8px;
+}
+
+/* Editor typography — tokens only; Appearance settings (WP-3.2) override these. */
+.prose {
+  outline: none;
+  user-select: text;
+  font-family: var(--aml-font-editor);
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--aml-text);
+  min-height: 60vh;
+}
+
+.prose :global(p) {
+  margin: 0 0 1em;
+}
+
+.prose :global(h1),
+.prose :global(h2),
+.prose :global(h3),
+.prose :global(h4),
+.prose :global(h5),
+.prose :global(h6) {
+  color: var(--aml-primary);
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 1.4em 0 0.5em;
+}
+
+.prose :global(h1) {
+  font-size: 1.9em;
+}
+.prose :global(h2) {
+  font-size: 1.5em;
+}
+.prose :global(h3) {
+  font-size: 1.25em;
+}
+.prose :global(h4) {
+  font-size: 1.1em;
+}
+
+.prose :global(a) {
+  color: var(--aml-primary);
+  text-decoration: underline;
+  text-decoration-color: var(--aml-muted);
+}
+
+.prose :global(blockquote) {
+  margin: 0 0 1em;
+  padding-left: 1em;
+  border-left: 2px solid var(--aml-muted);
+  color: color-mix(in srgb, var(--aml-text) 80%, var(--aml-primary));
+}
+
+.prose :global(pre) {
+  font-family: var(--aml-font-mono);
+  font-size: 0.85em;
+  line-height: 1.5;
+  background: var(--aml-surface);
+  border: 1px solid var(--aml-muted);
+  border-radius: var(--aml-radius);
+  padding: 0.75em 1em;
+  overflow-x: auto;
+  margin: 0 0 1em;
+}
+
+.prose :global(code) {
+  font-family: var(--aml-font-mono);
+  font-size: 0.9em;
+  background: var(--aml-highlight);
+  border-radius: 3px;
+  padding: 0 0.25em;
+}
+
+.prose :global(pre code) {
+  background: transparent;
+  padding: 0;
+  font-size: 1em;
+}
+
+.prose :global(ul),
+.prose :global(ol) {
+  padding-left: 1.5em;
+  margin: 0 0 1em;
+}
+
+.prose :global(ul[data-type="taskList"]) {
+  list-style: none;
+  padding-left: 0.25em;
+}
+
+.prose :global(ul[data-type="taskList"] li) {
+  display: flex;
+  gap: 0.5em;
+  align-items: flex-start;
+}
+
+.prose :global(ul[data-type="taskList"] li > label) {
+  flex: 0 0 auto;
+  margin-top: 0.3em;
+}
+
+.prose :global(ul[data-type="taskList"] li > div) {
+  flex: 1 1 auto;
+}
+
+.prose :global(hr) {
+  border: 0;
+  border-top: 1px solid var(--aml-muted);
+  margin: 2em auto;
+  width: 40%;
+}
+
+.prose :global(table) {
+  border-collapse: collapse;
+  margin: 0 0 1em;
+  font-size: 0.9em;
+  width: 100%;
+}
+
+.prose :global(th),
+.prose :global(td) {
+  border: 1px solid var(--aml-muted);
+  padding: 0.35em 0.6em;
+  vertical-align: top;
+}
+
+.prose :global(th) {
+  color: var(--aml-primary);
+  background: var(--aml-surface);
+}
+
+.prose :global(td p),
+.prose :global(th p) {
+  margin: 0;
+}
+
+.prose :global(img) {
+  max-width: 100%;
+  border-radius: var(--aml-radius);
+}
+
+.prose :global(.aml-front-matter) {
+  font-family: var(--aml-font-ui);
+  font-size: 11px;
+  color: var(--aml-primary);
+  border: 1px solid var(--aml-muted);
+  border-radius: var(--aml-radius);
+  padding: 4px 10px;
+  margin: 0 0 1.5em;
+  display: inline-block;
+}
+
+.prose :global(.aml-raw-block) {
+  background: transparent;
+  border-style: dashed;
+  color: color-mix(in srgb, var(--aml-text) 75%, transparent);
+  white-space: pre-wrap;
+}
+
+.prose :global(.aml-raw-inline) {
+  background: transparent;
+  border: 1px dashed var(--aml-muted);
+}
+
+.prose :global(.aml-wiki-link) {
+  text-decoration: none;
+  border-bottom: 1px solid var(--aml-muted);
+}
+
+.prose :global(.aml-wiki-embed) {
+  color: var(--aml-primary);
+  border: 1px solid var(--aml-muted);
+  border-radius: var(--aml-radius);
+  padding: 0 0.4em;
+  font-size: 0.9em;
+}
+
+.prose :global(.aml-tag) {
+  color: var(--aml-primary);
+  background: var(--aml-highlight);
+  border-radius: 10px;
+  padding: 0 0.5em;
+  font-size: 0.85em;
+  font-family: var(--aml-font-ui);
+}
+
+.prose :global(.aml-cite) {
+  color: var(--aml-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.prose :global(.aml-footnote-ref) {
+  color: var(--aml-primary);
+  font-size: 0.7em;
+}
+
+.prose :global(.aml-footnote-def) {
+  font-size: 0.85em;
+  border-top: 1px solid var(--aml-muted);
+  padding-top: 0.5em;
+  margin-top: 1.5em;
+}
+
+.prose :global(.aml-footnote-def)::before {
+  content: attr(data-label) ". ";
+  color: var(--aml-primary);
+}
+
+.prose :global(.ProseMirror-selectednode) {
+  outline: 2px solid var(--aml-primary);
+  outline-offset: 2px;
+}

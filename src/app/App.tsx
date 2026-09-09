@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { NoteEditor } from "@/features/editor/NoteEditor";
+import { useEditorStore } from "@/features/editor/store";
 import { FolioTree } from "@/features/folio/FolioTree";
 import { useFolioStore } from "@/features/folio/store";
 import { useFolioEvents } from "@/features/folio/useFolioEvents";
@@ -13,6 +15,7 @@ registerShellCommands();
 export function App() {
   const [info, setInfo] = useState<AppInfo | null>(null);
   const folio = useFolioStore((s) => s.folio);
+  const notePath = useEditorStore((s) => s.path);
   useFolioEvents();
 
   useEffect(() => {
@@ -30,11 +33,15 @@ export function App() {
       }
     >
       {folio ? (
-        <div className={styles.welcome} data-testid="editor-placeholder">
-          <p className={styles.tagline}>
-            {folio.noteCount} notes in {folio.name}. The editor arrives in WP-1.2.
-          </p>
-        </div>
+        notePath ? (
+          <NoteEditor />
+        ) : (
+          <div className={styles.welcome} data-testid="editor-placeholder">
+            <p className={styles.tagline}>
+              {folio.noteCount} notes in {folio.name}. Pick one from the Browser.
+            </p>
+          </div>
+        )
       ) : (
         <Welcome />
       )}

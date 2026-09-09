@@ -58,3 +58,8 @@
   opacity: 0.6;
   margin: 0;
 }
+
+.note[aria-current="true"] {
+  background: var(--aml-highlight);
+  color: var(--aml-primary);
+}

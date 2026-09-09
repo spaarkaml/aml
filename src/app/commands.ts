@@ -1,6 +1,7 @@
 import { useAppearanceStore } from "@/features/appearance/store";
 import { usePaletteStore } from "@/features/commands/paletteStore";
 import { type Command, commandRegistry } from "@/features/commands/registry";
+import { useEditorStore } from "@/features/editor/store";
 import { useFolioStore } from "@/features/folio/store";
 import { useLayoutStore } from "@/features/layout/store";
 
@@ -11,6 +12,7 @@ export const SHORTCUTS = {
   leftPanel: "mod+shift+e",
   rightPanel: "mod+shift+i",
   mode: "mod+shift+m",
+  save: "mod+s",
 } as const;
 
 export const SHELL_COMMANDS: Command[] = [
@@ -27,10 +29,27 @@ export const SHELL_COMMANDS: Command[] = [
     run: () => void useFolioStore.getState().pickAndCreate(),
   },
   {
+    id: "note.save",
+    title: "Save Note Now",
+    group: "Note",
+    shortcut: SHORTCUTS.save,
+    global: true,
+    run: () => void useEditorStore.getState().saveNow(),
+  },
+  {
+    id: "note.close",
+    title: "Close Note",
+    group: "Note",
+    run: () => void useEditorStore.getState().close(),
+  },
+  {
     id: "folio.close",
     title: "Close Folio",
     group: "Folio",
-    run: () => void useFolioStore.getState().close(),
+    run: () => {
+      void useEditorStore.getState().close();
+      void useFolioStore.getState().close();
+    },
   },
   {
     id: "palette.open",

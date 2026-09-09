@@ -33,13 +33,13 @@ Decision log: 2026-09-09 — Bryce answered Q1–Q5; ADR-003, 005, 006, 011 rewr
 
 ---
 
-## ADR-003 — Editor engine: WYSIWYG on ProseMirror (Tiptap), markdown as the interchange format  `ACCEPTED` *(supersedes the CodeMirror proposal; Stage 1 spike confirms the library)*
+## ADR-003 — Editor engine: WYSIWYG on ProseMirror (Tiptap), markdown as the interchange format  `ACCEPTED` *(spike WP-1.2 confirmed Tiptap 3 + own remark bridge on 2026-09-09)*
 
 **Your decision (Q4):** polish first; `.md` is the storage/interchange format the software interprets, not the thing you look at.
 
 **Decision:** The editor is a **ProseMirror document** (via **Tiptap**), parsed from markdown on open and serialised to markdown on save. The on-disk format is a **canonical AML markdown dialect** (GFM + front matter + `[[wikilinks]]` + footnotes + `[@citations]` + Mermaid fences), always written in one deterministic style.
 
-**Library choice for the Stage 1 spike (WP-1.2):**
+**Library choice (confirmed by WP-1.2):** Tiptap 3 with our own mdast↔ProseMirror bridge. `@tiptap/markdown` rejected (no Raw guarantee, no canonical-style control).
 | Candidate | For | Against |
 |---|---|---|
 | **Tiptap 3 + markdown bridge** (preferred) | Largest ecosystem and AI training data; tables, images, task lists, collaboration-free; extension model is clean for wikilinks/citations | Markdown parse/serialise is a bridge we own (remark/mdast ↔ ProseMirror) or Tiptap's markdown package if it covers GFM + footnotes at build time |

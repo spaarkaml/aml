@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useEditorStore } from "@/features/editor/store";
 import type { TreeNode } from "@/ipc";
 import styles from "./FolioTree.module.css";
 import { useFolioStore } from "./store";
@@ -24,14 +25,20 @@ export function FolioTree() {
 function Node({ node, depth }: { node: TreeNode; depth: number }) {
   const [open, setOpen] = useState(depth < 1);
   const isFolder = node.kind === "folder";
+  const openNote = useEditorStore((s) => s.open);
+  const current = useEditorStore((s) => s.path);
   return (
     <li className={styles.item}>
       <button
         type="button"
         className={isFolder ? styles.folder : node.kind === "note" ? styles.note : styles.file}
         style={{ paddingLeft: 8 + depth * 14 }}
-        onClick={() => isFolder && setOpen((o) => !o)}
+        onClick={() => {
+          if (isFolder) setOpen((o) => !o);
+          else if (node.kind === "note") void openNote(node.path);
+        }}
         data-path={node.path}
+        aria-current={current === node.path ? "true" : undefined}
         aria-expanded={isFolder ? open : undefined}
       >
         <span className={styles.glyph}>{isFolder ? (open ? "▾" : "▸") : ""}</span>

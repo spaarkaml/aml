@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useEditorStore } from "@/features/editor/store";
 import { events } from "@/ipc";
 import { useFolioStore } from "./store";
 
@@ -11,8 +12,9 @@ export function useFolioEvents(): void {
     let unlisten: (() => void) | null = null;
     let disposed = false;
     events.folioChanged
-      .listen(() => {
+      .listen((e) => {
         void refreshTree();
+        for (const p of e.payload.paths) useEditorStore.getState().noteChangedOnDisk(p);
       })
       .then((off) => {
         if (disposed) off();

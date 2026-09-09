@@ -4,6 +4,12 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### WP-1.2 — Editor spike (2026-09-09)
+- `src/lib/markdown`: remark-based parse, canonical serialiser with conservative escaping, AML inline syntax, mdast⇄ProseMirror bridge with verbatim Raw nodes. 48-file corpus AST-equal + idempotent.
+- Tiptap 3 editor with AML nodes (front matter, raw block/inline, wiki link/embed, tag, cite, footnotes), list `spread`, code `meta`, table `align`.
+- Editor store: open, debounced autosave with mtime conflict detection, external-change handling, word count; status bar shows words, reading time, save state.
+- Front matter guard plugin; Playwright suite limited to 2 workers for keystroke stability.
+
 ### WP-1.1 — Folio basics (2026-09-09)
 - Rust `folio` module: create/open, path-safe resolve, tree, read (BOM-stripped), atomic write with mtime conflict check, create/rename/trash, debounced watcher → `FolioChanged`.
 - Commands + typed errors exported to TS; native folder picker via tauri-plugin-dialog.

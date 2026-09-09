@@ -24,6 +24,17 @@ function node(
   };
 }
 
+const notes = new Map<string, { text: string; mtime: number }>([
+  [
+    "Thesis/chapters/03 Influence networks.md",
+    {
+      text: "---\ntype: chapter\nstatus: drafting\n---\n\n# Influence networks\n\nThe distinction between persuasion and manipulation is rarely visible from inside a single message. See [[04 Methods]] and [@rid2020, p. 41]. #thesis/ch3\n\n## Three properties\n\n- [ ] repetition without attribution\n- [x] collapse of the interval\n\n> [!note] Callout\n> Held verbatim.\n",
+      mtime: 1_700_000_000_000,
+    },
+  ],
+  ["Inbox.md", { text: "Quick thoughts.\n", mtime: 1_700_000_000_000 }],
+]);
+
 const state: { folio: FolioInfo | null; tree: TreeNode[]; recent: RecentFolio[] } = {
   folio: null,
   tree: [
@@ -46,6 +57,8 @@ const state: { folio: FolioInfo | null; tree: TreeNode[]; recent: RecentFolio[] 
 };
 
 export function installDevMocks(): void {
+  // Exposed for e2e assertions on what the app wrote.
+  (window as unknown as { __amlMockNotes: typeof notes }).__amlMockNotes = notes;
   mockIPC((cmd, args) => {
     const a = (args ?? {}) as Record<string, unknown>;
     switch (cmd) {
@@ -76,6 +89,17 @@ export function installDevMocks(): void {
       case "folio_tree":
         if (!state.folio) throw { kind: "noFolioOpen" };
         return state.tree;
+      case "note_read": {
+        const path = String(a.path);
+        const n = notes.get(path) ?? { text: "", mtime: 1 };
+        return { path, text: n.text, mtime: n.mtime, size: n.text.length };
+      }
+      case "note_write": {
+        const path = String(a.path);
+        const mtime = Date.now();
+        notes.set(path, { text: String(a.text), mtime });
+        return { path, mtime, size: String(a.text).length };
+      }
       case "plugin:event|listen":
         return 1;
       case "plugin:event|unlisten":

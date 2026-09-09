@@ -57,7 +57,7 @@ export function escapeText(text: string, ctx: EscapeContext): string {
         const token = m[1] ?? "";
         if (/^\d+$/.test(token)) {
           // "1. x" → "1\. x": escape the delimiter after the number
-          out += token + "\\";
+          out += `${token}\\`;
           i += token.length;
           atLineStart = false;
           continue;

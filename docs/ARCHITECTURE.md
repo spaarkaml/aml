@@ -28,8 +28,9 @@ Updated with every work package. If this file and the code disagree, the code is
 | `src-tauri/src/folio/` | Folio model, path safety, atomic writes (`mod.rs`), watcher (`watch.rs`), errors |
 | `src-tauri/src/state.rs` | `AppState { folio, watcher }` managed by Tauri |
 | `src/app/` | `App.tsx`, `commands.ts` (shell commands + `SHORTCUTS` table), `tokens.css`, `global.css`, `shell/` (Shell, TopBar, SidePanel, StatusBar) |
-| `src/features/<feature>/` | Feature folders: components, store, tests. Current: `commands`, `layout`, `appearance`, `folio` (store, Welcome, FolioTree, watcher events). No cross-feature imports except through `src/lib` |
-| `src/lib/` | Pure utilities with unit tests: `fuzzy.ts`, `platform.ts`; later markdown, paths, dates |
+| `src/features/<feature>/` | Feature folders: components, store, tests. Current: `commands`, `layout`, `appearance`, `folio` (store, Welcome, FolioTree, watcher events), `editor` (Tiptap extensions in `extensions/`, `NoteEditor.tsx`, store with debounced save/conflicts, `editorRef.ts`). No cross-feature imports except through `src/lib` |
+| `src/lib/markdown/` | The markdown bridge: `mdast.ts` (parse + canonical serialise), `escape.ts`, `inline-syntax.ts` (wiki/tag/cite), `pm.ts` (mdast ⇄ ProseMirror JSON, Raw nodes), `index.ts` API |
+| `src/lib/` | `fuzzy.ts`, `platform.ts`, `wordcount.ts` |
 | `src/ipc/` | Generated bindings + `index.ts` re-export |
 | `themes/` | Reserved for Book Designs' CSS previews; app colours live in `tokens.css` |
 | `test-corpus/` | Round-trip markdown corpus, 48 files in 6 categories, `manifest.json` declares expectations |
@@ -69,3 +70,14 @@ All results are `{status:"ok",data}|{status:"error",error:FolioError}`; `FolioEr
 - **Layouts:** `desk` (Browser pinned) and `page` (nothing pinned). Persisted per device in localStorage key `aml.layout`.
 - **Commands:** everything user-triggerable registers in `commandRegistry` with an optional shortcut (`mod+shift+e` grammar). `useGlobalShortcuts` binds them; `CommandPalette` lists them. Shortcut table lives in `src/app/commands.ts` and is exercised by `e2e/shell.spec.ts`.
 - **Appearance:** `aml.appearance` setting `system|paper|ink` → `<html data-mode>`; tokens in `tokens.css`.
+
+## Editor data flow (WP-1.2)
+
+```
+disk ──note_read──▶ text ──markdownToDoc──▶ PM JSON ──setContent──▶ Tiptap
+Tiptap ──onUpdate──▶ store.changed(doc) ──debounce 1 s──▶ docToMarkdown ──note_write(expectedMtime)──▶ disk
+```
+- `store.doc` is always the latest document; `docVersion` bumps only on load/reload so the editor reloads content only then.
+- Conflict (mtime moved) or watcher change while dirty → banner: Reload from disk / Keep mine.
+- Word count from PM JSON (`lib/wordcount.ts`), shown in the status bar.
+- Front matter node is guarded by a ProseMirror plugin: it cannot be removed by editing.
