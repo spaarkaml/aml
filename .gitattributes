@@ -1,0 +1,7 @@
+# Keep LF everywhere so Biome/cargo fmt agree across macOS and Windows checkouts.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ico binary
+*.icns binary
+*.woff2 binary
