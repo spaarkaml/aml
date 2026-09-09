@@ -1,28 +1,13 @@
-import { open as openDialog } from "@tauri-apps/plugin-dialog";
+import { confirm, open as openDialog } from "@tauri-apps/plugin-dialog";
 import { create } from "zustand";
-import { commands, type FolioError, type FolioInfo, type RecentFolio, type TreeNode } from "@/ipc";
+import { useEditorStore } from "@/features/editor/store";
+import { useTabsStore } from "@/features/tabs/store";
+import { commands, type FolioInfo, type RecentFolio, type TreeNode } from "@/ipc";
+import { baseName, isWithin, joinPath, noteTitle, parentDir } from "@/lib/paths";
+import { useBrowserStore } from "./browserStore";
+import { describeFolioError } from "./errors";
 
-/** Human-readable message for a FolioError; the UI never shows raw `kind` strings. */
-export function describeFolioError(e: FolioError): string {
-  switch (e.kind) {
-    case "noFolioOpen":
-      return "No Folio is open.";
-    case "notAFolio":
-      return `That folder is not a Folio yet (no .aml folder inside): ${e.detail}`;
-    case "notFound":
-      return `Not found: ${e.detail}`;
-    case "invalidPath":
-      return `Invalid path: ${e.detail}`;
-    case "alreadyExists":
-      return `Already exists: ${e.detail}`;
-    case "conflict":
-      return "This note changed on disk since you opened it.";
-    case "notText":
-      return `Not a text file: ${e.detail}`;
-    case "io":
-      return `File error: ${e.detail}`;
-  }
-}
+export { describeFolioError } from "./errors";
 
 interface FolioState {
   folio: FolioInfo | null;
@@ -40,6 +25,39 @@ interface FolioState {
   refreshTree: () => Promise<void>;
   close: () => Promise<void>;
   clearError: () => void;
+  /** Creates `Untitled.md` (or the next free name) in `dir`, opens it and starts a rename. */
+  createNote: (dir: string) => Promise<string | null>;
+  createFolder: (dir: string) => Promise<string | null>;
+  /** Renames or moves an entry; `to` is the full new relative path. */
+  rename: (from: string, to: string) => Promise<boolean>;
+  /** Moves an entry to the OS trash after confirmation. */
+  trash: (path: string) => Promise<boolean>;
+}
+
+/** Depth-first search of the loaded tree. */
+export function findNode(tree: TreeNode[], path: string): TreeNode | undefined {
+  for (const n of tree) {
+    if (n.path === path) return n;
+    if (n.kind === "folder") {
+      const hit = findNode(n.children, path);
+      if (hit) return hit;
+    }
+  }
+  return undefined;
+}
+
+function childNames(tree: TreeNode[], dir: string): Set<string> {
+  const nodes = dir ? (findNode(tree, dir)?.children ?? []) : tree;
+  return new Set(nodes.map((n) => n.name.toLowerCase()));
+}
+
+/** "Untitled", "Untitled 2", … — first name not already used in `dir`. */
+export function freeName(tree: TreeNode[], dir: string, base: string, ext = ""): string {
+  const taken = childNames(tree, dir);
+  for (let i = 1; ; i++) {
+    const name = `${i === 1 ? base : `${base} ${i}`}${ext}`;
+    if (!taken.has(name.toLowerCase())) return name;
+  }
 }
 
 export const useFolioStore = create<FolioState>((set, get) => ({
@@ -113,4 +131,85 @@ export const useFolioStore = create<FolioState>((set, get) => ({
   },
 
   clearError: () => set({ error: null }),
+
+  createNote: async (dir) => {
+    const path = joinPath(dir, freeName(get().tree, dir, "Untitled", ".md"));
+    const r = await commands.entryCreateNote(path);
+    if (r.status === "error") {
+      set({ error: describeFolioError(r.error) });
+      return null;
+    }
+    await get().refreshTree();
+    const browser = useBrowserStore.getState();
+    browser.reveal(path);
+    useTabsStore.getState().open(path);
+    browser.startRename(path);
+    return path;
+  },
+
+  createFolder: async (dir) => {
+    const path = joinPath(dir, freeName(get().tree, dir, "New folder"));
+    const r = await commands.entryCreateFolder(path);
+    if (r.status === "error") {
+      set({ error: describeFolioError(r.error) });
+      return null;
+    }
+    await get().refreshTree();
+    const browser = useBrowserStore.getState();
+    browser.reveal(path);
+    browser.startRename(path);
+    return path;
+  },
+
+  rename: async (from, to) => {
+    if (from === to) return true;
+    const editor = useEditorStore.getState();
+    if (editor.path && isWithin(editor.path, from) && editor.dirty) await editor.saveNow();
+    const r = await commands.entryRename(from, to);
+    if (r.status === "error") {
+      set({ error: describeFolioError(r.error) });
+      return false;
+    }
+    useEditorStore.getState().renamed(from, to);
+    useTabsStore.getState().rename(from, to);
+    useBrowserStore.getState().rename(from, to);
+    await get().refreshTree();
+    return true;
+  },
+
+  trash: async (path) => {
+    const node = findNode(get().tree, path);
+    const what =
+      node?.kind === "folder"
+        ? `the folder "${baseName(path)}" and everything in it`
+        : `"${noteTitle(path)}"`;
+    const ok = await confirm(`Move ${what} to the ${trashName()}?`, {
+      title: "Move to Trash",
+      kind: "warning",
+      okLabel: "Move to Trash",
+      cancelLabel: "Cancel",
+    });
+    if (!ok) return false;
+    const editor = useEditorStore.getState();
+    if (editor.path && isWithin(editor.path, path)) await editor.close();
+    const r = await commands.entryTrash(path);
+    if (r.status === "error") {
+      set({ error: describeFolioError(r.error) });
+      return false;
+    }
+    useTabsStore.getState().closeWithin(path);
+    useBrowserStore.getState().forget(path);
+    await get().refreshTree();
+    return true;
+  },
 }));
+
+function trashName(): string {
+  return navigator.platform.toLowerCase().includes("win") ? "Recycle Bin" : "Trash";
+}
+
+/** Folder that "New Note" should target: the active note's folder, else the root. */
+export function activeDir(): string {
+  const p = useEditorStore.getState().path;
+  return p ? parentDir(p) : "";
+}

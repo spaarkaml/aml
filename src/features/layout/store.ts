@@ -22,6 +22,7 @@ interface LayoutState {
   setLayout: (name: LayoutName) => void;
   toggleLayout: () => void;
   togglePanel: (side: Side) => void;
+  openPanel: (side: Side) => void;
   setPinned: (side: Side, pinned: boolean) => void;
   togglePinned: (side: Side) => void;
   setWidth: (side: Side, width: number) => void;
@@ -54,6 +55,7 @@ export const useLayoutStore = create<LayoutState>()(
           return { layout: next, ...LAYOUT_PRESETS[next] };
         }),
       togglePanel: (side) => set((s) => ({ [side]: { ...s[side], open: !s[side].open } })),
+      openPanel: (side) => set((s) => ({ [side]: { ...s[side], open: true } })),
       setPinned: (side, pinned) =>
         set((s) => ({ [side]: { ...s[side], pinned, open: pinned ? true : s[side].open } })),
       togglePinned: (side) =>

@@ -62,6 +62,10 @@ export function NoteEditor() {
   // run first). Focusing earlier — in `onCreate` or a layout effect, before the view is in
   // the document — left ProseMirror ignoring later mouse selections.
   useEffect(() => {
+    // Do not steal focus from a text field the user is already typing in (e.g. the
+    // Browser's inline rename that opens together with a new note).
+    const el = document.activeElement;
+    if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) return;
     editor?.commands.focus("start", { scrollIntoView: false });
   }, [editor]);
 

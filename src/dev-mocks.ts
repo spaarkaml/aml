@@ -56,6 +56,55 @@ const state: { folio: FolioInfo | null; tree: TreeNode[]; recent: RecentFolio[] 
   recent: [{ path: MOCK_ROOT, name: "Writing", lastOpened: 1_700_000_000_000 }],
 };
 
+function findNode(tree: TreeNode[], path: string): TreeNode | undefined {
+  for (const n of tree) {
+    if (n.path === path) return n;
+    const hit = findNode(n.children, path);
+    if (hit) return hit;
+  }
+  return undefined;
+}
+
+function siblingsOf(path: string): TreeNode[] | undefined {
+  const i = path.lastIndexOf("/");
+  if (i === -1) return state.tree;
+  return findNode(state.tree, path.slice(0, i))?.children;
+}
+
+function sortNodes(list: TreeNode[]): void {
+  list.sort((x, y) =>
+    x.kind === "folder" && y.kind !== "folder"
+      ? -1
+      : x.kind !== "folder" && y.kind === "folder"
+        ? 1
+        : x.name.localeCompare(y.name),
+  );
+}
+
+function insertNode(n: TreeNode): void {
+  const list = siblingsOf(n.path);
+  if (!list) throw { kind: "notFound", detail: n.path };
+  list.push(n);
+  sortNodes(list);
+}
+
+function removeNode(path: string): TreeNode | undefined {
+  const list = siblingsOf(path);
+  const i = list?.findIndex((n) => n.path === path) ?? -1;
+  if (!list || i === -1) return undefined;
+  return list.splice(i, 1)[0];
+}
+
+function remap(n: TreeNode, from: string, to: string): TreeNode {
+  const path = to + n.path.slice(from.length);
+  return {
+    ...n,
+    path,
+    name: path.split("/").pop() ?? path,
+    children: n.children.map((c) => remap(c, from, to)),
+  };
+}
+
 export function installDevMocks(): void {
   // Exposed for e2e assertions on what the app wrote.
   (window as unknown as { __amlMockNotes: typeof notes }).__amlMockNotes = notes;
@@ -72,6 +121,48 @@ export function installDevMocks(): void {
         };
       case "plugin:dialog|open":
         return MOCK_ROOT;
+      case "plugin:dialog|message": {
+        // confirm() compares the result with its OK label; always "click" OK in the mock.
+        const buttons = a.buttons as { OkCancelCustom?: string[] } | string | undefined;
+        return typeof buttons === "object" && buttons.OkCancelCustom
+          ? buttons.OkCancelCustom[0]
+          : "Ok";
+      }
+      case "entry_create_note": {
+        const path = String(a.path);
+        if (findNode(state.tree, path)) throw { kind: "alreadyExists", detail: path };
+        notes.set(path, { text: "", mtime: Date.now() });
+        insertNode(node(path.split("/").pop() ?? path, path, "note"));
+        return { path, mtime: Date.now(), size: 0 };
+      }
+      case "entry_create_folder": {
+        const path = String(a.path);
+        if (findNode(state.tree, path)) throw { kind: "alreadyExists", detail: path };
+        insertNode(node(path.split("/").pop() ?? path, path, "folder"));
+        return null;
+      }
+      case "entry_rename": {
+        const from = String(a.from);
+        const to = String(a.to);
+        const n = removeNode(from);
+        if (!n) throw { kind: "notFound", detail: from };
+        if (findNode(state.tree, to)) throw { kind: "alreadyExists", detail: to };
+        insertNode(remap(n, from, to));
+        for (const [p, v] of [...notes]) {
+          if (p === from || p.startsWith(`${from}/`)) {
+            notes.delete(p);
+            notes.set(to + p.slice(from.length), v);
+          }
+        }
+        return null;
+      }
+      case "entry_trash": {
+        const path = String(a.path);
+        if (!removeNode(path)) throw { kind: "notFound", detail: path };
+        for (const p of [...notes.keys()])
+          if (p === path || p.startsWith(`${path}/`)) notes.delete(p);
+        return null;
+      }
       case "folio_current":
         return state.folio;
       case "folio_recent":

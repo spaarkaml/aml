@@ -60,11 +60,53 @@ pub fn run() {
         .invoke_handler(builder.invoke_handler())
         .setup(move |app| {
             builder.mount_events(app);
+            #[cfg(target_os = "macos")]
+            install_mac_menu(app.handle())?;
             log::info!("AML {} starting", env!("CARGO_PKG_VERSION"));
             Ok(())
         })
         .run(tauri::generate_context!())
         .expect("error while running AML");
+}
+
+/// macOS menu bar without the default "Close Window" (⌘W), which AML uses to close a tab.
+/// The Edit menu stays: on macOS, clipboard shortcuts in the webview route through it.
+#[cfg(target_os = "macos")]
+fn install_mac_menu(app: &tauri::AppHandle) -> tauri::Result<()> {
+    use tauri::menu::{MenuBuilder, SubmenuBuilder};
+    let app_menu = SubmenuBuilder::new(app, "AML")
+        .about(None)
+        .separator()
+        .services()
+        .separator()
+        .hide()
+        .hide_others()
+        .show_all()
+        .separator()
+        .quit()
+        .build()?;
+    let edit = SubmenuBuilder::new(app, "Edit")
+        .undo()
+        .redo()
+        .separator()
+        .cut()
+        .copy()
+        .paste()
+        .select_all()
+        .build()?;
+    let window = SubmenuBuilder::new(app, "Window")
+        .minimize()
+        .maximize()
+        .separator()
+        .fullscreen()
+        .build()?;
+    let menu = MenuBuilder::new(app)
+        .item(&app_menu)
+        .item(&edit)
+        .item(&window)
+        .build()?;
+    app.set_menu(menu)?;
+    Ok(())
 }
 
 #[cfg(test)]

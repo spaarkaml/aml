@@ -11,6 +11,8 @@ export interface Command {
   shortcut?: string;
   /** When true the shortcut fires even while a text field has focus. */
   global?: boolean;
+  /** Not listed in the palette (shortcut-only, e.g. "Go to Tab 3"). */
+  hidden?: boolean;
   run: () => void;
 }
 
@@ -92,7 +94,9 @@ export class CommandRegistry {
   /** Sorted list; the same array instance is returned until the registry changes. */
   list(): Command[] {
     if (this.dirty) {
-      this.cache = [...this.map.values()].sort((a, b) => a.title.localeCompare(b.title));
+      this.cache = [...this.map.values()]
+        .filter((c) => !c.hidden)
+        .sort((a, b) => a.title.localeCompare(b.title));
       this.dirty = false;
     }
     return this.cache;

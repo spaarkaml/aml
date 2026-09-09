@@ -14,4 +14,9 @@ Run on both machines against a Folio paired with the DRIVESTOR (or a Local Folio
 | 8 | Backspace at start of first heading; ⌘A then type | Front matter chip remains | ☐ |
 | 9 | Kill the app mid-typing (Force Quit) 5× | No `.aml-tmp-*` files; note content is the last completed save | ☐ |
 | 10 | Word count: note with front matter, code block, HTML comment | Those excluded; headings/lists included | ☐ |
-| 11 | *(WP-1.3+)* images, tables, spell check, Quick Open, tabs | — | ☐ |
+| 11 | *(WP-1.3)* Paste a screenshot; drop a PNG | File under `<folder>/assets/`, image renders, markdown holds the relative path | ☐ |
+| 12 | *(WP-1.5)* Open three notes; ⌘W; ⌘[ ; ⌘] ; ⌘2 | Tab closes (window stays open on macOS); history walks; tab 2 activates | ☐ |
+| 13 | *(WP-1.5)* Right-click a note → Move to Trash… | Native confirm; note goes to the OS Trash / Recycle Bin; tab closes | ☐ |
+| 14 | *(WP-1.5)* Drag a note onto a folder; F2 on the open note | Note moves on disk and its tab follows; inline rename box appears in the Browser | ☐ |
+| 15 | *(WP-1.5)* Type in a note, pause 2 s, keep typing | Caret never jumps after "Saved" appears | ☐ |
+| 16 | *(WP-1.6+)* spell check, Quick Open | — | ☐ |

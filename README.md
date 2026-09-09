@@ -2,7 +2,7 @@
 
 Self-hosted writing environment for research, academic and creative work. Plain markdown in a **Folio** kept in sync with a home NAS by Syncthing bundled inside the app, a polished WYSIWYG editor, and professional compile to PDF/EPUB/DOCX.
 
-**Status:** planning. Start with `docs/01-DEVELOPMENT-PLAN.md`.
+**Status:** Stage 1 in progress (Folio, editor, images/tables/footnotes, tabs and Browser done). Start with `docs/01-DEVELOPMENT-PLAN.md`; per-WP changes in `docs/CHANGELOG.md`.
 
 | Doc | Purpose |
 |---|---|

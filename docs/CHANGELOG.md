@@ -4,6 +4,13 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### WP-1.5 — Folio Browser, tabs and navigation (2026-09-10)
+- Tabs per Folio (persisted per device), back/forward history, breadcrumb with reveal-in-Browser; ⌘W / ⌘⌥→← / ⌘[ ] / ⌘1–9.
+- Folio Browser: `+ Note` / `+ Folder`, context menu, inline rename, drag-move, OS-trash with confirm, persisted expanded folders, unsaved badge.
+- New Note ⌘N, Rename Note F2, Move Note to Trash…, Reveal Note in Browser.
+- Editor ignores the watcher echo of its own saves (no more remount after autosave); follows renamed files.
+- macOS menu bar without "Close Window" so ⌘W closes a tab.
+
 ### WP-1.3 — Images, tables, footnotes, properties (2026-09-10)
 - Assets: `asset_write` / `asset_import` / `asset_resolve` commands; per-top-level-folder `assets/`; asset protocol scoped to the Folio; paste/drop images into the editor; `AmlImage` node view.
 - Table toolbar (rows/cols/header/delete) and "Insert Table"; "Insert Footnote" (⌘⌥F).

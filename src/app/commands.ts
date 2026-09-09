@@ -4,8 +4,10 @@ import { type Command, commandRegistry } from "@/features/commands/registry";
 import { getActiveEditor } from "@/features/editor/editorRef";
 import { insertFootnote } from "@/features/editor/footnotes";
 import { useEditorStore } from "@/features/editor/store";
-import { useFolioStore } from "@/features/folio/store";
+import { useBrowserStore } from "@/features/folio/browserStore";
+import { activeDir, useFolioStore } from "@/features/folio/store";
 import { useLayoutStore } from "@/features/layout/store";
+import { useTabsStore } from "@/features/tabs/store";
 
 /** Single source of truth for shell shortcuts; the e2e suite presses each one. */
 export const SHORTCUTS = {
@@ -15,7 +17,121 @@ export const SHORTCUTS = {
   rightPanel: "mod+shift+i",
   mode: "mod+shift+m",
   save: "mod+s",
+  closeTab: "mod+w",
+  nextTab: "mod+alt+arrowright",
+  prevTab: "mod+alt+arrowleft",
+  back: "mod+[",
+  forward: "mod+]",
+  newNote: "mod+n",
+  rename: "f2",
 } as const;
+
+function activeTab(): string | null {
+  return useTabsStore.getState().current().active;
+}
+
+const TAB_COMMANDS: Command[] = [
+  {
+    id: "tab.close",
+    title: "Close Tab",
+    group: "Note",
+    shortcut: SHORTCUTS.closeTab,
+    global: true,
+    run: () => {
+      const p = activeTab();
+      if (p) useTabsStore.getState().close(p);
+    },
+  },
+  {
+    id: "tab.next",
+    title: "Next Tab",
+    group: "Note",
+    shortcut: SHORTCUTS.nextTab,
+    global: true,
+    run: () => useTabsStore.getState().cycle(1),
+  },
+  {
+    id: "tab.previous",
+    title: "Previous Tab",
+    group: "Note",
+    shortcut: SHORTCUTS.prevTab,
+    global: true,
+    run: () => useTabsStore.getState().cycle(-1),
+  },
+  {
+    id: "nav.back",
+    title: "Go Back",
+    group: "Note",
+    shortcut: SHORTCUTS.back,
+    global: true,
+    run: () => useTabsStore.getState().goBack(),
+  },
+  {
+    id: "nav.forward",
+    title: "Go Forward",
+    group: "Note",
+    shortcut: SHORTCUTS.forward,
+    global: true,
+    run: () => useTabsStore.getState().goForward(),
+  },
+  ...Array.from({ length: 9 }, (_, i) => ({
+    id: `tab.go.${i + 1}`,
+    title: i === 8 ? "Go to Last Tab" : `Go to Tab ${i + 1}`,
+    group: "Note",
+    shortcut: `mod+${i + 1}`,
+    global: true,
+    hidden: true,
+    run: () => useTabsStore.getState().activateIndex(i + 1),
+  })),
+  {
+    id: "note.new",
+    title: "New Note",
+    group: "Note",
+    shortcut: SHORTCUTS.newNote,
+    global: true,
+    run: () => void useFolioStore.getState().createNote(activeDir()),
+  },
+  {
+    id: "folder.new",
+    title: "New Folder",
+    group: "Folio",
+    run: () => void useFolioStore.getState().createFolder(activeDir()),
+  },
+  {
+    id: "note.rename",
+    title: "Rename Note",
+    group: "Note",
+    shortcut: SHORTCUTS.rename,
+    global: true,
+    run: () => {
+      const p = activeTab();
+      if (!p) return;
+      useBrowserStore.getState().reveal(p);
+      useLayoutStore.getState().openPanel("left");
+      useBrowserStore.getState().startRename(p);
+    },
+  },
+  {
+    id: "note.trash",
+    title: "Move Note to Trash…",
+    group: "Note",
+    run: () => {
+      const p = activeTab();
+      if (p) void useFolioStore.getState().trash(p);
+    },
+  },
+  {
+    id: "note.reveal",
+    title: "Reveal Note in Browser",
+    group: "Note",
+    run: () => {
+      const p = activeTab();
+      if (!p) return;
+      useBrowserStore.getState().reveal(p);
+      useLayoutStore.getState().openPanel("left");
+    },
+  },
+];
 
 export const SHELL_COMMANDS: Command[] = [
   {
@@ -66,20 +182,17 @@ export const SHELL_COMMANDS: Command[] = [
     run: () => void pickAndInsertImage(),
   },
   {
-    id: "note.close",
-    title: "Close Note",
-    group: "Note",
-    run: () => void useEditorStore.getState().close(),
-  },
-  {
     id: "folio.close",
     title: "Close Folio",
     group: "Folio",
     run: () => {
-      void useEditorStore.getState().close();
-      void useFolioStore.getState().close();
+      void useEditorStore
+        .getState()
+        .close()
+        .then(() => useFolioStore.getState().close());
     },
   },
+  ...TAB_COMMANDS,
   {
     id: "palette.open",
     title: "Show All Commands",

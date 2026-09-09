@@ -6,6 +6,7 @@ import { useFolioStore } from "@/features/folio/store";
 import { useFolioEvents } from "@/features/folio/useFolioEvents";
 import { Welcome } from "@/features/folio/Welcome";
 import { PropertiesPanel } from "@/features/properties/PropertiesPanel";
+import { useTabsSync } from "@/features/tabs/useTabsSync";
 import { type AppInfo, commands } from "@/ipc";
 import styles from "./App.module.css";
 import { registerShellCommands } from "./commands";
@@ -18,6 +19,7 @@ export function App() {
   const folio = useFolioStore((s) => s.folio);
   const notePath = useEditorStore((s) => s.path);
   useFolioEvents();
+  useTabsSync();
 
   useEffect(() => {
     commands.appInfo().then(setInfo);

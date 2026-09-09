@@ -1,7 +1,8 @@
 import { create } from "zustand";
-import { describeFolioError } from "@/features/folio/store";
+import { describeFolioError } from "@/features/folio/errors";
 import { commands } from "@/ipc";
 import { docToMarkdown, markdownToDoc, type PmDoc, type PmNode } from "@/lib/markdown";
+import { remapPath } from "@/lib/paths";
 import { countWords } from "@/lib/wordcount";
 
 export const SAVE_DEBOUNCE_MS = 1000;
@@ -27,6 +28,8 @@ interface EditorState {
   reloadFromDisk: () => Promise<void>;
   overwriteDisk: () => Promise<boolean>;
   noteChangedOnDisk: (path: string) => void;
+  /** The open note (or a folder above it) was renamed by us; keep following the file. */
+  renamed: (from: string, to: string) => void;
   close: () => Promise<void>;
 }
 
@@ -122,8 +125,25 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
   noteChangedOnDisk: (path) => {
     if (path !== get().path) return;
-    if (get().dirty) set({ externalChanged: true });
-    else void get().reloadFromDisk();
+    // Our own atomic write also trips the watcher; a save in flight or a matching mtime
+    // means nothing foreign happened, so do not reload (which would remount the editor).
+    if (get().saving) return;
+    if (get().dirty) {
+      set({ externalChanged: true });
+      return;
+    }
+    void commands.noteRead(path).then((r) => {
+      if (get().path !== path || get().dirty) return;
+      if (r.status === "ok" && r.data.mtime === get().mtime) return;
+      void get().reloadFromDisk();
+    });
+  },
+
+  renamed: (from, to) => {
+    const path = get().path;
+    if (!path) return;
+    const next = remapPath(path, from, to);
+    if (next !== path) set({ path: next });
   },
 
   close: async () => {

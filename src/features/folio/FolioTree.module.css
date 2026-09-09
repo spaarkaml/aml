@@ -63,3 +63,61 @@
   background: var(--aml-highlight);
   color: var(--aml-primary);
 }
+
+.browser,
+.browserDrop {
+  min-height: 100%;
+  padding-bottom: 40px;
+}
+
+.browserDrop {
+  outline: 1px dashed var(--aml-primary);
+  outline-offset: -2px;
+}
+
+.toolbar {
+  display: flex;
+  gap: 4px;
+  padding: 0 4px 6px;
+}
+
+.toolbar button {
+  border: 1px solid var(--aml-muted);
+  background: transparent;
+  color: var(--aml-primary);
+  font: inherit;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: var(--aml-radius);
+  cursor: default;
+}
+
+.toolbar button:hover {
+  background: var(--aml-highlight);
+}
+
+.folderDrop {
+  composes: folder;
+  outline: 1px dashed var(--aml-primary);
+  outline-offset: -1px;
+  background: var(--aml-highlight);
+}
+
+.dot {
+  margin-left: auto;
+  font-size: 8px;
+  color: var(--aml-accent);
+}
+
+.rename {
+  display: block;
+  width: calc(100% - 16px);
+  box-sizing: border-box;
+  font: inherit;
+  font-size: 12px;
+  padding: 2px 6px;
+  border: 1px solid var(--aml-primary);
+  border-radius: 3px;
+  background: var(--aml-surface);
+  color: var(--aml-text);
+}
