@@ -1,0 +1,20 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  font-family: var(--aml-font-ui);
+  background: var(--aml-bg);
+  color: var(--aml-text);
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}

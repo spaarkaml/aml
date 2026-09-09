@@ -1,0 +1,36 @@
+/* AML design tokens (ADR-010). Paper is the default; Ink overrides under [data-mode="ink"].
+   Every colour is user-editable at runtime by setting the same custom property on :root. */
+:root {
+  --aml-bg: #faefed;
+  --aml-surface: #ffffff;
+  --aml-text: #1f2a2e;
+  --aml-primary: #006078;
+  --aml-muted: #82bac4;
+  --aml-highlight: #ffd4d1;
+  --aml-accent: #e37c78;
+
+  --aml-font-ui: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  --aml-font-editor: "Source Serif 4", "Times New Roman", Times, serif;
+  --aml-font-mono: "IBM Plex Mono", Menlo, Consolas, monospace;
+
+  --aml-space-1: 4px;
+  --aml-space-2: 8px;
+  --aml-space-3: 12px;
+  --aml-space-4: 16px;
+  --aml-space-6: 24px;
+  --aml-space-8: 32px;
+  --aml-radius: 4px;
+
+  color-scheme: light;
+}
+
+:root[data-mode="ink"] {
+  --aml-bg: #17262b;
+  --aml-surface: #1f3238;
+  --aml-text: #f0e9e7;
+  --aml-primary: #82bac4;
+  --aml-muted: #2f4a52;
+  --aml-highlight: #3a2e31;
+  --aml-accent: #e37c78;
+  color-scheme: dark;
+}
