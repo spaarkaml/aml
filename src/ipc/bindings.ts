@@ -34,6 +34,16 @@ export const commands = {
 	assetResolve: (notePath: string, target: string) => typedError<string, FolioError>(__TAURI_INVOKE("asset_resolve", { notePath, target })),
 	/**  Copies a file chosen in the native dialog into the note's assets folder. */
 	assetImport: (notePath: string, source: string) => typedError<AssetInfo, FolioError>(__TAURI_INVOKE("asset_import", { notePath, source })),
+	/**
+	 *  Returns the words from `words` that the en_AU dictionary (plus the personal and ignore
+	 *  lists) does not accept. Tokenising is the editor's job; this only judges words.
+	 */
+	spellCheck: (words: string[]) => typedError<string[], FolioError>(__TAURI_INVOKE("spell_check", { words })),
+	spellSuggest: (word: string) => typedError<string[], FolioError>(__TAURI_INVOKE("spell_suggest", { word })),
+	/**  Adds the word to `.aml/dictionary.txt` in the open Folio. */
+	spellAdd: (word: string) => typedError<null, FolioError>(__TAURI_INVOKE("spell_add", { word })),
+	/**  Ignores the word until the Folio is closed. */
+	spellIgnore: (word: string) => typedError<null, FolioError>(__TAURI_INVOKE("spell_ignore", { word })),
 };
 
 /** Events */

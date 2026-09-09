@@ -112,6 +112,17 @@ function remap(n: TreeNode, from: string, to: string): TreeNode {
   };
 }
 
+// Spell-check mock: a handful of classic errors and US spellings are "misspelled".
+const MISSPELLED = new Set(["teh", "recieve", "color", "organize", "definately"]);
+const SUGGEST: Record<string, string[]> = {
+  teh: ["the", "tea", "ten"],
+  recieve: ["receive"],
+  color: ["colour"],
+  organize: ["organise"],
+  definately: ["definitely"],
+};
+const added = new Set<string>();
+
 export function installDevMocks(): void {
   // Exposed for e2e assertions on what the app wrote.
   (window as unknown as { __amlMockNotes: typeof notes }).__amlMockNotes = notes;
@@ -254,6 +265,18 @@ export function installDevMocks(): void {
       }
       case "asset_resolve":
         return `/mock/${String(a.target)}`;
+      case "spell_check": {
+        const words = (a.words as string[]) ?? [];
+        return words.filter((w) => MISSPELLED.has(w.toLowerCase()) && !added.has(w));
+      }
+      case "spell_suggest":
+        return SUGGEST[String(a.word).toLowerCase()] ?? [];
+      case "spell_add":
+        added.add(String(a.word));
+        return null;
+      case "spell_ignore":
+        added.add(String(a.word));
+        return null;
       case "plugin:event|listen":
         return 1;
       case "plugin:event|unlisten":

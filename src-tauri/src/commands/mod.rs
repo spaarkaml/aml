@@ -4,3 +4,4 @@
 
 pub mod app;
 pub mod folio;
+pub mod spell;

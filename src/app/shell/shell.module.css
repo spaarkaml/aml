@@ -175,3 +175,17 @@
   font-size: 11px;
   color: var(--aml-primary);
 }
+
+.statusButton {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  padding: 0 4px;
+  border-radius: 3px;
+  cursor: default;
+}
+
+.statusButton:hover {
+  background: var(--aml-highlight);
+}

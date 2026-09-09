@@ -3,6 +3,7 @@
 
 mod commands;
 mod folio;
+mod spell;
 mod state;
 
 use tauri_specta::{collect_commands, collect_events, Builder};
@@ -29,6 +30,10 @@ fn specta_builder() -> Builder<tauri::Wry> {
             commands::folio::asset_write,
             commands::folio::asset_resolve,
             commands::folio::asset_import,
+            commands::spell::spell_check,
+            commands::spell::spell_suggest,
+            commands::spell::spell_add,
+            commands::spell::spell_ignore,
         ])
         .events(collect_events![folio::watch::FolioChanged])
 }

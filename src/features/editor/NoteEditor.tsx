@@ -1,5 +1,6 @@
 import { EditorContent, useEditor } from "@tiptap/react";
 import { useCallback, useEffect, useMemo } from "react";
+import { SpellMenu } from "@/features/spell/SpellMenu";
 import type { PmNode } from "@/lib/markdown";
 import { setActiveEditor } from "./editorRef";
 import { amlExtensions } from "./extensions";
@@ -98,6 +99,7 @@ export function NoteEditor() {
       {editor ? <TableMenu editor={editor} /> : null}
       {editor ? <SelectionToolbar editor={editor} /> : null}
       {editor ? <SlashMenu editor={editor} /> : null}
+      {editor ? <SpellMenu editor={editor} /> : null}
       <EditorContent editor={editor} className={styles.content} />
     </div>
   );

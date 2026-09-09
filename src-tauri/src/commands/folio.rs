@@ -79,6 +79,11 @@ fn install(app: &AppHandle, state: &State<AppState>, folio: Folio) -> Result<Fol
         .map_err(|e| FolioError::Io(e.to_string()))?;
     let info = folio.info();
     remember(app, &folio)?;
+    state
+        .speller
+        .lock()
+        .map_err(|e| FolioError::Io(e.to_string()))?
+        .load_personal(&folio.root().join(crate::folio::AML_DIR));
     *state
         .watcher
         .lock()
@@ -113,6 +118,11 @@ pub fn folio_create(
 #[tauri::command]
 #[specta::specta]
 pub fn folio_close(state: State<AppState>) -> Result<()> {
+    state
+        .speller
+        .lock()
+        .map_err(|e| FolioError::Io(e.to_string()))?
+        .unload_personal();
     state
         .index
         .lock()

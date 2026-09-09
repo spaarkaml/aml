@@ -246,3 +246,9 @@
   outline: 2px solid var(--aml-primary);
   outline-offset: 2px;
 }
+
+.prose :global(.aml-misspelled) {
+  text-decoration: underline wavy var(--aml-accent);
+  text-decoration-skip-ink: none;
+  text-underline-offset: 3px;
+}

@@ -4,6 +4,11 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### WP-1.7 — Australian English spell check (2026-09-10)
+- Bundled SCOWL en_AU Hunspell dictionary checked in Rust (`spellbook`); commands `spell_check` / `spell_suggest` / `spell_add` / `spell_ignore`.
+- Wavy underlines in the editor with a right-click menu (suggestions, add to `.aml/dictionary.txt`, ignore); code, links, front matter, atoms and acronyms are skipped.
+- Status-bar toggle and palette command; setting persisted per device.
+
 ### WP-1.4 — Editor ergonomics (2026-09-10)
 - Auto-pair for brackets and quotes (skip-over, Backspace clears a pair, wrap or toggle marks on a selection); `[[Note]]` becomes a link while typing.
 - `/` block menu (headings, lists, quote, code, table, divider, footnote, note link, date).

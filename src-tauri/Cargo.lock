@@ -50,6 +50,7 @@ dependencies = [
  "serde_json",
  "specta",
  "specta-typescript",
+ "spellbook",
  "tauri",
  "tauri-build",
  "tauri-plugin-dialog",
@@ -3208,6 +3209,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "29b1fc02b446f7244a92924fe68c0555921209f1d342990cd1539e9138e69502"
 dependencies = [
  "specta",
+]
+
+[[package]]
+name = "spellbook"
+version = "0.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0d204abcbdf8e88729306a8d0ca01a79d8a49969fe1f84696909d6dbc4321c1a"
+dependencies = [
+ "foldhash",
+ "hashbrown 0.17.1",
 ]
 
 [[package]]
