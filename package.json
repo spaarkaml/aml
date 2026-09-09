@@ -13,7 +13,7 @@
     "lint:fix": "biome check --write .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "rust:check": "cd src-tauri && cargo clippy --all-targets -- -D warnings && cargo test",
+    "rust:check": "cd src-tauri && cargo fmt --check && cargo clippy --all-targets -- -D warnings && cargo test",
     "vocab": "node scripts/check-vocabulary.mjs",
     "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm vocab && pnpm contrast && pnpm rust:check",
     "e2e": "playwright test",

@@ -114,11 +114,38 @@ mod tests {
     fn australian_spellings_pass_and_common_errors_fail() {
         let mut s = Speller::default();
         for w in [
-            "colour", "organise", "realise", "centre", "travelling", "labour",
-            "defence", "licence", "analyse", "catalogue", "grey", "tyre", "kerb", "aluminium",
-            "mum", "fortnight", "neighbour", "favourite", "theatre", "metre", "litre",
-            "apologise", "recognise", "behaviour", "honour", "jewellery", "cheque", "enrol",
-            "Australia", "Melbourne", "Canberra", "The",
+            "colour",
+            "organise",
+            "realise",
+            "centre",
+            "travelling",
+            "labour",
+            "defence",
+            "licence",
+            "analyse",
+            "catalogue",
+            "grey",
+            "tyre",
+            "kerb",
+            "aluminium",
+            "mum",
+            "fortnight",
+            "neighbour",
+            "favourite",
+            "theatre",
+            "metre",
+            "litre",
+            "apologise",
+            "recognise",
+            "behaviour",
+            "honour",
+            "jewellery",
+            "cheque",
+            "enrol",
+            "Australia",
+            "Melbourne",
+            "Canberra",
+            "The",
         ] {
             assert!(s.is_correct(w).unwrap(), "{w} should be accepted");
         }
@@ -146,6 +173,11 @@ mod tests {
         assert!(!fresh.is_correct("Zorblax").unwrap());
         fresh.ignore("Zorblax");
         assert!(fresh.is_correct("Zorblax").unwrap());
-        assert_eq!(fresh.misspelled(&["teh".into(), "teh".into(), "the".into()]).unwrap(), vec!["teh"]);
+        assert_eq!(
+            fresh
+                .misspelled(&["teh".into(), "teh".into(), "the".into()])
+                .unwrap(),
+            vec!["teh"]
+        );
     }
 }

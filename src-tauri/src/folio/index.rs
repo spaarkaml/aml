@@ -129,12 +129,7 @@ pub fn extract(text: &str) -> (Option<String>, Vec<String>, Vec<String>) {
                     } else if let Some(inner) =
                         value.strip_prefix('[').and_then(|v| v.strip_suffix(']'))
                     {
-                        aliases.extend(
-                            inner
-                                .split(',')
-                                .map(unquote)
-                                .filter(|a| !a.is_empty()),
-                        );
+                        aliases.extend(inner.split(',').map(unquote).filter(|a| !a.is_empty()));
                     } else {
                         aliases.push(unquote(value));
                     }
@@ -190,7 +185,8 @@ mod tests {
 
     #[test]
     fn block_aliases_and_no_front_matter() {
-        let (title, aliases, headings) = extract("---\naliases:\n  - one\n  - \"two\"\ntype: x\n---\n### Deep\n");
+        let (title, aliases, headings) =
+            extract("---\naliases:\n  - one\n  - \"two\"\ntype: x\n---\n### Deep\n");
         assert_eq!(title, None);
         assert_eq!(aliases, vec!["one", "two"]);
         assert_eq!(headings, vec!["Deep"]);
@@ -204,7 +200,9 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         let folio = Folio::create(dir.path(), None).unwrap();
         folio.write_note("a.md", "# Alpha\n", None).unwrap();
-        folio.write_note("sub/b.md", "---\ntitle: Bee\n---\n", None).unwrap();
+        folio
+            .write_note("sub/b.md", "---\ntitle: Bee\n---\n", None)
+            .unwrap();
         let mut index = NoteIndex::default();
         let first = index.refresh(&folio).unwrap();
         assert_eq!(first.len(), 2);
