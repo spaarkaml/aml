@@ -1,0 +1,5 @@
+- [ ] open task
+- [x] done task
+- [X] done task capital X
+  - [ ] nested open
+- [ ] task with **bold** and a [link](https://example.org)

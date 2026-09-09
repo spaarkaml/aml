@@ -1,0 +1,245 @@
+{
+  "$comment": "Round-trip corpus (WP-0.6). expect: lossless = parse→serialise is byte-identical; canonicalised = output differs from input but is idempotent and AST-equal; raw = contains syntax held as Raw nodes that must be emitted verbatim.",
+  "files": {
+    "blocks/headings-atx.md": {
+      "category": "blocks",
+      "expect": "lossless",
+      "note": "ATX headings all levels, inline formatting inside heading"
+    },
+    "blocks/headings-setext.md": {
+      "category": "blocks",
+      "expect": "canonicalised",
+      "note": "Setext → ATX on save"
+    },
+    "blocks/paragraphs.md": {
+      "category": "blocks",
+      "expect": "canonicalised",
+      "note": "Soft breaks, multiple blank lines collapse, both hard-break forms"
+    },
+    "blocks/lists-unordered.md": {
+      "category": "blocks",
+      "expect": "canonicalised",
+      "note": "Markers normalise to '-'; nesting preserved"
+    },
+    "blocks/lists-ordered.md": {
+      "category": "blocks",
+      "expect": "canonicalised",
+      "note": "Start number preserved; all-ones and paren styles canonicalised"
+    },
+    "blocks/lists-tasks.md": {
+      "category": "blocks",
+      "expect": "canonicalised",
+      "note": "GFM task lists; capital X → lowercase"
+    },
+    "blocks/lists-loose-tight.md": {
+      "category": "blocks",
+      "expect": "lossless",
+      "note": "Tight vs loose lists must be preserved"
+    },
+    "blocks/lists-mixed-content.md": {
+      "category": "blocks",
+      "expect": "lossless",
+      "note": "Blocks nested inside list items"
+    },
+    "blocks/blockquotes.md": {
+      "category": "blocks",
+      "expect": "lossless",
+      "note": "Nested quotes and blocks inside quotes"
+    },
+    "blocks/code-fenced.md": {
+      "category": "blocks",
+      "expect": "canonicalised",
+      "note": "Fences: languages, tilde → backtick, nested fences, info-string attributes preserved"
+    },
+    "blocks/code-indented.md": {
+      "category": "blocks",
+      "expect": "canonicalised",
+      "note": "Indented code → fenced"
+    },
+    "blocks/tables.md": {
+      "category": "blocks",
+      "expect": "canonicalised",
+      "note": "Alignment preserved; pipes normalised; escaped pipe kept"
+    },
+    "blocks/thematic-breaks.md": {
+      "category": "blocks",
+      "expect": "canonicalised",
+      "note": "All hr forms → ---"
+    },
+    "blocks/html-block.md": {
+      "category": "blocks",
+      "expect": "raw",
+      "note": "HTML blocks and comments preserved verbatim as Raw nodes"
+    },
+    "blocks/footnotes.md": {
+      "category": "blocks",
+      "expect": "canonicalised",
+      "note": "Footnote definitions collected at end; multi-paragraph footnotes"
+    },
+    "blocks/math.md": {
+      "category": "blocks",
+      "expect": "raw",
+      "note": "Math kept verbatim until modelled (Stage 7 candidate)"
+    },
+    "blocks/mermaid.md": {
+      "category": "blocks",
+      "expect": "lossless",
+      "note": "Mermaid fence is a normal code fence until WP-7.1"
+    },
+    "inline/emphasis.md": {
+      "category": "inline",
+      "expect": "canonicalised",
+      "note": "Emphasis normalises to * and **; intraword underscores stay literal"
+    },
+    "inline/code-spans.md": {
+      "category": "inline",
+      "expect": "lossless",
+      "note": "Code spans with embedded backticks"
+    },
+    "inline/escapes.md": {
+      "category": "inline",
+      "expect": "canonicalised",
+      "note": "Escapes: only necessary escapes are emitted; entities preserved"
+    },
+    "inline/unicode.md": {
+      "category": "inline",
+      "expect": "lossless",
+      "note": "CJK, emoji ZWJ, combining marks, RTL, typographic punctuation, NBSP"
+    },
+    "inline/autolinks.md": {
+      "category": "inline",
+      "expect": "canonicalised",
+      "note": "GFM autolinks; trailing punctuation handling"
+    },
+    "links/markdown-links.md": {
+      "category": "links",
+      "expect": "canonicalised",
+      "note": "Reference links resolve to inline on save (canonical form)"
+    },
+    "links/wikilinks.md": {
+      "category": "links",
+      "expect": "lossless",
+      "note": "Wikilink family incl. embeds; block refs held as Raw"
+    },
+    "links/tags.md": {
+      "category": "links",
+      "expect": "lossless",
+      "note": "Tag detection rules"
+    },
+    "links/citations.md": {
+      "category": "links",
+      "expect": "lossless",
+      "note": "Pandoc citation syntax kept verbatim (modelled in WP-6.5)"
+    },
+    "meta/front-matter-basic.md": {
+      "category": "meta",
+      "expect": "lossless",
+      "note": "YAML front matter with list and date"
+    },
+    "meta/front-matter-complex.md": {
+      "category": "meta",
+      "expect": "canonicalised",
+      "note": "Nested YAML, block scalar; blank line inserted after front matter"
+    },
+    "meta/front-matter-empty.md": {
+      "category": "meta",
+      "expect": "canonicalised",
+      "note": "Empty front matter is removed"
+    },
+    "meta/no-front-matter-hr-start.md": {
+      "category": "meta",
+      "expect": "lossless",
+      "note": "Leading --- followed by blank line is an hr, not YAML"
+    },
+    "meta/obsidian-callouts.md": {
+      "category": "meta",
+      "expect": "raw",
+      "note": "Obsidian callouts: Raw until WP-3.9 models them"
+    },
+    "meta/obsidian-extras.md": {
+      "category": "meta",
+      "expect": "raw",
+      "note": "Obsidian-specific syntax held as Raw/verbatim"
+    },
+    "edge/empty.md": {
+      "category": "edge",
+      "expect": "lossless",
+      "note": "Zero-byte file"
+    },
+    "edge/only-whitespace.md": {
+      "category": "edge",
+      "expect": "canonicalised",
+      "note": "Whitespace-only → empty"
+    },
+    "edge/no-trailing-newline.md": {
+      "category": "edge",
+      "expect": "canonicalised",
+      "note": "Trailing newline added"
+    },
+    "edge/crlf.md": {
+      "category": "edge",
+      "expect": "canonicalised",
+      "note": "CRLF → LF"
+    },
+    "edge/bom.md": {
+      "category": "edge",
+      "expect": "canonicalised",
+      "note": "BOM stripped"
+    },
+    "edge/tabs.md": {
+      "category": "edge",
+      "expect": "canonicalised",
+      "note": "Tabs normalised to spaces in structure, preserved inside code"
+    },
+    "edge/long-line.md": {
+      "category": "edge",
+      "expect": "lossless",
+      "note": "10k-character single line"
+    },
+    "edge/large.md": {
+      "category": "edge",
+      "expect": "lossless",
+      "note": "~300 sections, ~130 KB"
+    },
+    "edge/trailing-spaces.md": {
+      "category": "edge",
+      "expect": "canonicalised",
+      "note": "3 spaces = hard break; 1 space stripped"
+    },
+    "edge/heading-edge-cases.md": {
+      "category": "edge",
+      "expect": "canonicalised",
+      "note": "Heading parsing edge cases"
+    },
+    "edge/list-edge-cases.md": {
+      "category": "edge",
+      "expect": "canonicalised",
+      "note": "Empty items, missing spaces"
+    },
+    "edge/nested-emphasis.md": {
+      "category": "edge",
+      "expect": "canonicalised",
+      "note": "Nested and unclosed emphasis"
+    },
+    "raw/unknown-fence-attrs.md": {
+      "category": "raw",
+      "expect": "raw",
+      "note": "Pandoc-style fenced attrs preserved"
+    },
+    "raw/definition-list.md": {
+      "category": "raw",
+      "expect": "raw",
+      "note": "Pandoc definition lists held as Raw"
+    },
+    "raw/html-inline.md": {
+      "category": "raw",
+      "expect": "lossless",
+      "note": "Inline HTML preserved"
+    },
+    "raw/mixed-everything.md": {
+      "category": "raw",
+      "expect": "raw",
+      "note": "Stress test combining every category"
+    }
+  }
+}

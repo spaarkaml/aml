@@ -64,6 +64,17 @@ jobs:
       - name: Unit tests
         run: pnpm test
 
+      - name: Contrast report
+        run: pnpm contrast
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: E2E (shell, browser + mocked IPC)
+        run: pnpm e2e
+        env:
+          CI: "1"
+
       - name: Build frontend
         run: pnpm build
 

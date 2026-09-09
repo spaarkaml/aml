@@ -1,0 +1,88 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in srgb, var(--aml-text) 18%, transparent);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 12vh;
+  z-index: 100;
+}
+
+.backdropButton {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.panel {
+  position: relative;
+  width: min(560px, 90vw);
+  background: var(--aml-surface);
+  border: 1px solid var(--aml-muted);
+  border-radius: var(--aml-radius);
+  box-shadow: 0 12px 40px color-mix(in srgb, var(--aml-text) 25%, transparent);
+  overflow: hidden;
+}
+
+.input {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--aml-muted);
+  background: transparent;
+  color: var(--aml-text);
+  font: inherit;
+  font-size: 15px;
+  padding: var(--aml-space-3) var(--aml-space-4);
+  outline: none;
+}
+
+.list {
+  margin: 0;
+  padding: var(--aml-space-1) 0;
+  max-height: 50vh;
+  overflow: auto;
+}
+
+.item,
+.itemActive {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--aml-space-4);
+  padding: var(--aml-space-2) var(--aml-space-4);
+  font-size: 13px;
+  cursor: default;
+}
+
+.itemActive {
+  background: var(--aml-highlight);
+  color: var(--aml-primary);
+}
+
+.group {
+  opacity: 0.6;
+  margin-right: var(--aml-space-2);
+}
+
+.group::after {
+  content: "›";
+  margin-left: var(--aml-space-1);
+}
+
+.kbd {
+  font-family: var(--aml-font-ui);
+  font-size: 11px;
+  color: var(--aml-primary);
+  border: 1px solid var(--aml-muted);
+  border-radius: 3px;
+  padding: 1px 6px;
+}
+
+.empty {
+  padding: var(--aml-space-3) var(--aml-space-4);
+  font-size: 13px;
+  opacity: 0.6;
+}

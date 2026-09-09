@@ -1,12 +1,10 @@
-.shell {
-  min-height: 100vh;
+.welcome {
+  flex-grow: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: var(--aml-space-2);
-  background: var(--aml-bg);
-  color: var(--aml-text);
 }
 
 .wordmark {
@@ -23,10 +21,7 @@
   margin: 0;
 }
 
-.meta {
-  font-family: var(--aml-font-ui);
-  font-size: 0.75rem;
-  color: var(--aml-primary);
-  opacity: 0.7;
+.placeholder {
+  opacity: 0.6;
   margin: 0;
 }
