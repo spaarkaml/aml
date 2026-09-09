@@ -4,6 +4,10 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### WP-1.6 — Quick Open (2026-09-10)
+- ⌘O Quick Open: fuzzy over titles, front-matter aliases, headings and paths; recents on an empty query; heading match jumps to the heading; "Create note" for unmatched queries.
+- Rust `folio_index` command with an mtime-cached in-memory index (`folio/index.rs`).
+
 ### WP-1.5 — Folio Browser, tabs and navigation (2026-09-10)
 - Tabs per Folio (persisted per device), back/forward history, breadcrumb with reveal-in-Browser; ⌘W / ⌘⌥→← / ⌘[ ] / ⌘1–9.
 - Folio Browser: `+ Note` / `+ Folder`, context menu, inline rename, drag-move, OS-trash with confirm, persisted expanded folders, unsaved badge.

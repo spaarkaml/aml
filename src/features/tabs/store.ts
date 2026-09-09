@@ -10,6 +10,8 @@ import { isWithin, remapPath } from "@/lib/paths";
 interface FolioTabs {
   tabs: string[];
   active: string | null;
+  /** Most recently activated notes, newest first (for Quick Open's empty query). */
+  recents?: string[];
 }
 
 interface TabsState {
@@ -33,8 +35,13 @@ interface TabsState {
   current: () => FolioTabs;
 }
 
-const EMPTY: FolioTabs = { tabs: [], active: null };
+const EMPTY: FolioTabs = { tabs: [], active: null, recents: [] };
 export const MAX_HISTORY = 50;
+export const MAX_RECENTS = 20;
+
+function pushRecent(recents: string[] | undefined, path: string): string[] {
+  return [path, ...(recents ?? []).filter((p) => p !== path)].slice(0, MAX_RECENTS);
+}
 
 /** Adds `path` to the current Folio's tab list if it is not there yet. */
 function ensureTab(path: string): void {
@@ -43,7 +50,7 @@ function ensureTab(path: string): void {
   const cur = byFolio[folioRoot] ?? EMPTY;
   if (cur.tabs.includes(path)) return;
   useTabsStore.setState({
-    byFolio: { ...byFolio, [folioRoot]: { tabs: [...cur.tabs, path], active: cur.active } },
+    byFolio: { ...byFolio, [folioRoot]: { ...cur, tabs: [...cur.tabs, path] } },
   });
 }
 
@@ -75,7 +82,10 @@ export const useTabsStore = create<TabsState>()(
         if (cur.active === path) return;
         const pushHistory = opts?.history !== false && cur.active !== null;
         set((s) => ({
-          byFolio: { ...s.byFolio, [root]: { tabs: cur.tabs, active: path } },
+          byFolio: {
+            ...s.byFolio,
+            [root]: { ...cur, active: path, recents: pushRecent(cur.recents, path) },
+          },
           back: pushHistory ? [...s.back, cur.active as string].slice(-MAX_HISTORY) : s.back,
           forward: pushHistory ? [] : s.forward,
         }));
@@ -91,7 +101,7 @@ export const useTabsStore = create<TabsState>()(
         let active = cur.active;
         if (active === path) active = tabs[Math.min(i, tabs.length - 1)] ?? null;
         set((s) => ({
-          byFolio: { ...s.byFolio, [root]: { tabs, active } },
+          byFolio: { ...s.byFolio, [root]: { ...cur, tabs, active } },
           back: s.back.filter((p) => p !== path),
           forward: s.forward.filter((p) => p !== path),
         }));
@@ -125,7 +135,11 @@ export const useTabsStore = create<TabsState>()(
         set((s) => ({
           byFolio: {
             ...s.byFolio,
-            [root]: { tabs: cur.tabs.map(map), active: cur.active ? map(cur.active) : null },
+            [root]: {
+              tabs: cur.tabs.map(map),
+              active: cur.active ? map(cur.active) : null,
+              recents: (cur.recents ?? []).map(map),
+            },
           },
           back: s.back.map(map),
           forward: s.forward.map(map),

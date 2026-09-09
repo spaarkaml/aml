@@ -19,6 +19,7 @@ fn specta_builder() -> Builder<tauri::Wry> {
             commands::folio::folio_current,
             commands::folio::folio_recent,
             commands::folio::folio_tree,
+            commands::folio::folio_index,
             commands::folio::note_read,
             commands::folio::note_write,
             commands::folio::entry_create_note,

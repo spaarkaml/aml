@@ -6,6 +6,7 @@ use tauri::{AppHandle, Manager, State};
 
 use base64::Engine;
 
+use crate::folio::index::NoteIndexEntry;
 use crate::folio::{
     watch, AssetInfo, Folio, FolioError, FolioInfo, NoteContent, NoteMeta, Result, TreeNode,
 };
@@ -112,6 +113,11 @@ pub fn folio_create(
 #[tauri::command]
 #[specta::specta]
 pub fn folio_close(state: State<AppState>) -> Result<()> {
+    state
+        .index
+        .lock()
+        .map_err(|e| FolioError::Io(e.to_string()))?
+        .clear();
     *state
         .watcher
         .lock()
@@ -163,6 +169,18 @@ pub fn note_write(
     with_folio(&state, |f| {
         f.write_note(&path, &text, expected_mtime.map(|m| m as u64))
     })
+}
+
+/// Quick Open index: every note's title, aliases and headings. Cached by mtime in AppState;
+/// the UI calls it on Folio open and after each `FolioChanged`.
+#[tauri::command]
+#[specta::specta]
+pub fn folio_index(state: State<AppState>) -> Result<Vec<NoteIndexEntry>> {
+    let mut index = state
+        .index
+        .lock()
+        .map_err(|e| FolioError::Io(e.to_string()))?;
+    with_folio(&state, |f| index.refresh(f))
 }
 
 #[tauri::command]

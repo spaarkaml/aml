@@ -7,6 +7,7 @@ import { useEditorStore } from "@/features/editor/store";
 import { useBrowserStore } from "@/features/folio/browserStore";
 import { activeDir, useFolioStore } from "@/features/folio/store";
 import { useLayoutStore } from "@/features/layout/store";
+import { useQuickOpenStore } from "@/features/quickopen/store";
 import { useTabsStore } from "@/features/tabs/store";
 
 /** Single source of truth for shell shortcuts; the e2e suite presses each one. */
@@ -23,6 +24,7 @@ export const SHORTCUTS = {
   back: "mod+[",
   forward: "mod+]",
   newNote: "mod+n",
+  quickOpen: "mod+o",
   rename: "f2",
 } as const;
 
@@ -31,6 +33,18 @@ function activeTab(): string | null {
 }
 
 const TAB_COMMANDS: Command[] = [
+  {
+    id: "note.quickOpen",
+    title: "Quick Open…",
+    group: "Note",
+    shortcut: SHORTCUTS.quickOpen,
+    global: true,
+    run: () => {
+      if (!useFolioStore.getState().folio) return;
+      usePaletteStore.getState().setOpen(false);
+      useQuickOpenStore.getState().toggle();
+    },
+  },
   {
     id: "tab.close",
     title: "Close Tab",

@@ -86,3 +86,19 @@
   font-size: 13px;
   opacity: 0.6;
 }
+
+.label {
+  display: flex;
+  align-items: baseline;
+  gap: var(--aml-space-3);
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.detail {
+  opacity: 0.55;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

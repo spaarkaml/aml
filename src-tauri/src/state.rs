@@ -1,5 +1,6 @@
 use std::sync::Mutex;
 
+use crate::folio::index::NoteIndex;
 use crate::folio::watch::FolioWatcher;
 use crate::folio::Folio;
 
@@ -8,4 +9,5 @@ use crate::folio::Folio;
 pub struct AppState {
     pub folio: Mutex<Option<Folio>>,
     pub watcher: Mutex<Option<FolioWatcher>>,
+    pub index: Mutex<NoteIndex>,
 }

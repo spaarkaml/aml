@@ -19,4 +19,5 @@ Run on both machines against a Folio paired with the DRIVESTOR (or a Local Folio
 | 13 | *(WP-1.5)* Right-click a note → Move to Trash… | Native confirm; note goes to the OS Trash / Recycle Bin; tab closes | ☐ |
 | 14 | *(WP-1.5)* Drag a note onto a folder; F2 on the open note | Note moves on disk and its tab follows; inline rename box appears in the Browser | ☐ |
 | 15 | *(WP-1.5)* Type in a note, pause 2 s, keep typing | Caret never jumps after "Saved" appears | ☐ |
-| 16 | *(WP-1.6+)* spell check, Quick Open | — | ☐ |
+| 16 | *(WP-1.6)* ⌘O, type part of a heading, Enter | Note opens with the caret in that heading; results feel instant | ☐ |
+| 17 | *(WP-1.7+)* spell check | — | ☐ |

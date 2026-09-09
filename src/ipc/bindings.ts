@@ -18,6 +18,11 @@ export const commands = {
 } | null, FolioError>(__TAURI_INVOKE("folio_current")),
 	folioRecent: () => __TAURI_INVOKE<RecentFolio[]>("folio_recent"),
 	folioTree: () => typedError<TreeNode[], FolioError>(__TAURI_INVOKE("folio_tree")),
+	/**
+	 *  Quick Open index: every note's title, aliases and headings. Cached by mtime in AppState;
+	 *  the UI calls it on Folio open and after each `FolioChanged`.
+	 */
+	folioIndex: () => typedError<NoteIndexEntry[], FolioError>(__TAURI_INVOKE("folio_index")),
 	noteRead: (path: string) => typedError<NoteContent, FolioError>(__TAURI_INVOKE("note_read", { path })),
 	noteWrite: (path: string, text: string, expectedMtime: number | null) => typedError<NoteMeta, FolioError>(__TAURI_INVOKE("note_write", { path, text, expectedMtime })),
 	entryCreateNote: (path: string) => typedError<NoteMeta, FolioError>(__TAURI_INVOKE("entry_create_note", { path })),
@@ -81,6 +86,15 @@ export type NoteContent = {
 	text: string,
 	mtime: number,
 	size: number,
+};
+
+export type NoteIndexEntry = {
+	path: string,
+	/**  Front-matter `title:` if present, else the file name without `.md`. */
+	title: string,
+	aliases: string[],
+	headings: string[],
+	mtime: number,
 };
 
 export type NoteMeta = {

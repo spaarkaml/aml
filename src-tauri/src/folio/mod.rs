@@ -3,6 +3,7 @@
 //! [`Folio::resolve`] so the UI can never reach outside the root.
 
 pub mod error;
+pub mod index;
 pub mod watch;
 
 use std::fs;

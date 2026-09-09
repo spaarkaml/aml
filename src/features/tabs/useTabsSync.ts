@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useEditorStore } from "@/features/editor/store";
 import { useBrowserStore } from "@/features/folio/browserStore";
 import { useFolioStore } from "@/features/folio/store";
+import { useQuickOpenStore } from "@/features/quickopen/store";
 import { useTabsStore } from "./store";
 
 /**
@@ -19,6 +20,8 @@ export function useTabsSync(): void {
   useEffect(() => {
     useTabsStore.getState().setFolio(root);
     useBrowserStore.getState().setRoot(root);
+    if (root) void useQuickOpenStore.getState().refresh();
+    else useQuickOpenStore.getState().clear();
   }, [root]);
 
   useEffect(() => {

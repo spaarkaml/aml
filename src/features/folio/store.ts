@@ -25,8 +25,11 @@ interface FolioState {
   refreshTree: () => Promise<void>;
   close: () => Promise<void>;
   clearError: () => void;
-  /** Creates `Untitled.md` (or the next free name) in `dir`, opens it and starts a rename. */
-  createNote: (dir: string) => Promise<string | null>;
+  /**
+   * Creates a note in `dir` and opens it. Without `name` it is `Untitled.md` (next free
+   * name) and an inline rename starts; with `name` the note is `<name>.md` (next free).
+   */
+  createNote: (dir: string, name?: string) => Promise<string | null>;
   createFolder: (dir: string) => Promise<string | null>;
   /** Renames or moves an entry; `to` is the full new relative path. */
   rename: (from: string, to: string) => Promise<boolean>;
@@ -132,8 +135,8 @@ export const useFolioStore = create<FolioState>((set, get) => ({
 
   clearError: () => set({ error: null }),
 
-  createNote: async (dir) => {
-    const path = joinPath(dir, freeName(get().tree, dir, "Untitled", ".md"));
+  createNote: async (dir, name) => {
+    const path = joinPath(dir, freeName(get().tree, dir, name ?? "Untitled", ".md"));
     const r = await commands.entryCreateNote(path);
     if (r.status === "error") {
       set({ error: describeFolioError(r.error) });
@@ -143,7 +146,7 @@ export const useFolioStore = create<FolioState>((set, get) => ({
     const browser = useBrowserStore.getState();
     browser.reveal(path);
     useTabsStore.getState().open(path);
-    browser.startRename(path);
+    if (!name) browser.startRename(path);
     return path;
   },
 

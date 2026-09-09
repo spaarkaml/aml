@@ -28,7 +28,7 @@ Updated with every work package. If this file and the code disagree, the code is
 | `src-tauri/src/folio/` | Folio model, path safety, atomic writes (`mod.rs`), watcher (`watch.rs`), errors |
 | `src-tauri/src/state.rs` | `AppState { folio, watcher }` managed by Tauri |
 | `src/app/` | `App.tsx`, `commands.ts` (shell commands + `SHORTCUTS` table), `tokens.css`, `global.css`, `shell/` (Shell, TopBar, SidePanel, StatusBar) |
-| `src/features/<feature>/` | Feature folders: components, store, tests. Current: `commands`, `layout`, `appearance`, `folio` (store, Welcome, FolioTree, watcher events), `editor` (Tiptap extensions in `extensions/`, `NoteEditor.tsx`, store with debounced save/conflicts, `editorRef.ts`, `assets.ts`/`paste.ts` for images, `TableMenu.tsx`, `footnotes.ts`), `properties` (front-matter panel + `frontmatter.ts` helpers), `tabs` (per-Folio tab store, `useTabsSync`, `TabStrip`, `Breadcrumb`). `folio` also holds `browserStore.ts` (expanded folders, inline rename target), `ContextMenu.tsx` and `errors.ts`. Cross-feature imports are limited to stores and `src/lib` |
+| `src/features/<feature>/` | Feature folders: components, store, tests. Current: `commands`, `layout`, `appearance`, `folio` (store, Welcome, FolioTree, watcher events), `editor` (Tiptap extensions in `extensions/`, `NoteEditor.tsx`, store with debounced save/conflicts, `editorRef.ts`, `assets.ts`/`paste.ts` for images, `TableMenu.tsx`, `footnotes.ts`), `properties` (front-matter panel + `frontmatter.ts` helpers), `tabs` (per-Folio tab store with recents, `useTabsSync`, `TabStrip`, `Breadcrumb`), `quickopen` (index store, ranking in `search.ts`, `QuickOpen.tsx`). `folio` also holds `browserStore.ts` (expanded folders, inline rename target), `ContextMenu.tsx` and `errors.ts`. Cross-feature imports are limited to stores and `src/lib` |
 | `src/lib/markdown/` | The markdown bridge: `mdast.ts` (parse + canonical serialise), `escape.ts`, `inline-syntax.ts` (wiki/tag/cite), `pm.ts` (mdast ⇄ ProseMirror JSON, Raw nodes), `index.ts` API |
 | `src/lib/` | `fuzzy.ts`, `platform.ts`, `wordcount.ts` |
 | `src/ipc/` | Generated bindings + `index.ts` re-export |
@@ -46,6 +46,7 @@ Updated with every work package. If this file and the code disagree, the code is
 | `folio_create` | path, name? | `FolioInfo` | folio |
 | `folio_close` / `folio_current` / `folio_recent` | — | — / `FolioInfo?` / `RecentFolio[]` | folio |
 | `folio_tree` | — | `TreeNode[]` | folio |
+| `folio_index` | — | `NoteIndexEntry[] { path, title, aliases, headings, mtime }` (mtime-cached) | folio |
 | `note_read` | path | `NoteContent { path, text, mtime, size }` | folio |
 | `note_write` | path, text, expectedMtime? | `NoteMeta` (Conflict error if mtime moved) | folio |
 | `entry_create_note` / `entry_create_folder` / `entry_rename` / `entry_trash` | paths | — | folio |
@@ -80,6 +81,7 @@ All results are `{status:"ok",data}|{status:"error",error:FolioError}`; `FolioEr
 - One editor instance; the **active tab** decides what it shows. `useTabsSync` (mounted in `App`) maps Folio root → tabs store and active tab → `useEditorStore.open`; a missing note closes its tab.
 - Tabs and expanded Browser folders are per Folio and per device (`aml.tabs`, `aml.browser` in localStorage). Back/forward stacks are session-only.
 - Entry operations (create / rename / move / trash) live in `useFolioStore` and fan out to the editor (`renamed`), tabs (`rename`, `closeWithin`) and Browser state before refreshing the tree from Rust. Trash is always the OS trash, behind a native confirm.
+- Quick Open (⌘O) searches `folio_index` in memory (`quickopen/search.ts`); the index is refreshed on Folio open and after each `FolioChanged`.
 - The watcher echoes the app's own writes; the editor ignores a `FolioChanged` for its note while a save is in flight or when the on-disk mtime equals the one it holds.
 
 ## Editor data flow (WP-1.2)

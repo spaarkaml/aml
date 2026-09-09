@@ -33,6 +33,13 @@ const notes = new Map<string, { text: string; mtime: number }>([
     },
   ],
   ["Inbox.md", { text: "Quick thoughts.\n", mtime: 1_700_000_000_000 }],
+  [
+    "Thesis/chapters/04 Methods.md",
+    {
+      text: "---\naliases: [methodology, interviews]\n---\n\n# Methods\n\n## Interview protocol\n\nText.\n",
+      mtime: 1_700_000_000_000,
+    },
+  ],
 ]);
 
 const state: { folio: FolioInfo | null; tree: TreeNode[]; recent: RecentFolio[] } = {
@@ -180,6 +187,42 @@ export function installDevMocks(): void {
       case "folio_tree":
         if (!state.folio) throw { kind: "noFolioOpen" };
         return state.tree;
+      case "folio_index": {
+        if (!state.folio) throw { kind: "noFolioOpen" };
+        const out: Array<{
+          path: string;
+          title: string;
+          aliases: string[];
+          headings: string[];
+          mtime: number;
+        }> = [];
+        const walk = (nodes: TreeNode[]) => {
+          for (const n of nodes) {
+            if (n.kind === "folder") walk(n.children);
+            else if (n.kind === "note") {
+              const text = notes.get(n.path)?.text ?? "";
+              const fm = /^---\n([\s\S]*?)\n---/.exec(text)?.[1] ?? "";
+              const title = /^title:\s*(.+)$/m.exec(fm)?.[1]?.replace(/^["']|["']$/g, "");
+              const aliases =
+                /^aliases:\s*\[(.*)\]$/m
+                  .exec(fm)?.[1]
+                  ?.split(",")
+                  .map((a) => a.trim().replace(/^["']|["']$/g, ""))
+                  .filter(Boolean) ?? [];
+              const headings = [...text.matchAll(/^#{1,6}\s+(.+?)\s*#*$/gm)].map((m) => m[1] ?? "");
+              out.push({
+                path: n.path,
+                title: title ?? n.name.replace(/\.md$/i, ""),
+                aliases,
+                headings,
+                mtime: notes.get(n.path)?.mtime ?? n.mtime,
+              });
+            }
+          }
+        };
+        walk(state.tree);
+        return out;
+      }
       case "note_read": {
         const path = String(a.path);
         const n = notes.get(path) ?? { text: "", mtime: 1 };
