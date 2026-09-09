@@ -1,6 +1,7 @@
 import { useAppearanceStore } from "@/features/appearance/store";
 import { usePaletteStore } from "@/features/commands/paletteStore";
 import { formatShortcut } from "@/features/commands/registry";
+import { useFolioStore } from "@/features/folio/store";
 import { useLayoutStore } from "@/features/layout/store";
 import { SHORTCUTS } from "../commands";
 import styles from "./shell.module.css";
@@ -16,6 +17,7 @@ export function TopBar() {
   const setting = useAppearanceStore((s) => s.setting);
   const cycleMode = useAppearanceStore((s) => s.cycle);
   const openPalette = usePaletteStore((s) => s.setOpen);
+  const folio = useFolioStore((s) => s.folio);
 
   return (
     <header className={styles.topbar}>
@@ -29,8 +31,8 @@ export function TopBar() {
       >
         ◧
       </button>
-      <nav className={styles.crumbs} aria-label="Breadcrumb">
-        <span>Overview</span>
+      <nav className={styles.crumbs} aria-label="Breadcrumb" data-testid="breadcrumb">
+        <span>{folio ? folio.name : "Overview"}</span>
       </nav>
       <div className={styles.tabs} role="tablist" aria-label="Open notes" />
       <div className={styles.actions}>

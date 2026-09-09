@@ -24,9 +24,11 @@ Updated with every work package. If this file and the code disagree, the code is
 | Path | Owns |
 |---|---|
 | `src-tauri/src/lib.rs` | App bootstrap, plugin registration, command registry |
-| `src-tauri/src/commands/<domain>.rs` | One file per command domain (`app`, later `folio`, `notes`, `index`, `snapshots`, `sync`, `compile`) |
+| `src-tauri/src/commands/<domain>.rs` | One file per command domain (`app`, `folio`; later `index`, `snapshots`, `sync`, `compile`) |
+| `src-tauri/src/folio/` | Folio model, path safety, atomic writes (`mod.rs`), watcher (`watch.rs`), errors |
+| `src-tauri/src/state.rs` | `AppState { folio, watcher }` managed by Tauri |
 | `src/app/` | `App.tsx`, `commands.ts` (shell commands + `SHORTCUTS` table), `tokens.css`, `global.css`, `shell/` (Shell, TopBar, SidePanel, StatusBar) |
-| `src/features/<feature>/` | Feature folders: components, store, tests. Current: `commands` (registry, palette), `layout` (panel/Layout store), `appearance` (mode). No cross-feature imports except through `src/lib` |
+| `src/features/<feature>/` | Feature folders: components, store, tests. Current: `commands`, `layout`, `appearance`, `folio` (store, Welcome, FolioTree, watcher events). No cross-feature imports except through `src/lib` |
 | `src/lib/` | Pure utilities with unit tests: `fuzzy.ts`, `platform.ts`; later markdown, paths, dates |
 | `src/ipc/` | Generated bindings + `index.ts` re-export |
 | `themes/` | Reserved for Book Designs' CSS previews; app colours live in `tokens.css` |
@@ -38,11 +40,24 @@ Updated with every work package. If this file and the code disagree, the code is
 
 | Command | Args | Returns | Domain |
 |---|---|---|---|
-| `app_info` | — | `AppInfo { name, version, platform, arch, debug }` | app |
+| `app_info` | — | `AppInfo` | app |
+| `folio_open` | path | `FolioInfo` | folio |
+| `folio_create` | path, name? | `FolioInfo` | folio |
+| `folio_close` / `folio_current` / `folio_recent` | — | — / `FolioInfo?` / `RecentFolio[]` | folio |
+| `folio_tree` | — | `TreeNode[]` | folio |
+| `note_read` | path | `NoteContent { path, text, mtime, size }` | folio |
+| `note_write` | path, text, expectedMtime? | `NoteMeta` (Conflict error if mtime moved) | folio |
+| `entry_create_note` / `entry_create_folder` / `entry_rename` / `entry_trash` | paths | — | folio |
+
+Events: `folio-changed` → `FolioChanged { paths }` (debounced watcher).
+
+All results are `{status:"ok",data}|{status:"error",error:FolioError}`; `FolioError` is `{kind, detail}`.
 
 ## Data on disk
 
-Nothing yet. Folio layout is specified in `03-GLOSSARY-AND-NAMING.md` §4 and ADR-004.
+- **Folio:** `<root>/.aml/config.yaml`, `<root>/.aml/snapshots/`, `<root>/.stignore` (created by `Folio::create`). Everything else in the root is user content; dotfiles, `node_modules` and `.aml-tmp-*` are invisible to the tree.
+- **Per device (app-data dir):** `recent-folios.json`. Layout/appearance in webview localStorage.
+- **Writes** always go through `folio::write_atomic` (temp + fsync + rename).
 
 ## Quality tooling
 

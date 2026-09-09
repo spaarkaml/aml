@@ -2,13 +2,31 @@
 //! only talks to it through the commands collected here (ADR-001).
 
 mod commands;
+mod folio;
+mod state;
 
-use tauri_specta::{collect_commands, Builder};
+use tauri_specta::{collect_commands, collect_events, Builder};
 
 /// The single registry of commands and events exposed to the UI.
 /// `cargo test` re-exports `src/ipc/bindings.ts` from this (see `tests::export_bindings`).
 fn specta_builder() -> Builder<tauri::Wry> {
-    Builder::<tauri::Wry>::new().commands(collect_commands![commands::app::app_info])
+    Builder::<tauri::Wry>::new()
+        .commands(collect_commands![
+            commands::app::app_info,
+            commands::folio::folio_open,
+            commands::folio::folio_create,
+            commands::folio::folio_close,
+            commands::folio::folio_current,
+            commands::folio::folio_recent,
+            commands::folio::folio_tree,
+            commands::folio::note_read,
+            commands::folio::note_write,
+            commands::folio::entry_create_note,
+            commands::folio::entry_create_folder,
+            commands::folio::entry_rename,
+            commands::folio::entry_trash,
+        ])
+        .events(collect_events![folio::watch::FolioChanged])
 }
 
 fn export_bindings(builder: &Builder<tauri::Wry>) {
@@ -29,6 +47,8 @@ pub fn run() {
     export_bindings(&builder);
 
     tauri::Builder::default()
+        .manage(state::AppState::default())
+        .plugin(tauri_plugin_dialog::init())
         .plugin(
             tauri_plugin_log::Builder::new()
                 .level(log::LevelFilter::Info)

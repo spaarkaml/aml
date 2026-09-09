@@ -1,6 +1,7 @@
 import { useAppearanceStore } from "@/features/appearance/store";
 import { usePaletteStore } from "@/features/commands/paletteStore";
 import { type Command, commandRegistry } from "@/features/commands/registry";
+import { useFolioStore } from "@/features/folio/store";
 import { useLayoutStore } from "@/features/layout/store";
 
 /** Single source of truth for shell shortcuts; the e2e suite presses each one. */
@@ -13,6 +14,24 @@ export const SHORTCUTS = {
 } as const;
 
 export const SHELL_COMMANDS: Command[] = [
+  {
+    id: "folio.open",
+    title: "Open Folio…",
+    group: "Folio",
+    run: () => void useFolioStore.getState().pickAndOpen(),
+  },
+  {
+    id: "folio.create",
+    title: "Create Folio…",
+    group: "Folio",
+    run: () => void useFolioStore.getState().pickAndCreate(),
+  },
+  {
+    id: "folio.close",
+    title: "Close Folio",
+    group: "Folio",
+    run: () => void useFolioStore.getState().close(),
+  },
   {
     id: "palette.open",
     title: "Show All Commands",

@@ -3,6 +3,7 @@ import { vi } from "vitest";
 import { useLayoutStore } from "@/features/layout/store";
 import { App } from "./App";
 
+vi.mock("@tauri-apps/plugin-dialog", () => ({ open: vi.fn() }));
 vi.mock("@/ipc", () => ({
   commands: {
     appInfo: vi.fn().mockResolvedValue({
@@ -12,7 +13,10 @@ vi.mock("@/ipc", () => ({
       arch: "x",
       debug: true,
     }),
+    folioCurrent: vi.fn().mockResolvedValue({ status: "ok", data: null }),
+    folioRecent: vi.fn().mockResolvedValue([]),
   },
+  events: { folioChanged: { listen: vi.fn().mockResolvedValue(() => undefined) } },
 }));
 
 beforeEach(() => useLayoutStore.getState().setLayout("desk"));
@@ -20,7 +24,7 @@ beforeEach(() => useLayoutStore.getState().setLayout("desk"));
 describe("App shell", () => {
   it("renders wordmark, status info and the pinned Browser in Desk layout", async () => {
     render(<App />);
-    expect(screen.getByText("Hello Folio.")).toBeInTheDocument();
+    expect(screen.getByText("Open a Folio to start writing.")).toBeInTheDocument();
     expect(await screen.findByTestId("app-info")).toHaveTextContent("v0.1.0");
     expect(screen.getByTestId("panel-left")).toHaveAttribute("data-pinned", "true");
     expect(screen.queryByTestId("panel-right")).not.toBeInTheDocument();

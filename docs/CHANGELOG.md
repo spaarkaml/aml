@@ -4,6 +4,11 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### WP-1.1 — Folio basics (2026-09-09)
+- Rust `folio` module: create/open, path-safe resolve, tree, read (BOM-stripped), atomic write with mtime conflict check, create/rename/trash, debounced watcher → `FolioChanged`.
+- Commands + typed errors exported to TS; native folder picker via tauri-plugin-dialog.
+- Welcome screen (open/create/recent, "Make it a Folio"), read-only tree in the Browser, breadcrumb shows the Folio.
+
 ### WP-0.4 — Design tokens & contrast (2026-09-09)
 - `scripts/contrast-report.mjs` generates `docs/qa/contrast-report.md`; all text pairings ≥ 6.2:1 in both modes.
 

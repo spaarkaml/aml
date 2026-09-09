@@ -1,0 +1,117 @@
+.welcome {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--aml-space-4);
+  padding: var(--aml-space-8);
+}
+
+.wordmark {
+  font-family: var(--aml-font-ui);
+  font-size: 2rem;
+  letter-spacing: 0.3em;
+  color: var(--aml-primary);
+  margin: 0;
+}
+
+.tagline {
+  font-family: var(--aml-font-editor);
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  gap: var(--aml-space-3);
+}
+
+.primary,
+.secondary {
+  font: inherit;
+  font-size: 13px;
+  padding: 8px 16px;
+  border-radius: var(--aml-radius);
+  border: 1px solid var(--aml-primary);
+  cursor: default;
+}
+
+.primary {
+  background: var(--aml-primary);
+  color: var(--aml-bg);
+}
+
+.secondary {
+  background: transparent;
+  color: var(--aml-primary);
+}
+
+.primary:disabled,
+.secondary:disabled {
+  opacity: 0.5;
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  gap: var(--aml-space-3);
+  font-size: 12px;
+  padding: var(--aml-space-2) var(--aml-space-3);
+  border: 1px solid var(--aml-accent);
+  border-radius: var(--aml-radius);
+  background: var(--aml-highlight);
+  max-width: 560px;
+}
+
+.recent {
+  margin-top: var(--aml-space-6);
+  width: min(480px, 90%);
+}
+
+.recentHeading {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--aml-primary);
+  margin: 0 0 var(--aml-space-2);
+}
+
+.recentList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--aml-space-1);
+}
+
+.recentItem {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  font: inherit;
+  text-align: left;
+  padding: var(--aml-space-2) var(--aml-space-3);
+  border: 1px solid transparent;
+  border-radius: var(--aml-radius);
+  background: transparent;
+  color: var(--aml-text);
+  cursor: default;
+}
+
+.recentItem:hover {
+  background: var(--aml-highlight);
+}
+
+.recentName {
+  font-size: 13px;
+  color: var(--aml-primary);
+}
+
+.recentPath {
+  font-size: 11px;
+  opacity: 0.6;
+}

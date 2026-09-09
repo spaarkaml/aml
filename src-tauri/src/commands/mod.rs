@@ -3,3 +3,4 @@
 //! Hand-written IPC on the TypeScript side is forbidden (ADR-002).
 
 pub mod app;
+pub mod folio;
