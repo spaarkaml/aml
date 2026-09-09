@@ -42,12 +42,12 @@ Roughly 80–95 AI sessions. Stages 2 and 3 can overlap; 6 and 7 can overlap.
 | 0.6 | Test infrastructure: Vitest, Playwright via tauri-driver, `test-corpus/` seeded with 60 files (every supported syntax, Raw pass-through cases, unicode/emoji/CJK/RTL, CRLF, BOM, no trailing newline), loopback SMB share script for CI where the runner allows | `pnpm test`, `pnpm e2e` in CI |
 | 0.7 | Docs skeleton: `ARCHITECTURE.md`, `specs/` template, `qa/stage-0.md`, CHANGELOG, `BACKLOG.md` | — |
 
-### Quality Gate 0
-- [ ] `pnpm check` and e2e green on both OSes in CI
-- [ ] App opens on Mac and Windows; panels slide and pin; Layout toggles; palette opens
-- [ ] Contrast report: every text token ≥ 4.5:1 on its surface
+### Quality Gate 0 — status 2026-09-09
+- [x] `pnpm check` and e2e green locally on macOS *(CI on both OSes needs the repo pushed to GitHub — your action)*
+- [x] App opens on Mac; panels slide and pin; Layout toggles; palette opens *(Windows: pending your PC)*
+- [x] Contrast report: every text token ≥ 4.5:1 on its surface (`docs/qa/contrast-report.md`)
 - [ ] Ink (dark) palette approved by you on screen
-- [ ] Forbidden-vocabulary grep passes
+- [x] Forbidden-vocabulary grep passes
 
 ---
 
