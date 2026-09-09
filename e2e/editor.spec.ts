@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { clickEndOf, waitForEditor } from "./helpers";
 
 const mod = process.platform === "darwin" ? "Meta" : "Control";
 
@@ -9,6 +10,7 @@ test.beforeEach(async ({ page }) => {
   await page.getByRole("button", { name: "Open Folio…" }).click();
   await page.getByTestId("folio-tree").getByText("chapters").click();
   await page.getByTestId("folio-tree").getByText("03 Influence networks").click();
+  await waitForEditor(page);
 });
 
 test.afterEach(async ({ page }, info) => {
@@ -34,13 +36,6 @@ test("opens a note WYSIWYG with AML atoms rendered and a word count", async ({ p
   await expect(page.getByTestId("word-count")).toContainText("words");
   await expect(page.getByTestId("save-state")).toHaveText("Saved");
 });
-
-async function clickEndOf(page: import("@playwright/test").Page, selector: string) {
-  const el = page.getByTestId("note-editor").locator(selector);
-  const box = await el.boundingBox();
-  if (!box) throw new Error(`no box for ${selector}`);
-  await page.mouse.click(box.x + box.width - 3, box.y + box.height / 2);
-}
 
 async function writtenMarkdown(page: import("@playwright/test").Page, path: string) {
   return page.evaluate((p) => {

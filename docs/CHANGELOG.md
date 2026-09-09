@@ -4,6 +4,12 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### WP-1.4 — Editor ergonomics (2026-09-10)
+- Auto-pair for brackets and quotes (skip-over, Backspace clears a pair, wrap or toggle marks on a selection); `[[Note]]` becomes a link while typing.
+- `/` block menu (headings, lists, quote, code, table, divider, footnote, note link, date).
+- Floating formatting toolbar on selection (bold, italic, strike, code, link, H1–H3).
+- E2E helpers that wait for ProseMirror to adopt a mouse-placed caret.
+
 ### WP-1.6 — Quick Open (2026-09-10)
 - ⌘O Quick Open: fuzzy over titles, front-matter aliases, headings and paths; recents on an empty query; heading match jumps to the heading; "Create note" for unmatched queries.
 - Rust `folio_index` command with an mtime-cached in-memory index (`folio/index.rs`).

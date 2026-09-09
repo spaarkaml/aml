@@ -5,6 +5,8 @@ import { setActiveEditor } from "./editorRef";
 import { amlExtensions } from "./extensions";
 import styles from "./NoteEditor.module.css";
 import { handleDrop, handlePaste } from "./paste";
+import { SelectionToolbar } from "./SelectionToolbar";
+import { SlashMenu } from "./SlashMenu";
 import { useEditorStore } from "./store";
 import { TableMenu } from "./TableMenu";
 
@@ -94,6 +96,8 @@ export function NoteEditor() {
         </div>
       ) : null}
       {editor ? <TableMenu editor={editor} /> : null}
+      {editor ? <SelectionToolbar editor={editor} /> : null}
+      {editor ? <SlashMenu editor={editor} /> : null}
       <EditorContent editor={editor} className={styles.content} />
     </div>
   );

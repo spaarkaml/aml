@@ -1,0 +1,57 @@
+.toolbar {
+  position: fixed;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  background: var(--aml-surface);
+  border: 1px solid var(--aml-muted);
+  border-radius: var(--aml-radius);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.16);
+  font-family: var(--aml-font-ui);
+  font-size: 12px;
+}
+
+.toolbar button {
+  font: inherit;
+  font-weight: 600;
+  color: var(--aml-primary);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  min-width: 26px;
+  padding: 2px 6px;
+  cursor: default;
+}
+
+.toolbar button:hover {
+  background: var(--aml-highlight);
+}
+
+.toolbar button[aria-pressed="true"] {
+  background: var(--aml-highlight);
+  border-color: var(--aml-primary);
+}
+
+.sep {
+  width: 1px;
+  height: 14px;
+  background: var(--aml-muted);
+  margin: 0 3px;
+}
+
+.linkForm {
+  display: flex;
+  gap: 4px;
+}
+
+.linkForm input {
+  font: inherit;
+  width: 220px;
+  padding: 2px 6px;
+  border: 1px solid var(--aml-muted);
+  border-radius: 3px;
+  background: var(--aml-bg);
+  color: var(--aml-text);
+}

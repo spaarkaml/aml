@@ -1,4 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
+import { clickEndOf, waitForEditor } from "./helpers";
 
 const mod = process.platform === "darwin" ? "Meta" : "Control";
 const NOTE = "Thesis/chapters/03 Influence networks.md";
@@ -10,6 +11,7 @@ async function openNote(page: Page) {
   await page.getByRole("button", { name: "Open Folio…" }).click();
   await page.getByTestId("folio-tree").getByText("chapters").click();
   await page.getByTestId("folio-tree").getByText("03 Influence networks").click();
+  await waitForEditor(page);
   await page.getByTestId("note-editor").locator("h1").waitFor();
 }
 
@@ -87,9 +89,7 @@ test("insert table from the palette, edit it with the table menu, save canonical
 test("insert footnote adds a reference and a definition", async ({ page }) => {
   await openNote(page);
   const editor = page.getByTestId("note-editor");
-  const h1 = editor.locator("h1");
-  const box = (await h1.boundingBox()) ?? { x: 0, y: 0, width: 0, height: 0 };
-  await page.mouse.click(box.x + box.width - 3, box.y + box.height / 2);
+  await clickEndOf(page, "h1");
   await runCommand(page, "insert footnote");
   await expect(editor.locator(".aml-footnote-ref")).toHaveText("1");
   await expect(editor.locator(".aml-footnote-def")).toHaveCount(1);

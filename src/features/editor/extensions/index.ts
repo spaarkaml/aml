@@ -14,7 +14,9 @@ import {
   WikiEmbed,
   WikiLink,
 } from "./aml-nodes";
+import { AutoPair } from "./autopair";
 import { AmlImage } from "./image";
+import { SlashMenu } from "./slash";
 
 /**
  * The AML editor schema. Node names and attrs must match src/lib/markdown/pm.ts.
@@ -71,5 +73,7 @@ export function amlExtensions(): Extensions {
     Cite,
     FootnoteRef,
     FootnoteDef,
+    AutoPair,
+    SlashMenu,
   ];
 }
