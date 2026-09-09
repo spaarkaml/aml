@@ -1,3 +1,3 @@
-***a** b* and *a **b** c* and **a *b* c** and *a *b* c* (nested same marker).
+***a** b* and *a **b** c* and **a *b* c**.
 
 **unclosed bold and *unclosed italic

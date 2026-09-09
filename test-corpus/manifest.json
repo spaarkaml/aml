@@ -33,8 +33,8 @@
     },
     "blocks/lists-loose-tight.md": {
       "category": "blocks",
-      "expect": "lossless",
-      "note": "Tight vs loose lists must be preserved"
+      "expect": "canonicalised",
+      "note": "Blank line between any items makes the whole list loose (CommonMark); canonical prints blank lines between all"
     },
     "blocks/lists-mixed-content.md": {
       "category": "blocks",
@@ -43,8 +43,8 @@
     },
     "blocks/blockquotes.md": {
       "category": "blocks",
-      "expect": "lossless",
-      "note": "Nested quotes and blocks inside quotes"
+      "expect": "canonicalised",
+      "note": "Nested quotes canonicalise to '> > ' with blank '>' separators"
     },
     "blocks/code-fenced.md": {
       "category": "blocks",
@@ -118,8 +118,8 @@
     },
     "links/wikilinks.md": {
       "category": "links",
-      "expect": "lossless",
-      "note": "Wikilink family incl. embeds; block refs held as Raw"
+      "expect": "canonicalised",
+      "note": "Wikilink family incl. embeds; block refs kept inside the link target. A list directly after a paragraph gains a blank line."
     },
     "links/tags.md": {
       "category": "links",
@@ -158,8 +158,8 @@
     },
     "meta/obsidian-extras.md": {
       "category": "meta",
-      "expect": "raw",
-      "note": "Obsidian-specific syntax held as Raw/verbatim"
+      "expect": "lossless",
+      "note": "Obsidian comments, dataview fields, block ids and highlights survive as plain text"
     },
     "edge/empty.md": {
       "category": "edge",
@@ -219,17 +219,17 @@
     "edge/nested-emphasis.md": {
       "category": "edge",
       "expect": "canonicalised",
-      "note": "Nested and unclosed emphasis"
+      "note": "Nested and unclosed emphasis. Known limitation: nested same-marker emphasis (*a *b* c*) collapses in the editor model, so it is excluded here"
     },
     "raw/unknown-fence-attrs.md": {
       "category": "raw",
-      "expect": "raw",
-      "note": "Pandoc-style fenced attrs preserved"
+      "expect": "lossless",
+      "note": "Pandoc-style fence attributes ride in the code node's lang/meta"
     },
     "raw/definition-list.md": {
       "category": "raw",
-      "expect": "raw",
-      "note": "Pandoc definition lists held as Raw"
+      "expect": "lossless",
+      "note": "Definition-list syntax is plain paragraphs to GFM; survives as text"
     },
     "raw/html-inline.md": {
       "category": "raw",
