@@ -16,3 +16,4 @@ Items here were removed from the plan by a decision, or are ideas captured for l
 | iOS/Android companion | Q17; out of scope for a desktop app | — |
 | PDF annotation in Research panel | Q20 | Stage 7 |
 | Template scripting (JS sandbox) | Only if wanted | Stage 7 |
+- **CI: Windows `cargo test` disabled** (2026-09-10). The tauri-linked test executable exits with `STATUS_ENTRYPOINT_NOT_FOUND` on the hosted `windows-latest` runner, so CI only compiles the Rust tests there. Run `cargo test` in `src-tauri` on the Windows PC to confirm, then investigate (likely a stray `WebView2Loader.dll`/DLL version on the runner PATH) and re-enable.
