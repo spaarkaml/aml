@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useEditorStore } from "@/features/editor/store";
+import { useLinkStore } from "@/features/links/store";
 import { useQuickOpenStore } from "@/features/quickopen/store";
 import { events } from "@/ipc";
 import { useFolioStore } from "./store";
@@ -16,6 +17,7 @@ export function useFolioEvents(): void {
       .listen((e) => {
         void refreshTree();
         void useQuickOpenStore.getState().refresh();
+        useLinkStore.getState().invalidate();
         for (const p of e.payload.paths) useEditorStore.getState().noteChangedOnDisk(p);
       })
       .then((off) => {

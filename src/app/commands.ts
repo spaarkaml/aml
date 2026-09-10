@@ -260,6 +260,12 @@ export const SHELL_COMMANDS: Command[] = [
     run: () => useSyncStore.getState().setOpen(true),
   },
   {
+    id: "note.undoRename",
+    title: "Undo Last Rename",
+    group: "Note",
+    run: () => void useFolioStore.getState().undoRename(),
+  },
+  {
     id: "index.rebuild",
     title: "Rebuild Index",
     group: "Folio",

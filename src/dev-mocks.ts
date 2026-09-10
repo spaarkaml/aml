@@ -42,6 +42,85 @@ const notes = new Map<string, { text: string; mtime: number }>([
   ],
 ]);
 
+/* ---- links (WP-2.2): a small mirror of Rust's resolution and rename rules ---- */
+function mockParentDir(p: string): string {
+  const i = p.lastIndexOf("/");
+  return i === -1 ? "" : p.slice(0, i);
+}
+function mockStem(p: string): string {
+  return (p.split("/").pop() ?? p).replace(/\.md$/i, "").toLowerCase();
+}
+function mockNormalise(dir: string, target: string): string {
+  const parts = dir ? dir.split("/") : [];
+  for (const seg of target.split("/")) {
+    if (seg === "" || seg === ".") continue;
+    if (seg === "..") parts.pop();
+    else parts.push(seg);
+  }
+  return parts.join("/");
+}
+function mockRelative(fromDir: string, toPath: string): string {
+  const a = fromDir ? fromDir.split("/") : [];
+  const b = toPath.split("/");
+  let common = 0;
+  while (common < a.length && a[common] === b[common]) common++;
+  return [...a.slice(common).map(() => ".."), ...b.slice(common)].join("/");
+}
+function mockResolve(from: string, target: string, kind: string): string | null {
+  const paths = [...notes.keys()];
+  if (kind === "md") {
+    const p = mockNormalise(mockParentDir(from), target).toLowerCase();
+    return paths.find((x) => x.toLowerCase() === p) ?? null;
+  }
+  const bare = target.replace(/\.md$/i, "");
+  if (bare.includes("/")) {
+    const want = `${bare}.md`.toLowerCase();
+    return (
+      paths.find((x) => x.toLowerCase() === want || x.toLowerCase().endsWith(`/${want}`)) ?? null
+    );
+  }
+  const same = paths.filter((x) => mockStem(x) === bare.toLowerCase());
+  same.sort((x, y) => x.length - y.length);
+  return same.find((x) => mockParentDir(x) === mockParentDir(from)) ?? same[0] ?? null;
+}
+function mockRenamePreview(from: string, to: string) {
+  const moved = new Map<string, string>();
+  if (notes.has(from)) moved.set(from, to);
+  else
+    for (const p of notes.keys())
+      if (p.startsWith(`${from}/`)) moved.set(p, to + p.slice(from.length));
+  const out: Array<{
+    path: string;
+    newPath: string;
+    edits: Array<{ line: number; before: string; after: string }>;
+  }> = [];
+  let links = 0;
+  for (const [path, n] of notes) {
+    const edits: Array<{ line: number; before: string; after: string }> = [];
+    n.text.split("\n").forEach((before, i) => {
+      let after = before.replace(
+        /\[\[([^\]|#]+)((?:#[^\]|]*)?(?:\|[^\]]*)?)\]\]/g,
+        (m, t: string, rest: string) => {
+          const dest = moved.get(mockResolve(path, t.trim(), "wiki") ?? "");
+          if (!dest) return m;
+          links++;
+          const stem = (dest.split("/").pop() ?? dest).replace(/\.md$/i, "");
+          return `[[${t.includes("/") ? dest.replace(/\.md$/i, "") : stem}${rest}]]`;
+        },
+      );
+      after = after.replace(/\]\(([^)\s]+\.md)((?:#[^)]*)?)\)/g, (m, t: string, rest: string) => {
+        const dest = moved.get(mockResolve(path, decodeURIComponent(t), "md") ?? "");
+        if (!dest) return m;
+        links++;
+        return `](${mockRelative(mockParentDir(moved.get(path) ?? path), dest).replace(/ /g, "%20")}${rest})`;
+      });
+      if (after !== before) edits.push({ line: i + 1, before, after });
+    });
+    if (edits.length) out.push({ path, newPath: moved.get(path) ?? path, edits });
+  }
+  return { from, to, notes: out, links };
+}
+
 const index = { building: false, done: 0, total: 0, lastBuilt: 0, lastDurationMs: 0 };
 function indexStatus() {
   return { notes: notes.size, ...index };
@@ -229,7 +308,9 @@ export function installDevMocks(): void {
         return null;
       case "folio_tree":
         if (!state.folio) throw { kind: "noFolioOpen" };
-        return state.tree;
+        // Fresh objects each call, as Rust returns them: in-place mutations above must not
+        // hand the UI the same reference twice (React would see no change).
+        return structuredClone(state.tree);
       case "folio_index": {
         if (!state.folio) throw { kind: "noFolioOpen" };
         const out: Array<{
@@ -406,6 +487,32 @@ export function installDevMocks(): void {
             const snippet = `${n.text.slice(Math.max(0, at - 30), at)}«${n.text.slice(at, at + q.length)}»${n.text.slice(at + q.length, at + q.length + 30)}`;
             return { path, title: path.split("/").pop()?.replace(/\.md$/i, "") ?? path, snippet };
           });
+      }
+      case "link_resolve": {
+        if (!state.folio) throw { kind: "noFolioOpen" };
+        const from = String(a.from);
+        return (a.links as Array<{ target: string; kind: string }>).map((l) =>
+          mockResolve(from, l.target, l.kind),
+        );
+      }
+      case "link_rename_preview":
+        if (!state.folio) throw { kind: "noFolioOpen" };
+        return mockRenamePreview(String(a.from), String(a.to));
+      case "link_rename_apply": {
+        let applied = 0;
+        for (const n of a.notes as ReturnType<typeof mockRenamePreview>["notes"]) {
+          const cur = notes.get(n.newPath);
+          if (!cur) continue;
+          const lines = cur.text.split("\n");
+          for (const e of n.edits) {
+            if (lines[e.line - 1] === e.before) {
+              lines[e.line - 1] = e.after;
+              applied++;
+            }
+          }
+          notes.set(n.newPath, { text: lines.join("\n"), mtime: Date.now() });
+        }
+        return applied;
       }
       case "plugin:event|listen":
         return 1;

@@ -5,5 +5,6 @@
 pub mod app;
 pub mod folio;
 pub mod index;
+pub mod links;
 pub mod spell;
 pub mod sync;

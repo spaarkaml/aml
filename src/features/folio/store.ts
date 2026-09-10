@@ -1,6 +1,7 @@
 import { confirm, open as openDialog } from "@tauri-apps/plugin-dialog";
 import { create } from "zustand";
 import { useEditorStore } from "@/features/editor/store";
+import { askRenameDecision, type RenameDecision, useLinkStore } from "@/features/links/store";
 import { useTabsStore } from "@/features/tabs/store";
 import { commands, type FolioInfo, type RecentFolio, type TreeNode } from "@/ipc";
 import { baseName, isWithin, joinPath, noteTitle, parentDir } from "@/lib/paths";
@@ -31,8 +32,14 @@ interface FolioState {
    */
   createNote: (dir: string, name?: string) => Promise<string | null>;
   createFolder: (dir: string) => Promise<string | null>;
-  /** Renames or moves an entry; `to` is the full new relative path. */
-  rename: (from: string, to: string) => Promise<boolean>;
+  /**
+   * Renames or moves an entry; `to` is the full new relative path. Links pointing at the
+   * moved note(s) are previewed and, with the user's consent (`links: "ask"`, the default),
+   * rewritten after the move.
+   */
+  rename: (from: string, to: string, links?: RenameDecision | "ask") => Promise<boolean>;
+  /** Reverses the last rename, rewriting links back without asking. */
+  undoRename: () => Promise<boolean>;
   /** Moves an entry to the OS trash after confirmation. */
   trash: (path: string) => Promise<boolean>;
 }
@@ -164,10 +171,20 @@ export const useFolioStore = create<FolioState>((set, get) => ({
     return path;
   },
 
-  rename: async (from, to) => {
+  rename: async (from, to, links = "ask") => {
     if (from === to) return true;
     const editor = useEditorStore.getState();
     if (editor.path && isWithin(editor.path, from) && editor.dirty) await editor.saveNow();
+    let decision: RenameDecision = links === "ask" ? "skip" : links;
+    let preview = null;
+    if (links !== "skip") {
+      const p = await commands.linkRenamePreview(from, to);
+      if (p.status === "ok" && p.data.links > 0) {
+        preview = p.data;
+        if (links === "ask") decision = await askRenameDecision(p.data);
+        if (decision === "cancel") return false;
+      }
+    }
     const r = await commands.entryRename(from, to);
     if (r.status === "error") {
       set({ error: describeFolioError(r.error) });
@@ -176,8 +193,25 @@ export const useFolioStore = create<FolioState>((set, get) => ({
     useEditorStore.getState().renamed(from, to);
     useTabsStore.getState().rename(from, to);
     useBrowserStore.getState().rename(from, to);
+    if (preview && decision === "update") {
+      // The open note may be one of those rewritten; flush it first so nothing is lost.
+      const ed = useEditorStore.getState();
+      if (ed.dirty) await ed.saveNow();
+      const applied = await commands.linkRenameApply(preview.notes);
+      if (applied.status === "error") set({ error: describeFolioError(applied.error) });
+    }
+    useLinkStore.getState().set({ lastRename: { from, to } });
+    useLinkStore.getState().invalidate();
     await get().refreshTree();
     return true;
+  },
+
+  undoRename: async () => {
+    const last = useLinkStore.getState().lastRename;
+    if (!last) return false;
+    const ok = await get().rename(last.to, last.from, "update");
+    if (ok) useLinkStore.getState().set({ lastRename: null });
+    return ok;
   },
 
   trash: async (path) => {

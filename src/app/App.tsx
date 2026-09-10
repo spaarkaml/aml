@@ -5,6 +5,7 @@ import { FolioTree } from "@/features/folio/FolioTree";
 import { useFolioStore } from "@/features/folio/store";
 import { useFolioEvents } from "@/features/folio/useFolioEvents";
 import { Welcome } from "@/features/folio/Welcome";
+import { RenameLinksDialog } from "@/features/links/RenameLinksDialog";
 import { PropertiesPanel } from "@/features/properties/PropertiesPanel";
 import { useTabsSync } from "@/features/tabs/useTabsSync";
 import { type AppInfo, commands } from "@/ipc";
@@ -46,6 +47,7 @@ export function App() {
       ) : (
         <Welcome />
       )}
+      <RenameLinksDialog />
     </Shell>
   );
 }

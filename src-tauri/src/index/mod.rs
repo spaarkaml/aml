@@ -4,6 +4,7 @@
 //! rebuilt on demand. Never lives inside the Folio (ADR-004).
 
 pub mod extract;
+pub mod links;
 
 use std::collections::HashMap;
 use std::fs;
@@ -93,7 +94,7 @@ pub fn db_path_for(app_data: &Path, root: &Path) -> PathBuf {
     app_data.join("index").join(format!("{h:016x}.sqlite"))
 }
 
-fn sql_err(e: rusqlite::Error) -> FolioError {
+pub(crate) fn sql_err(e: rusqlite::Error) -> FolioError {
     FolioError::Io(format!("index: {e}"))
 }
 

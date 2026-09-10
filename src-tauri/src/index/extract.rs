@@ -15,6 +15,8 @@ pub struct LinkFact {
     pub kind: &'static str,
     /// 1-based line in the file.
     pub line: u32,
+    /// Byte range of the target text within its line (what a rename rewrites).
+    pub span: (usize, usize),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -122,16 +124,15 @@ fn scan_wiki_links(line: &str, line_no: u32, out: &mut Vec<LinkFact>) {
             Some((r, a)) => (r, Some(a.trim().to_string()).filter(|a| !a.is_empty())),
             None => (inner, None),
         };
-        let (target, heading) = match rest.split_once('#') {
-            Some((t, h)) => (
-                t.trim(),
-                Some(h.trim().to_string()).filter(|h| !h.is_empty()),
-            ),
-            None => (rest.trim(), None),
+        let (raw_target, heading) = match rest.split_once('#') {
+            Some((t, h)) => (t, Some(h.trim().to_string()).filter(|h| !h.is_empty())),
+            None => (rest, None),
         };
+        let target = raw_target.trim();
         if target.is_empty() {
             continue;
         }
+        let start = open + 2 + (raw_target.len() - raw_target.trim_start().len());
         out.push(LinkFact {
             target: target.to_string(),
             key: link_key(target),
@@ -139,6 +140,7 @@ fn scan_wiki_links(line: &str, line_no: u32, out: &mut Vec<LinkFact>) {
             alias,
             kind: if embed { "embed" } else { "wiki" },
             line: line_no,
+            span: (start, start + target.len()),
         });
     }
 }
@@ -161,7 +163,9 @@ fn scan_md_links(line: &str, line_no: u32, out: &mut Vec<LinkFact>) {
             continue;
         }
         let text = line[ts + 1..paren - 2].trim();
-        let raw_target = line[paren..end].trim();
+        let dest = &line[paren..end];
+        let lead = dest.len() - dest.trim_start().len();
+        let raw_target = dest.trim();
         let target = raw_target
             .split_once(" \"")
             .map(|(t, _)| t)
@@ -175,6 +179,8 @@ fn scan_md_links(line: &str, line_no: u32, out: &mut Vec<LinkFact>) {
         if !lower.ends_with(".md") || lower.contains("://") || target.starts_with('/') {
             continue;
         }
+        let start = paren + lead;
+        let span = (start, start + target.len());
         let target = percent_decode(target);
         out.push(LinkFact {
             key: link_key(&target),
@@ -183,6 +189,7 @@ fn scan_md_links(line: &str, line_no: u32, out: &mut Vec<LinkFact>) {
             alias: Some(text.to_string()).filter(|t| !t.is_empty()),
             kind: "md",
             line: line_no,
+            span,
         });
     }
 }
@@ -232,6 +239,22 @@ fn scan_tags(line: &str, line_no: u32, out: &mut Vec<(String, u32)>) {
         }
         prev = Some(c);
     }
+}
+
+/// Encodes the characters a CommonMark link destination cannot hold bare.
+pub fn percent_encode_path(s: &str) -> String {
+    let mut out = String::with_capacity(s.len());
+    for c in s.chars() {
+        match c {
+            ' ' => out.push_str("%20"),
+            '(' => out.push_str("%28"),
+            ')' => out.push_str("%29"),
+            '<' => out.push_str("%3C"),
+            '>' => out.push_str("%3E"),
+            _ => out.push(c),
+        }
+    }
+    out
 }
 
 /// Extracts every fact the index stores from a note's text.

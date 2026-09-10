@@ -16,6 +16,8 @@ import {
 } from "./aml-nodes";
 import { AutoPair } from "./autopair";
 import { AmlImage } from "./image";
+import { LinkMenu } from "./linkmenu";
+import { NoteLinks } from "./links";
 import { SlashMenu } from "./slash";
 import { SpellCheck } from "./spell";
 
@@ -76,6 +78,8 @@ export function amlExtensions(): Extensions {
     FootnoteDef,
     AutoPair,
     SlashMenu,
+    LinkMenu,
+    NoteLinks,
     SpellCheck,
   ];
 }

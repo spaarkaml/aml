@@ -26,12 +26,12 @@ Updated with every work package. If this file and the code disagree, the code is
 | `src-tauri/src/lib.rs` | App bootstrap, plugin registration, command registry |
 | `src-tauri/src/commands/<domain>.rs` | One file per command domain (`app`, `folio`, `index`, `spell`, `sync`; later `snapshots`, `compile`) |
 | `src-tauri/src/folio/` | Folio model, path safety, atomic writes (`mod.rs`), watcher (`watch.rs`), errors |
-| `src-tauri/src/index/` | SQLite FTS5 index (ADR-007): `extract.rs` (note facts from markdown), `mod.rs` (schema, build/refresh, watcher updates, Quick Open entries, search) |
+| `src-tauri/src/index/` | SQLite FTS5 index (ADR-007): `extract.rs` (note facts from markdown), `mod.rs` (schema, build/refresh, watcher updates, Quick Open entries, search), `links.rs` (link resolution, rename preview/apply) |
 | `src-tauri/src/sidecar/` | `syncthing.rs`, the only module that touches the Syncthing binary |
 | `src-tauri/src/spell.rs` | Hunspell en_AU checker |
 | `src-tauri/src/state.rs` | `AppState { folio, watcher, index, speller, syncthing }` managed by Tauri |
 | `src/app/` | `App.tsx`, `commands.ts` (shell commands + `SHORTCUTS` table), `tokens.css`, `global.css`, `shell/` (Shell, TopBar, SidePanel, StatusBar) |
-| `src/features/<feature>/` | Feature folders: components, store, tests. Current: `commands`, `layout`, `appearance`, `folio` (store, Welcome, FolioTree, watcher events), `editor` (Tiptap extensions in `extensions/` incl. `autopair.ts` and `slash.ts`, `NoteEditor.tsx`, `SlashMenu.tsx` + `slashStore.ts`, `SelectionToolbar.tsx`, store with debounced save/conflicts, `editorRef.ts`, `assets.ts`/`paste.ts` for images, `TableMenu.tsx`, `footnotes.ts`), `properties` (front-matter panel + `frontmatter.ts` helpers), `tabs` (per-Folio tab store with recents, `useTabsSync`, `TabStrip`, `Breadcrumb`), `quickopen` (index store, ranking in `search.ts`, `QuickOpen.tsx`), `spell` (tokeniser, store, `SpellMenu.tsx`; the ProseMirror plugin lives in `editor/extensions/spell.ts`), `sync` (status polling store, `SyncScreen.tsx`), `index` (build progress store, status-bar label). `folio` also holds `browserStore.ts` (expanded folders, inline rename target), `ContextMenu.tsx` and `errors.ts`. Cross-feature imports are limited to stores and `src/lib` |
+| `src/features/<feature>/` | Feature folders: components, store, tests. Current: `commands`, `layout`, `appearance`, `folio` (store, Welcome, FolioTree, watcher events), `editor` (Tiptap extensions in `extensions/` incl. `autopair.ts` and `slash.ts`, `NoteEditor.tsx`, `SlashMenu.tsx` + `slashStore.ts`, `SelectionToolbar.tsx`, store with debounced save/conflicts, `editorRef.ts`, `assets.ts`/`paste.ts` for images, `TableMenu.tsx`, `footnotes.ts`), `properties` (front-matter panel + `frontmatter.ts` helpers), `tabs` (per-Folio tab store with recents, `useTabsSync`, `TabStrip`, `Breadcrumb`), `quickopen` (index store, ranking in `search.ts`, `QuickOpen.tsx`), `spell` (tokeniser, store, `SpellMenu.tsx`; the ProseMirror plugin lives in `editor/extensions/spell.ts`), `sync` (status polling store, `SyncScreen.tsx`), `index` (build progress store, status-bar label), `links` (resolution cache + `[[` picker state + rename dialog; the ProseMirror plugins live in `editor/extensions/links.ts` and `linkmenu.ts`). `folio` also holds `browserStore.ts` (expanded folders, inline rename target), `ContextMenu.tsx` and `errors.ts`. Cross-feature imports are limited to stores and `src/lib` |
 | `src/lib/markdown/` | The markdown bridge: `mdast.ts` (parse + canonical serialise), `escape.ts`, `inline-syntax.ts` (wiki/tag/cite), `pm.ts` (mdast ⇄ ProseMirror JSON, Raw nodes), `index.ts` API |
 | `src/lib/` | `fuzzy.ts`, `platform.ts`, `wordcount.ts` |
 | `src/ipc/` | Generated bindings + `index.ts` re-export |
@@ -53,6 +53,9 @@ Updated with every work package. If this file and the code disagree, the code is
 | `index_status` | — | `IndexStatus { notes, building, done, total, lastBuilt, lastDurationMs }` | index |
 | `index_rebuild` | — | — (runs on a thread; progress by event) | index |
 | `index_search` | query, limit? | `SearchHit[] { path, title, snippet }` (FTS5, bm25) | index |
+| `link_resolve` | from, links[{target, kind}] | `(path \| null)[]` | links |
+| `link_rename_preview` | from, to | `RenamePreview { notes[{path, newPath, edits[{line, before, after}]}], links }` | links |
+| `link_rename_apply` | notes (from a preview) | lines rewritten | links |
 | `note_read` | path | `NoteContent { path, text, mtime, size }` | folio |
 | `note_write` | path, text, expectedMtime? | `NoteMeta` (Conflict error if mtime moved) | folio |
 | `entry_create_note` / `entry_create_folder` / `entry_rename` / `entry_trash` | paths | — | folio |
@@ -97,7 +100,13 @@ All results are `{status:"ok",data}|{status:"error",error:FolioError}`; `FolioEr
 - One SQLite file per Folio (`index::db_path_for`), opened with the Folio and refreshed on a thread; `AppState.index` holds the query handle, builds use `Index::for_thread()` on the same file (WAL) and share `Progress` atomics.
 - Tables `notes / aliases / headings / tags / links / props` (cascade on delete) + FTS5 `notes_fts(title, body)`. `notes.stem` and `links.key` are lower-case file stems: backlinks and rename propagation are a join.
 - The watcher calls `commands::index::apply_changes(paths)` before emitting `FolioChanged`; a rebuild is `DELETE` + `refresh`. Everything is derived: deleting the file rebuilds on next open.
-- `extract.rs` is the single markdown fact-extractor for Rust (front matter, headings, tags, links, body, words); it is line-based and never fails.
+- `extract.rs` is the single markdown fact-extractor for Rust (front matter, headings, tags, links, body, words); it is line-based and never fails. Links carry the byte span of their target so a rename can rewrite exactly that.
+
+## Links (WP-2.2)
+
+- Resolution lives in Rust only (`Index::resolve`): `.md` links relative to the note, wiki targets by path suffix → stem (same folder first) → title → alias. The editor batches `link_resolve` per document change and paints `.aml-link-missing`.
+- `useFolioStore.rename` = preview (`link_rename_preview`) → dialog when links are affected → `entry_rename` → `link_rename_apply` → invalidate the resolution cache. Apply is line-exact and skips lines that changed since the preview.
+- The `[[` picker reads Quick Open's entries; it never talks to Rust while typing.
 
 ## Syncthing sidecar (WP-1.1b)
 

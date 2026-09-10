@@ -36,6 +36,12 @@ export const commands = {
 	indexRebuild: () => typedError<null, FolioError>(__TAURI_INVOKE("index_rebuild")),
 	/**  Plain full-text search (words, `"phrases"`); the query language lands in WP-2.5. */
 	indexSearch: (query: string, limit: number | null) => typedError<SearchHit[], FolioError>(__TAURI_INVOKE("index_search", { query, limit })),
+	/**  Resolves each link as seen from `from`; `null` where nothing matches. */
+	linkResolve: (from: string, links: LinkQuery[]) => typedError<(string | null)[], FolioError>(__TAURI_INVOKE("link_resolve", { from, links })),
+	/**  What renaming `from` → `to` would rewrite. Call before `entry_rename`. */
+	linkRenamePreview: (from: string, to: string) => typedError<RenamePreview, FolioError>(__TAURI_INVOKE("link_rename_preview", { from, to })),
+	/**  Applies a preview's edits after the rename happened. Returns lines rewritten. */
+	linkRenameApply: (notes: NoteEdits[]) => typedError<number, FolioError>(__TAURI_INVOKE("link_rename_apply", { notes })),
 	/**
 	 *  Returns the words from `words` that the en_AU dictionary (plus the personal and ignore
 	 *  lists) does not accept. Tokenising is the editor's job; this only judges words.
@@ -131,11 +137,32 @@ export type IndexStatus = {
 	lastDurationMs: number,
 };
 
+export type LinkEdit = {
+	/**  1-based line. */
+	line: number,
+	before: string,
+	after: string,
+};
+
+export type LinkQuery = {
+	target: string,
+	/**  `wiki`, `embed` or `md`. */
+	kind: string,
+};
+
 export type NoteContent = {
 	path: string,
 	text: string,
 	mtime: number,
 	size: number,
+};
+
+export type NoteEdits = {
+	/**  Path before the rename. */
+	path: string,
+	/**  Path after the rename (differs only for notes inside the renamed entry). */
+	newPath: string,
+	edits: LinkEdit[],
 };
 
 /**  Quick Open's view of a note (ADR-007: fuzzy ranking stays in memory on the UI side). */
@@ -165,6 +192,14 @@ export type RecentFolio = {
 	path: string,
 	name: string,
 	lastOpened: number,
+};
+
+export type RenamePreview = {
+	from: string,
+	to: string,
+	notes: NoteEdits[],
+	/**  Total links that would be rewritten. */
+	links: number,
 };
 
 export type SearchHit = {

@@ -4,6 +4,11 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### WP-2.2 — Links (2026-09-10)
+- `[[` note picker in the editor (titles, aliases, `#` headings, "link to new note"); click a wiki link or a `.md` link to open it, or create the note when it does not exist; links that point nowhere are dashed.
+- Rename propagation: renaming or moving a note or folder previews every link that would change and rewrites them after the move; **Undo Last Rename** in the palette.
+- Commands `link_resolve` / `link_rename_preview` / `link_rename_apply` on the SQLite index.
+
 ### WP-2.1 — Index (2026-09-10)
 - SQLite FTS5 index per Folio in local app-data (`src-tauri/src/index/`): notes, aliases, headings, tags, links, front-matter properties and full text; built on a thread with progress, kept current by the watcher, `Rebuild Index` in the palette; 5,000 notes in under a second.
 - Commands `index_status` / `index_rebuild` / `index_search`; event `index-progress`; `folio_index` (Quick Open) now reads from SQLite.

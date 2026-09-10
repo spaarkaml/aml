@@ -201,6 +201,13 @@
 .prose :global(.aml-wiki-link) {
   text-decoration: none;
   border-bottom: 1px solid var(--aml-muted);
+  cursor: pointer;
+}
+
+/* A link whose note does not exist (yet): clicking it creates the note. */
+.prose :global(.aml-link-missing) {
+  border-bottom: 1px dashed var(--aml-muted);
+  opacity: 0.7;
 }
 
 .prose :global(.aml-wiki-embed) {
