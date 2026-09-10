@@ -1,0 +1,51 @@
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { useLayoutStore } from "@/features/layout/store";
+import { commands, type TagEntry } from "@/ipc";
+import { ancestorsOf } from "./tree";
+
+export type LeftView = "folio" | "tags";
+
+interface TagsState {
+  entries: TagEntry[];
+  /** Which list the left panel shows; per device. */
+  view: LeftView;
+  /** Expanded tag nodes (full tags). */
+  expanded: Record<string, boolean>;
+  /** Tag whose notes are listed, if any. */
+  selected: string | null;
+  refresh: () => Promise<void>;
+  clear: () => void;
+  setView: (view: LeftView) => void;
+  toggle: (tag: string) => void;
+  select: (tag: string | null) => void;
+  /** Opens the left panel on the Tags view with `tag` expanded and selected. */
+  show: (tag: string | null) => void;
+}
+
+export const useTagsStore = create<TagsState>()(
+  persist(
+    (set, get) => ({
+      entries: [],
+      view: "folio",
+      expanded: {},
+      selected: null,
+
+      refresh: async () => {
+        const r = await commands.tagsList();
+        if (r.status === "ok") set({ entries: r.data });
+      },
+      clear: () => set({ entries: [], selected: null }),
+      setView: (view) => set({ view }),
+      toggle: (tag) => set((s) => ({ expanded: { ...s.expanded, [tag]: !s.expanded[tag] } })),
+      select: (tag) => set({ selected: tag }),
+      show: (tag) => {
+        const expanded = { ...get().expanded };
+        if (tag) for (const a of ancestorsOf(tag)) expanded[a] = true;
+        set({ view: "tags", selected: tag, expanded });
+        useLayoutStore.getState().openPanel("left");
+      },
+    }),
+    { name: "aml.tags", version: 1, partialize: (s) => ({ view: s.view, expanded: s.expanded }) },
+  ),
+);

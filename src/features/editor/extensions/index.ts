@@ -20,6 +20,7 @@ import { LinkMenu } from "./linkmenu";
 import { NoteLinks } from "./links";
 import { SlashMenu } from "./slash";
 import { SpellCheck } from "./spell";
+import { TagClicks } from "./tags";
 
 /**
  * The AML editor schema. Node names and attrs must match src/lib/markdown/pm.ts.
@@ -80,6 +81,7 @@ export function amlExtensions(): Extensions {
     SlashMenu,
     LinkMenu,
     NoteLinks,
+    TagClicks,
     SpellCheck,
   ];
 }

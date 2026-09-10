@@ -3,6 +3,7 @@ import { useEditorStore } from "@/features/editor/store";
 import { useBrowserStore } from "@/features/folio/browserStore";
 import { useFolioStore } from "@/features/folio/store";
 import { useQuickOpenStore } from "@/features/quickopen/store";
+import { useTagsStore } from "@/features/tags/store";
 import { useTabsStore } from "./store";
 
 /**
@@ -20,8 +21,13 @@ export function useTabsSync(): void {
   useEffect(() => {
     useTabsStore.getState().setFolio(root);
     useBrowserStore.getState().setRoot(root);
-    if (root) void useQuickOpenStore.getState().refresh();
-    else useQuickOpenStore.getState().clear();
+    if (root) {
+      void useQuickOpenStore.getState().refresh();
+      void useTagsStore.getState().refresh();
+    } else {
+      useQuickOpenStore.getState().clear();
+      useTagsStore.getState().clear();
+    }
   }, [root]);
 
   useEffect(() => {

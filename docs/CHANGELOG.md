@@ -4,6 +4,10 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### WP-2.4 — Tags (2026-09-10)
+- Left panel gains a Folio / Tags switch: tag hierarchy with note counts, click a tag to list and open its notes; clicking a `#tag` chip in a note jumps there; palette **Show Tags**.
+- Commands `tags_list` / `tag_notes`.
+
 ### WP-2.3 — Backlinks and unlinked mentions (2026-09-10)
 - Context panel (right side, ⌘⇧I) now holds Properties and Backlinks: linked mentions with line, context and section (click to jump), unlinked mentions with *Link* / *Link all*.
 - Commands `backlinks` / `unlinked_mentions` / `link_mention_apply`; palette **Show Backlinks**.

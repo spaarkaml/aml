@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { NoteEditor } from "@/features/editor/NoteEditor";
 import { useEditorStore } from "@/features/editor/store";
-import { FolioTree } from "@/features/folio/FolioTree";
 import { useFolioStore } from "@/features/folio/store";
 import { useFolioEvents } from "@/features/folio/useFolioEvents";
 import { Welcome } from "@/features/folio/Welcome";
@@ -11,6 +10,7 @@ import { type AppInfo, commands } from "@/ipc";
 import styles from "./App.module.css";
 import { registerShellCommands } from "./commands";
 import { ContextPanel } from "./shell/ContextPanel";
+import { LeftPanel } from "./shell/LeftPanel";
 import { Shell } from "./shell/Shell";
 
 registerShellCommands();
@@ -27,13 +27,7 @@ export function App() {
   }, []);
 
   return (
-    <Shell
-      info={info}
-      left={
-        folio ? <FolioTree /> : <p className={styles.placeholder}>Open a Folio to browse it.</p>
-      }
-      right={<ContextPanel />}
-    >
+    <Shell info={info} left={<LeftPanel />} right={<ContextPanel />}>
       {folio ? (
         notePath ? (
           <NoteEditor />

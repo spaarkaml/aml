@@ -48,6 +48,10 @@ export const commands = {
 	unlinkedMentions: (path: string) => typedError<Mention[], FolioError>(__TAURI_INVOKE("unlinked_mentions", { path })),
 	/**  Turns one mention into a `[[link]]`; false if the line changed meanwhile. */
 	linkMentionApply: (source: string, line: number, matched: string, target: string) => typedError<boolean, FolioError>(__TAURI_INVOKE("link_mention_apply", { source, line, matched, target })),
+	/**  Every distinct (tag, note) pair in the Folio. */
+	tagsList: () => typedError<TagEntry[], FolioError>(__TAURI_INVOKE("tags_list")),
+	/**  Paths of the notes carrying `tag` or a tag nested under it. */
+	tagNotes: (tag: string) => typedError<string[], FolioError>(__TAURI_INVOKE("tag_notes", { tag })),
 	/**
 	 *  Returns the words from `words` that the en_AU dictionary (plus the personal and ignore
 	 *  lists) does not accept. Tokenising is the editor's job; this only judges words.
@@ -266,6 +270,14 @@ export type SyncStatus = {
 	pending: PendingFolder[],
 	guiUrl: string,
 	error: string | null,
+};
+
+/**  One (tag, note) pair; a note appears once per tag however often it uses it. */
+export type TagEntry = {
+	/**  Lower-case, without `#`, nested with `/`. */
+	tag: string,
+	path: string,
+	title: string,
 };
 
 export type TreeNode = {

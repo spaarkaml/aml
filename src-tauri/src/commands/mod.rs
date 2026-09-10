@@ -8,3 +8,4 @@ pub mod index;
 pub mod links;
 pub mod spell;
 pub mod sync;
+pub mod tags;

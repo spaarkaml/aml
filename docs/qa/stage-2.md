@@ -15,3 +15,4 @@ Run against your real Folio on the Mac (and later the PC). Record results in `do
 | 9 | *(WP-2.2)* Drag a note into another folder | Preview lists its own relative `.md` links (if any) and links into it; nothing breaks after the move | ☐ |
 | 10 | *(WP-2.3)* Open a well-linked note; ⌘⇧I | Backlinks lists every note you know links here, each with its section; clicking jumps there | ☐ |
 | 11 | *(WP-2.3)* Open a note whose name appears as plain text elsewhere; *Link* one, then *Link all* | Text becomes `[[Name]]` (alias kept when the case differs); counts move from unlinked to linked; nothing inside code or existing links is touched | ☐ |
+| 12 | *(WP-2.4)* Left panel → Tags; expand a nested tag; select it; click a `#tag` chip in a note | Hierarchy and counts match your notes; the note list opens notes; the chip selects its tag | ☐ |

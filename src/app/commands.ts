@@ -12,6 +12,7 @@ import { useQuickOpenStore } from "@/features/quickopen/store";
 import { useSpellStore } from "@/features/spell/store";
 import { useSyncStore } from "@/features/sync/store";
 import { useTabsStore } from "@/features/tabs/store";
+import { useTagsStore } from "@/features/tags/store";
 
 /** Single source of truth for shell shortcuts; the e2e suite presses each one. */
 export const SHORTCUTS = {
@@ -258,6 +259,12 @@ export const SHELL_COMMANDS: Command[] = [
     title: "NAS Sync…",
     group: "Folio",
     run: () => useSyncStore.getState().setOpen(true),
+  },
+  {
+    id: "tags.show",
+    title: "Show Tags",
+    group: "View",
+    run: () => useTagsStore.getState().show(null),
   },
   {
     id: "note.backlinks",

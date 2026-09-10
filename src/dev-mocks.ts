@@ -36,7 +36,7 @@ const notes = new Map<string, { text: string; mtime: number }>([
   [
     "journal/2026-09-09.md",
     {
-      text: "# Tuesday\n\nReworked the interviews section of 04 Methods; the methodology needs a table.\n",
+      text: "# Tuesday\n\nReworked the interviews section of 04 Methods; the methodology needs a table. #thesis #journal\n",
       mtime: 1_700_000_000_000,
     },
   ],
@@ -520,6 +520,30 @@ export function installDevMocks(): void {
           notes.set(n.newPath, { text: lines.join("\n"), mtime: Date.now() });
         }
         return applied;
+      }
+      case "tags_list": {
+        if (!state.folio) throw { kind: "noFolioOpen" };
+        const out: Array<{ tag: string; path: string; title: string }> = [];
+        for (const [path, n] of notes) {
+          const tags = new Set<string>();
+          const fm = /^---\n([\s\S]*?)\n---/.exec(n.text)?.[1] ?? "";
+          const listed = /^tags:\s*\[(.*)\]$/m.exec(fm)?.[1];
+          for (const t of listed?.split(",") ?? []) if (t.trim()) tags.add(t.trim().toLowerCase());
+          const body = n.text.slice(fm ? fm.length + 8 : 0).replace(/```[\s\S]*?```/g, "");
+          for (const m of body.matchAll(/(?:^|[\s(])#([\p{L}\p{N}_][\p{L}\p{N}_\-/]*)/gu))
+            if (m[1] && !/^\d+$/.test(m[1])) tags.add(m[1].replace(/\/+$/, "").toLowerCase());
+          const title = (path.split("/").pop() ?? path).replace(/\.md$/i, "");
+          for (const tag of tags) out.push({ tag, path, title });
+        }
+        return out.sort((x, y) => x.tag.localeCompare(y.tag) || x.path.localeCompare(y.path));
+      }
+      case "tag_notes": {
+        if (!state.folio) throw { kind: "noFolioOpen" };
+        const tag = String(a.tag).replace(/^#/, "").toLowerCase();
+        const seen = new Set<string>();
+        for (const [path, n] of notes)
+          if (new RegExp(`#${tag}(?:/|\\b)`, "i").test(n.text)) seen.add(path);
+        return [...seen].sort();
       }
       case "backlinks": {
         if (!state.folio) throw { kind: "noFolioOpen" };

@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useEditorStore } from "@/features/editor/store";
 import { useLinkStore } from "@/features/links/store";
 import { useQuickOpenStore } from "@/features/quickopen/store";
+import { useTagsStore } from "@/features/tags/store";
 import { events } from "@/ipc";
 import { useFolioStore } from "./store";
 
@@ -18,6 +19,7 @@ export function useFolioEvents(): void {
         void refreshTree();
         void useQuickOpenStore.getState().refresh();
         useLinkStore.getState().invalidate();
+        void useTagsStore.getState().refresh();
         for (const p of e.payload.paths) useEditorStore.getState().noteChangedOnDisk(p);
       })
       .then((off) => {

@@ -1,0 +1,107 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--aml-space-3);
+  font-size: 12px;
+}
+
+.empty {
+  opacity: 0.6;
+  margin: 0;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.item {
+  margin: 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.twisty {
+  width: 14px;
+  flex: none;
+  font: inherit;
+  font-size: 10px;
+  border: 0;
+  background: transparent;
+  color: var(--aml-text);
+  opacity: 0.6;
+  padding: 0;
+  cursor: default;
+}
+
+.tag,
+.tagActive,
+.note {
+  flex-grow: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--aml-space-2);
+  font: inherit;
+  text-align: left;
+  padding: 3px 8px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--aml-primary);
+  cursor: default;
+}
+
+.tag:hover,
+.note:hover {
+  background: var(--aml-highlight);
+}
+
+.tagActive {
+  background: var(--aml-highlight);
+}
+
+.name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.count,
+.folder {
+  flex: none;
+  opacity: 0.55;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.folder {
+  max-width: 40%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notes {
+  border-top: 1px solid var(--aml-muted);
+  padding-top: var(--aml-space-2);
+}
+
+.head {
+  margin: 0 0 var(--aml-space-1);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.note {
+  color: var(--aml-text);
+}
