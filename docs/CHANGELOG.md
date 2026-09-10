@@ -4,6 +4,13 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### WP-2.7 — Templates and Daily notes (2026-09-10)
+- Templates in `_templates/` with `{{title}}`, `{{date}}`, `{{time}}`, `{{yesterday}}` and `{{tomorrow}}` placeholders, each date one taking a format (`{{date:dddd D MMMM YYYY}}`); an unknown placeholder is left exactly as written. Every template becomes a palette command ("New Scene Note").
+- Daily notes at `journal/YYYY/YYYY-MM-DD.md`: `⌘⇧D` / **Today's Daily Note** opens today's, creating it from `_templates/daily.md` (or a built-in default) the first time.
+- Left panel gains a Daily view: a Monday-first week strip with today outlined and a dot on days that have a note, arrows to page weeks, and recent Dailies.
+- Commands `templates_list` / `note_from_template` / `daily_note` / `daily_dates`.
+- Command Palette fixes: the selection returns to the top match as you type (hovering the list could leave it on a row the new query did not list, so Enter ran the wrong command or none), the query is reset on close rather than on open, and Enter acts on what the field holds.
+
 ### WP-2.6 — Outline (2026-09-10)
 - Context panel gains an Outline: the open note's headings, indented by level, with the caret's section highlighted; click to jump.
 - Drag a row to move a whole section (subheadings and content included) elsewhere in the note, or use **Move Section Up / Down** (`⌘⇧↑` / `⌘⇧↓`); one undo step either way.

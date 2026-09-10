@@ -1,3 +1,4 @@
+import { DailyPanel } from "@/features/daily/DailyPanel";
 import { FolioTree } from "@/features/folio/FolioTree";
 import { useFolioStore } from "@/features/folio/store";
 import { SearchPanel } from "@/features/search/SearchPanel";
@@ -9,9 +10,17 @@ const VIEWS: Array<{ id: LeftView; label: string }> = [
   { id: "folio", label: "Folio" },
   { id: "tags", label: "Tags" },
   { id: "search", label: "Search" },
+  { id: "daily", label: "Daily" },
 ];
 
-/** Left panel: the Folio Browser, Tags or Search, switched by a segmented control. */
+/** Left panel: the Folio Browser, Tags, Search or Daily, switched by a segmented control. */
+const PANELS: Record<LeftView, React.ReactNode> = {
+  folio: <FolioTree />,
+  tags: <TagsPanel />,
+  search: <SearchPanel />,
+  daily: <DailyPanel />,
+};
+
 export function LeftPanel() {
   const folio = useFolioStore((s) => s.folio);
   const view = useTagsStore((s) => s.view);
@@ -33,7 +42,7 @@ export function LeftPanel() {
           </button>
         ))}
       </div>
-      {view === "tags" ? <TagsPanel /> : view === "search" ? <SearchPanel /> : <FolioTree />}
+      {PANELS[view]}
     </div>
   );
 }

@@ -1,0 +1,160 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--aml-space-2);
+  font-size: 12px;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--aml-space-2);
+}
+
+.label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  opacity: 0.8;
+}
+
+.arrow {
+  font: inherit;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--aml-primary);
+  cursor: default;
+}
+
+.arrow:hover,
+.arrow:focus-visible {
+  background: var(--aml-highlight);
+  outline: none;
+}
+
+.week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.day,
+.dayToday {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  width: 100%;
+  font: inherit;
+  padding: 4px 0 6px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+  color: inherit;
+  cursor: default;
+}
+
+.day:hover,
+.dayToday:hover,
+.day:focus-visible,
+.dayToday:focus-visible {
+  background: var(--aml-highlight);
+  outline: none;
+}
+
+.dayToday {
+  border-color: var(--aml-primary);
+  color: var(--aml-primary);
+  font-weight: 600;
+}
+
+.weekday {
+  font-size: 10px;
+  opacity: 0.6;
+}
+
+.number {
+  font-variant-numeric: tabular-nums;
+}
+
+/* A day that already has a note carries a dot under its number. */
+.day[data-has]::after,
+.dayToday[data-has]::after {
+  content: "";
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--aml-accent);
+}
+
+.today {
+  font: inherit;
+  font-size: 11px;
+  padding: 3px 8px;
+  border: 1px solid var(--aml-muted);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--aml-primary);
+  cursor: default;
+}
+
+.today:hover,
+.today:focus-visible {
+  background: var(--aml-highlight);
+  outline: none;
+}
+
+.title {
+  margin: var(--aml-space-1) 0 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.entry {
+  width: 100%;
+  font: inherit;
+  text-align: left;
+  padding: 3px 6px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: inherit;
+  cursor: default;
+}
+
+.entry:hover,
+.entry:focus-visible {
+  background: var(--aml-highlight);
+  outline: none;
+}
+
+.entry[aria-current] {
+  background: var(--aml-highlight);
+  color: var(--aml-primary);
+  font-weight: 600;
+}
+
+.empty {
+  margin: 0;
+  opacity: 0.6;
+}

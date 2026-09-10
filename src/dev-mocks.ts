@@ -293,6 +293,119 @@ function mockSearchQuery(query: string, limit: number) {
   return { results: results.slice(0, limit), total: results.length, error: null };
 }
 
+/* ---- templates and Daily notes (WP-2.7): mirrors src-tauri/src/templates.rs ---- */
+const templates = new Map<string, string>([
+  [
+    "daily",
+    "---\ntype: daily\n---\n\n# {{date:dddd D MMMM YYYY}}\n\n## Today\n\nYesterday: [[{{yesterday}}]]\n",
+  ],
+  ["Scene", "---\ntype: scene\n---\n\n# {{title}}\n\nWritten {{date}}.\n"],
+]);
+
+const MOCK_WEEKDAYS = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
+const MOCK_MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+function mockDate(iso: string): Date {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y ?? 1970, (m ?? 1) - 1, d ?? 1, 12);
+}
+function mockIso(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+function mockShift(iso: string, n: number): string {
+  const d = mockDate(iso);
+  d.setDate(d.getDate() + n);
+  return mockIso(d);
+}
+function mockFormat(iso: string, fmt: string): string {
+  const d = mockDate(iso);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const tokens: Array<[string, () => string]> = [
+    ["YYYY", () => String(d.getFullYear())],
+    ["YY", () => pad(d.getFullYear() % 100)],
+    ["MMMM", () => MOCK_MONTHS[d.getMonth()] ?? ""],
+    ["MMM", () => (MOCK_MONTHS[d.getMonth() ?? 0] ?? "").slice(0, 3)],
+    ["MM", () => pad(d.getMonth() + 1)],
+    ["M", () => String(d.getMonth() + 1)],
+    ["dddd", () => MOCK_WEEKDAYS[d.getDay()] ?? ""],
+    ["ddd", () => (MOCK_WEEKDAYS[d.getDay()] ?? "").slice(0, 3)],
+    ["DD", () => pad(d.getDate())],
+    ["D", () => String(d.getDate())],
+  ];
+  let out = "";
+  let rest = fmt;
+  outer: while (rest) {
+    for (const [token, f] of tokens) {
+      if (rest.startsWith(token)) {
+        out += f();
+        rest = rest.slice(token.length);
+        continue outer;
+      }
+    }
+    out += rest[0];
+    rest = rest.slice(1);
+  }
+  return out;
+}
+
+/** Unknown placeholders are left verbatim, exactly as Rust leaves them. */
+function mockRender(text: string, vars: { title: string; date: string; time: string }): string {
+  return text.replace(/\{\{([^}]*)\}\}/g, (whole, body: string) => {
+    const [rawName, ...rest] = body.split(":");
+    const name = (rawName ?? "").trim();
+    const fmt = rest.length > 0 ? rest.join(":").trim() : null;
+    const shifted = (n: number) => mockShift(vars.date, n);
+    if (name === "title" && !fmt) return vars.title;
+    if (name === "time" && !fmt) return vars.time;
+    if (name === "date") return fmt ? mockFormat(vars.date, fmt) : vars.date;
+    if (name === "yesterday") return fmt ? mockFormat(shifted(-1), fmt) : shifted(-1);
+    if (name === "tomorrow") return fmt ? mockFormat(shifted(1), fmt) : shifted(1);
+    return whole;
+  });
+}
+
+const DAILY_RE = /(?:^|\/)(\d{4}-\d{2}-\d{2})\.md$/;
+
+function mockDailyDates(): string[] {
+  const out = new Set<string>();
+  for (const path of notes.keys()) {
+    const m = path.startsWith("journal/") ? DAILY_RE.exec(path) : null;
+    if (m?.[1]) out.add(m[1]);
+  }
+  return [...out].sort().reverse();
+}
+
+/** The mock tree is nested, so a note in a new year folder needs that folder first. */
+function ensureFolder(path: string): void {
+  const parts = path.split("/");
+  for (let i = 1; i <= parts.length; i++) {
+    const dir = parts.slice(0, i).join("/");
+    if (dir && !findNode(state.tree, dir)) insertNode(node(parts[i - 1] ?? dir, dir, "folder"));
+  }
+}
+
 const index = { building: false, done: 0, total: 0, lastBuilt: 0, lastDurationMs: 0 };
 function indexStatus() {
   return { notes: notes.size, ...index };
@@ -690,6 +803,49 @@ export function installDevMocks(): void {
         if (!state.folio) throw { kind: "noFolioOpen" };
         return mockSearchQuery(String(a.query ?? ""), Number(a.limit ?? 200));
       }
+      case "templates_list": {
+        if (!state.folio) throw { kind: "noFolioOpen" };
+        return [...templates.entries()]
+          .map(([name, text]) => ({
+            name,
+            path: `_templates/${name}.md`,
+            noteType: /^---\n(?:[\s\S]*?\n)?type:\s*(\S+)/.exec(text)?.[1] ?? null,
+          }))
+          .sort((x, y) => x.name.toLowerCase().localeCompare(y.name.toLowerCase()));
+      }
+      case "note_from_template": {
+        if (!state.folio) throw { kind: "noFolioOpen" };
+        const path = String(a.path);
+        if (notes.has(path)) throw { kind: "alreadyExists", detail: path };
+        const vars = a.vars as { title: string; date: string; time: string };
+        const text = mockRender(templates.get(String(a.template)) ?? "", vars);
+        notes.set(path, { text, mtime: Date.now() });
+        ensureFolder(mockParentDir(path));
+        insertNode(node(path.split("/").pop() ?? path, path, "note"));
+        return { path, mtime: Date.now(), size: text.length };
+      }
+      case "daily_note": {
+        if (!state.folio) throw { kind: "noFolioOpen" };
+        const date = String(a.date);
+        const year = date.slice(0, 4);
+        const existing = [`journal/${year}/${date}.md`, `journal/${date}.md`].find((p) =>
+          notes.has(p),
+        );
+        if (existing) return { path: existing, created: false };
+        const path = `journal/${year}/${date}.md`;
+        const text = mockRender(templates.get("daily") ?? "", {
+          title: date,
+          date,
+          time: String(a.time),
+        });
+        notes.set(path, { text, mtime: Date.now() });
+        ensureFolder(`journal/${year}`);
+        insertNode(node(`${date}.md`, path, "note"));
+        return { path, created: true };
+      }
+      case "daily_dates":
+        if (!state.folio) throw { kind: "noFolioOpen" };
+        return mockDailyDates();
       case "tags_list": {
         if (!state.folio) throw { kind: "noFolioOpen" };
         const out: Array<{ tag: string; path: string; title: string }> = [];

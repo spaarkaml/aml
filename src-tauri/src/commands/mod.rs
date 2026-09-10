@@ -10,3 +10,4 @@ pub mod search;
 pub mod spell;
 pub mod sync;
 pub mod tags;
+pub mod templates;

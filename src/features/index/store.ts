@@ -61,8 +61,18 @@ export const useIndexStore = create<IndexState>((set, get) => ({
       });
       return;
     }
+    // Show progress from the moment the build starts, even if no status has been read yet:
+    // waiting for the first poll left the status bar blank for builds shorter than a tick.
     set((s) => ({
-      status: s.status ? { ...s.status, building: true, done: 0, total: 0 } : s.status,
+      status: {
+        notes: 0,
+        lastBuilt: 0,
+        lastDurationMs: 0,
+        ...s.status,
+        building: true,
+        done: 0,
+        total: 0,
+      },
     }));
     pollWhileBuilding();
   },

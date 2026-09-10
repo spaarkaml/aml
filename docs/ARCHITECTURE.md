@@ -26,12 +26,13 @@ Updated with every work package. If this file and the code disagree, the code is
 | `src-tauri/src/lib.rs` | App bootstrap, plugin registration, command registry |
 | `src-tauri/src/commands/<domain>.rs` | One file per command domain (`app`, `folio`, `index`, `spell`, `sync`; later `snapshots`, `compile`) |
 | `src-tauri/src/folio/` | Folio model, path safety, atomic writes (`mod.rs`), watcher (`watch.rs`), errors |
+| `src-tauri/src/templates.rs` | Templates and Daily notes (WP-2.7): placeholder rendering, civil-date arithmetic, `_templates/` listing, `journal/` scanning |
 | `src-tauri/src/index/` | SQLite FTS5 index (ADR-007): `extract.rs` (note facts from markdown), `mod.rs` (schema, build/refresh, watcher updates, Quick Open entries, search), `links.rs` (link resolution, rename preview/apply), `backlinks.rs` (backlinks, unlinked mentions, link a mention), `tags.rs` (tag/note pairs), `search.rs` (query language: parse, evaluate, snippet) |
 | `src-tauri/src/sidecar/` | `syncthing.rs`, the only module that touches the Syncthing binary |
 | `src-tauri/src/spell.rs` | Hunspell en_AU checker |
 | `src-tauri/src/state.rs` | `AppState { folio, watcher, index, speller, syncthing }` managed by Tauri |
 | `src/app/` | `App.tsx`, `commands.ts` (shell commands + `SHORTCUTS` table), `tokens.css`, `global.css`, `shell/` (Shell, TopBar, SidePanel, StatusBar) |
-| `src/features/<feature>/` | Feature folders: components, store, tests. Current: `commands`, `layout`, `appearance`, `folio` (store, Welcome, FolioTree, watcher events), `editor` (Tiptap extensions in `extensions/` incl. `autopair.ts` and `slash.ts`, `NoteEditor.tsx`, `SlashMenu.tsx` + `slashStore.ts`, `SelectionToolbar.tsx`, store with debounced save/conflicts, `editorRef.ts`, `assets.ts`/`paste.ts` for images, `TableMenu.tsx`, `footnotes.ts`), `properties` (front-matter panel + `frontmatter.ts` helpers), `tabs` (per-Folio tab store with recents, `useTabsSync`, `TabStrip`, `Breadcrumb`), `quickopen` (index store, ranking in `search.ts`, `QuickOpen.tsx`), `spell` (tokeniser, store, `SpellMenu.tsx`; the ProseMirror plugin lives in `editor/extensions/spell.ts`), `sync` (status polling store, `SyncScreen.tsx`), `index` (build progress store, status-bar label), `links` (resolution cache + `[[` picker state + rename dialog + `backlinksStore`/`BacklinksPanel`; the ProseMirror plugins live in `editor/extensions/links.ts` and `linkmenu.ts`). The right panel is `app/shell/ContextPanel.tsx` (Outline + Properties + Backlinks sections); the left panel is `app/shell/LeftPanel.tsx` (Folio Browser / Tags / Search switch). `outline` holds `outline.ts` (heading tree and section moves over a structural `DocLike`), the store and `OutlinePanel.tsx`; the plugin that feeds it is `editor/extensions/outline.ts`. `search` holds the query store (debounced, generation-guarded), `terms.ts` (the text terms of a query, for replace-in-note) and `SearchPanel.tsx`. `tags` holds the store (entries, view, expanded, selected; persisted `aml.tags`), `tree.ts` and `TagsPanel.tsx`; the chip-click plugin is `editor/extensions/tags.ts`. `folio` also holds `browserStore.ts` (expanded folders, inline rename target), `ContextMenu.tsx` and `errors.ts`. Cross-feature imports are limited to stores and `src/lib` |
+| `src/features/<feature>/` | Feature folders: components, store, tests. Current: `commands`, `layout`, `appearance`, `folio` (store, Welcome, FolioTree, watcher events), `editor` (Tiptap extensions in `extensions/` incl. `autopair.ts` and `slash.ts`, `NoteEditor.tsx`, `SlashMenu.tsx` + `slashStore.ts`, `SelectionToolbar.tsx`, store with debounced save/conflicts, `editorRef.ts`, `assets.ts`/`paste.ts` for images, `TableMenu.tsx`, `footnotes.ts`), `properties` (front-matter panel + `frontmatter.ts` helpers), `tabs` (per-Folio tab store with recents, `useTabsSync`, `TabStrip`, `Breadcrumb`), `quickopen` (index store, ranking in `search.ts`, `QuickOpen.tsx`), `spell` (tokeniser, store, `SpellMenu.tsx`; the ProseMirror plugin lives in `editor/extensions/spell.ts`), `sync` (status polling store, `SyncScreen.tsx`), `index` (build progress store, status-bar label), `links` (resolution cache + `[[` picker state + rename dialog + `backlinksStore`/`BacklinksPanel`; the ProseMirror plugins live in `editor/extensions/links.ts` and `linkmenu.ts`). The right panel is `app/shell/ContextPanel.tsx` (Outline + Properties + Backlinks sections); the left panel is `app/shell/LeftPanel.tsx` (Folio Browser / Tags / Search / Daily switch). `outline` holds `outline.ts` (heading tree and section moves over a structural `DocLike`), the store and `OutlinePanel.tsx`; the plugin that feeds it is `editor/extensions/outline.ts`. `daily` holds `dates.ts` (local civil dates), the store and `DailyPanel.tsx`; `templates` holds the store that lists `_templates/` and registers a palette command per template. `search` holds the query store (debounced, generation-guarded), `terms.ts` (the text terms of a query, for replace-in-note) and `SearchPanel.tsx`. `tags` holds the store (entries, view, expanded, selected; persisted `aml.tags`), `tree.ts` and `TagsPanel.tsx`; the chip-click plugin is `editor/extensions/tags.ts`. `folio` also holds `browserStore.ts` (expanded folders, inline rename target), `ContextMenu.tsx` and `errors.ts`. Cross-feature imports are limited to stores and `src/lib` |
 | `src/lib/markdown/` | The markdown bridge: `mdast.ts` (parse + canonical serialise), `escape.ts`, `inline-syntax.ts` (wiki/tag/cite), `pm.ts` (mdast ⇄ ProseMirror JSON, Raw nodes), `index.ts` API |
 | `src/lib/` | `fuzzy.ts`, `platform.ts`, `wordcount.ts` |
 | `src/ipc/` | Generated bindings + `index.ts` re-export |
@@ -61,6 +62,10 @@ Updated with every work package. If this file and the code disagree, the code is
 | `link_mention_apply` | source, line, matched, target | true if rewritten | links |
 | `tags_list` | — | `TagEntry[] { tag, path, title }` (distinct pairs) | tags |
 | `tag_notes` | tag | paths carrying the tag or a nested one | tags |
+| `templates_list` | — | `TemplateInfo[] { name, path, noteType? }` | templates |
+| `note_from_template` | path, template, vars { title, date, time } | `NoteMeta` (AlreadyExists if the note is there) | templates |
+| `daily_note` | date (`YYYY-MM-DD`), time (`HH:MM`) | `DailyNote { path, created }` | templates |
+| `daily_dates` | — | dates that have a Daily, newest first | templates |
 | `search_query` | query, limit? | `SearchResponse { results[{path, title, matches, snippets[{line, text, section?}]}], total, error? }` | search |
 | `note_read` | path | `NoteContent { path, text, mtime, size }` | folio |
 | `note_write` | path, text, expectedMtime? | `NoteMeta` (Conflict error if mtime moved) | folio |
@@ -88,7 +93,7 @@ All results are `{status:"ok",data}|{status:"error",error:FolioError}`; `FolioEr
 
 ## Shell model (WP-0.5)
 
-- **Panels:** `left` (Folio Browser, Tags or Search view) and `right` (Context: Outline + Properties + Backlinks sections). Each is closed, open-as-overlay, or pinned. Overlay closes on Escape or backdrop click; pinned takes layout space and is resizable.
+- **Panels:** `left` (Folio Browser, Tags, Search or Daily view) and `right` (Context: Outline + Properties + Backlinks sections). Each is closed, open-as-overlay, or pinned. Overlay closes on Escape or backdrop click; pinned takes layout space and is resizable.
 - **Layouts:** `desk` (Browser pinned) and `page` (nothing pinned). Persisted per device in localStorage key `aml.layout`.
 - **Commands:** everything user-triggerable registers in `commandRegistry` with an optional shortcut (`mod+shift+e` grammar). `useGlobalShortcuts` binds them; `CommandPalette` lists them. Shortcut table lives in `src/app/commands.ts` and is exercised by `e2e/shell.spec.ts`.
 - **Appearance:** `aml.appearance` setting `system|paper|ink` → `<html data-mode>`; tokens in `tokens.css`.
@@ -107,6 +112,12 @@ All results are `{status:"ok",data}|{status:"error",error:FolioError}`; `FolioEr
 - Tables `notes / aliases / headings / tags / links / props` (cascade on delete) + FTS5 `notes_fts(title, body)`. `notes.stem` and `links.key` are lower-case file stems: backlinks and rename propagation are a join.
 - The watcher calls `commands::index::apply_changes(paths)` before emitting `FolioChanged`; a rebuild is `DELETE` + `refresh`. Everything is derived: deleting the file rebuilds on next open.
 - `extract.rs` is the single markdown fact-extractor for Rust (front matter, headings, tags, links, body, words); it is line-based and never fails. Links carry the byte span of their target so a rename can rewrite exactly that.
+
+## Templates and Daily notes (WP-2.7)
+
+- Placeholders are expanded in Rust; **the frontend owns "now"** (only it knows the device's timezone) and passes `YYYY-MM-DD` plus `HH:MM`, so `templates::render` is pure civil-date arithmetic and fully testable. Unknown placeholders are left verbatim, like Raw nodes.
+- Dailies are written to `journal/YYYY/YYYY-MM-DD.md` and read from there or a flat `journal/YYYY-MM-DD.md`; an existing Daily is opened, never overwritten.
+- Templates register palette commands from the Folio's own files (`commandRegistry.register` returns an unregister function); WP-3.3's "New <Type>" commands will reuse this.
 
 ## Outline (WP-2.6)
 

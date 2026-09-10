@@ -54,6 +54,17 @@ export const commands = {
 	tagNotes: (tag: string) => typedError<string[], FolioError>(__TAURI_INVOKE("tag_notes", { tag })),
 	/**  Runs a query in the search language (see `index/search.rs`). */
 	searchQuery: (query: string, limit: number | null) => typedError<SearchResponse, FolioError>(__TAURI_INVOKE("search_query", { query, limit })),
+	/**  The templates in `_templates/`. */
+	templatesList: () => typedError<TemplateInfo[], FolioError>(__TAURI_INVOKE("templates_list")),
+	/**  Creates `path` from the named template, expanding its placeholders. Fails if it exists. */
+	noteFromTemplate: (path: string, template: string, vars: RenderVars) => typedError<NoteMeta, FolioError>(__TAURI_INVOKE("note_from_template", { path, template, vars })),
+	/**
+	 *  Opens the Daily note for `date` (`YYYY-MM-DD`), creating it from `_templates/daily.md` —
+	 *  or a built-in default when the Folio has no such template — the first time.
+	 */
+	dailyNote: (date: string, time: string) => typedError<DailyNote, FolioError>(__TAURI_INVOKE("daily_note", { date, time })),
+	/**  Dates that already have a Daily note, newest first. */
+	dailyDates: () => typedError<string[], FolioError>(__TAURI_INVOKE("daily_dates")),
 	/**
 	 *  Returns the words from `words` that the en_AU dictionary (plus the personal and ignore
 	 *  lists) does not accept. Tokenising is the editor's job; this only judges words.
@@ -121,6 +132,12 @@ export type Backlink = {
 	/**  Nearest heading above the link, for jumping to the right section. */
 	section: string | null,
 	kind: string,
+};
+
+export type DailyNote = {
+	path: string,
+	/**  False when the note was already there and was simply opened. */
+	created: boolean,
 };
 
 export type EntryKind = "folder" | "note" | "file";
@@ -235,6 +252,14 @@ export type RenamePreview = {
 	links: number,
 };
 
+export type RenderVars = {
+	title: string,
+	/**  The note's date as `YYYY-MM-DD`, in the device's timezone. */
+	date: string,
+	/**  `HH:MM`, 24-hour. */
+	time: string,
+};
+
 export type SearchHit = {
 	path: string,
 	title: string,
@@ -302,6 +327,14 @@ export type TagEntry = {
 	tag: string,
 	path: string,
 	title: string,
+};
+
+export type TemplateInfo = {
+	/**  File stem — what the commands take, e.g. "daily". */
+	name: string,
+	path: string,
+	/**  The template's front-matter `type:`, if it declares one (Note Types arrive in WP-3.3). */
+	noteType: string | null,
 };
 
 export type TreeNode = {

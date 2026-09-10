@@ -11,6 +11,8 @@ function useCommands(): Command[] {
   return useSyncExternalStore(subscribe, getSnapshot);
 }
 
+const label = (c: Command) => `${c.group ? `${c.group}: ` : ""}${c.title}`;
+
 export function CommandPalette() {
   const open = usePaletteStore((s) => s.open);
   const setOpen = usePaletteStore((s) => s.setOpen);
@@ -19,17 +21,17 @@ export function CommandPalette() {
   const [index, setIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const results = useMemo(
-    () => fuzzyFilter(query, all, (c) => `${c.group ? `${c.group}: ` : ""}${c.title}`),
-    [query, all],
-  );
+  const results = useMemo(() => fuzzyFilter(query, all, label), [query, all]);
 
+  // Reset on close, never on open: an effect that clears the query after the palette has
+  // rendered can land after the first keystrokes and wipe them.
   useEffect(() => {
-    if (open) {
+    if (!open) {
       setQuery("");
       setIndex(0);
-      requestAnimationFrame(() => inputRef.current?.focus());
+      return;
     }
+    requestAnimationFrame(() => inputRef.current?.focus());
   }, [open]);
 
   useEffect(() => {
@@ -38,8 +40,8 @@ export function CommandPalette() {
 
   if (!open) return null;
 
-  const runAt = (i: number) => {
-    const cmd = results[i];
+  const runAt = (i: number, list: Command[] = results) => {
+    const cmd = list[i];
     setOpen(false);
     // Run after React has unmounted the palette so a command that focuses the editor
     // is not immediately blurred by the input going away.
@@ -55,7 +57,11 @@ export function CommandPalette() {
       setIndex((i) => (results.length ? (i - 1 + results.length) % results.length : 0));
     } else if (e.key === "Enter") {
       e.preventDefault();
-      runAt(index);
+      // Act on what the field actually holds. Enter can arrive before React has rendered the
+      // last keystroke, and the palette must never run a command the user was not looking at.
+      const typed = e.currentTarget.value;
+      if (typed === query) runAt(index);
+      else runAt(0, fuzzyFilter(typed, all, label));
     } else if (e.key === "Escape") {
       e.preventDefault();
       setOpen(false);
@@ -76,7 +82,12 @@ export function CommandPalette() {
           ref={inputRef}
           className={styles.input}
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            // Back to the top match on every keystroke: the pointer may have left the
+            // selection on a row that the new query does not even list.
+            setIndex(0);
+          }}
           onKeyDown={onKeyDown}
           placeholder="Type a command…"
           aria-label="Search commands"

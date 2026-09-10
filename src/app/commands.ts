@@ -1,6 +1,7 @@
 import { useAppearanceStore } from "@/features/appearance/store";
 import { usePaletteStore } from "@/features/commands/paletteStore";
 import { type Command, commandRegistry } from "@/features/commands/registry";
+import { useDailyStore } from "@/features/daily/store";
 import { getActiveEditor } from "@/features/editor/editorRef";
 import { insertFootnote } from "@/features/editor/footnotes";
 import { useEditorStore } from "@/features/editor/store";
@@ -32,6 +33,7 @@ export const SHORTCUTS = {
   newNote: "mod+n",
   quickOpen: "mod+o",
   search: "mod+shift+f",
+  today: "mod+shift+d",
   rename: "f2",
 } as const;
 
@@ -262,6 +264,20 @@ export const SHELL_COMMANDS: Command[] = [
     title: "NAS Sync…",
     group: "Folio",
     run: () => useSyncStore.getState().setOpen(true),
+  },
+  {
+    id: "daily.today",
+    title: "Today's Daily Note",
+    group: "Note",
+    shortcut: SHORTCUTS.today,
+    global: true,
+    run: () => void useDailyStore.getState().openToday(),
+  },
+  {
+    id: "daily.show",
+    title: "Show Daily Notes",
+    group: "View",
+    run: () => useDailyStore.getState().show(),
   },
   {
     id: "outline.show",

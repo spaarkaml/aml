@@ -7,6 +7,7 @@ mod index;
 mod sidecar;
 mod spell;
 mod state;
+mod templates;
 
 use tauri_specta::{collect_commands, collect_events, Builder};
 
@@ -44,6 +45,10 @@ fn specta_builder() -> Builder<tauri::Wry> {
             commands::tags::tags_list,
             commands::tags::tag_notes,
             commands::search::search_query,
+            commands::templates::templates_list,
+            commands::templates::note_from_template,
+            commands::templates::daily_note,
+            commands::templates::daily_dates,
             commands::spell::spell_check,
             commands::spell::spell_suggest,
             commands::spell::spell_add,

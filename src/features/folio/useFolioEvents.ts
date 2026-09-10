@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useDailyStore } from "@/features/daily/store";
 import { useEditorStore } from "@/features/editor/store";
 import { useLinkStore } from "@/features/links/store";
 import { useQuickOpenStore } from "@/features/quickopen/store";
@@ -20,6 +21,7 @@ export function useFolioEvents(): void {
         void useQuickOpenStore.getState().refresh();
         useLinkStore.getState().invalidate();
         void useTagsStore.getState().refresh();
+        void useDailyStore.getState().refresh();
         for (const p of e.payload.paths) useEditorStore.getState().noteChangedOnDisk(p);
       })
       .then((off) => {
