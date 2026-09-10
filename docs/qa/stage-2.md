@@ -13,3 +13,5 @@ Run against your real Folio on the Mac (and later the PC). Record results in `do
 | 7 | *(WP-2.2)* Type `[[Not Yet Written]]`, click it | Dashed until clicked; note created beside the current one and opened | ☐ |
 | 8 | *(WP-2.2)* Rename a heavily linked note (F2), accept the preview; open three linking notes; then ⌘K → Undo Last Rename | Every `[[link]]` and `(x.md)` reference updated, headings/aliases kept; undo restores name and links | ☐ |
 | 9 | *(WP-2.2)* Drag a note into another folder | Preview lists its own relative `.md` links (if any) and links into it; nothing breaks after the move | ☐ |
+| 10 | *(WP-2.3)* Open a well-linked note; ⌘⇧I | Backlinks lists every note you know links here, each with its section; clicking jumps there | ☐ |
+| 11 | *(WP-2.3)* Open a note whose name appears as plain text elsewhere; *Link* one, then *Link all* | Text becomes `[[Name]]` (alias kept when the case differs); counts move from unlinked to linked; nothing inside code or existing links is touched | ☐ |

@@ -42,6 +42,12 @@ export const commands = {
 	linkRenamePreview: (from: string, to: string) => typedError<RenamePreview, FolioError>(__TAURI_INVOKE("link_rename_preview", { from, to })),
 	/**  Applies a preview's edits after the rename happened. Returns lines rewritten. */
 	linkRenameApply: (notes: NoteEdits[]) => typedError<number, FolioError>(__TAURI_INVOKE("link_rename_apply", { notes })),
+	/**  Links in other notes that resolve to `path`. */
+	backlinks: (path: string) => typedError<Backlink[], FolioError>(__TAURI_INVOKE("backlinks", { path })),
+	/**  Plain-text mentions of the note's name, title or aliases that are not links yet. */
+	unlinkedMentions: (path: string) => typedError<Mention[], FolioError>(__TAURI_INVOKE("unlinked_mentions", { path })),
+	/**  Turns one mention into a `[[link]]`; false if the line changed meanwhile. */
+	linkMentionApply: (source: string, line: number, matched: string, target: string) => typedError<boolean, FolioError>(__TAURI_INVOKE("link_mention_apply", { source, line, matched, target })),
 	/**
 	 *  Returns the words from `words` that the en_AU dictionary (plus the personal and ignore
 	 *  lists) does not accept. Tokenising is the editor's job; this only judges words.
@@ -100,6 +106,17 @@ export type AssetInfo = {
 	size: number,
 };
 
+export type Backlink = {
+	source: string,
+	sourceTitle: string,
+	line: number,
+	/**  The whole line, trimmed. */
+	context: string,
+	/**  Nearest heading above the link, for jumping to the right section. */
+	section: string | null,
+	kind: string,
+};
+
 export type EntryKind = "folder" | "note" | "file";
 
 export type FolioChanged = {
@@ -148,6 +165,16 @@ export type LinkQuery = {
 	target: string,
 	/**  `wiki`, `embed` or `md`. */
 	kind: string,
+};
+
+export type Mention = {
+	source: string,
+	sourceTitle: string,
+	line: number,
+	context: string,
+	/**  The text as it appears in the line (its case may differ from the name). */
+	matched: string,
+	section: string | null,
 };
 
 export type NoteContent = {

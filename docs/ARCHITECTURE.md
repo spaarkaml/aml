@@ -26,12 +26,12 @@ Updated with every work package. If this file and the code disagree, the code is
 | `src-tauri/src/lib.rs` | App bootstrap, plugin registration, command registry |
 | `src-tauri/src/commands/<domain>.rs` | One file per command domain (`app`, `folio`, `index`, `spell`, `sync`; later `snapshots`, `compile`) |
 | `src-tauri/src/folio/` | Folio model, path safety, atomic writes (`mod.rs`), watcher (`watch.rs`), errors |
-| `src-tauri/src/index/` | SQLite FTS5 index (ADR-007): `extract.rs` (note facts from markdown), `mod.rs` (schema, build/refresh, watcher updates, Quick Open entries, search), `links.rs` (link resolution, rename preview/apply) |
+| `src-tauri/src/index/` | SQLite FTS5 index (ADR-007): `extract.rs` (note facts from markdown), `mod.rs` (schema, build/refresh, watcher updates, Quick Open entries, search), `links.rs` (link resolution, rename preview/apply), `backlinks.rs` (backlinks, unlinked mentions, link a mention) |
 | `src-tauri/src/sidecar/` | `syncthing.rs`, the only module that touches the Syncthing binary |
 | `src-tauri/src/spell.rs` | Hunspell en_AU checker |
 | `src-tauri/src/state.rs` | `AppState { folio, watcher, index, speller, syncthing }` managed by Tauri |
 | `src/app/` | `App.tsx`, `commands.ts` (shell commands + `SHORTCUTS` table), `tokens.css`, `global.css`, `shell/` (Shell, TopBar, SidePanel, StatusBar) |
-| `src/features/<feature>/` | Feature folders: components, store, tests. Current: `commands`, `layout`, `appearance`, `folio` (store, Welcome, FolioTree, watcher events), `editor` (Tiptap extensions in `extensions/` incl. `autopair.ts` and `slash.ts`, `NoteEditor.tsx`, `SlashMenu.tsx` + `slashStore.ts`, `SelectionToolbar.tsx`, store with debounced save/conflicts, `editorRef.ts`, `assets.ts`/`paste.ts` for images, `TableMenu.tsx`, `footnotes.ts`), `properties` (front-matter panel + `frontmatter.ts` helpers), `tabs` (per-Folio tab store with recents, `useTabsSync`, `TabStrip`, `Breadcrumb`), `quickopen` (index store, ranking in `search.ts`, `QuickOpen.tsx`), `spell` (tokeniser, store, `SpellMenu.tsx`; the ProseMirror plugin lives in `editor/extensions/spell.ts`), `sync` (status polling store, `SyncScreen.tsx`), `index` (build progress store, status-bar label), `links` (resolution cache + `[[` picker state + rename dialog; the ProseMirror plugins live in `editor/extensions/links.ts` and `linkmenu.ts`). `folio` also holds `browserStore.ts` (expanded folders, inline rename target), `ContextMenu.tsx` and `errors.ts`. Cross-feature imports are limited to stores and `src/lib` |
+| `src/features/<feature>/` | Feature folders: components, store, tests. Current: `commands`, `layout`, `appearance`, `folio` (store, Welcome, FolioTree, watcher events), `editor` (Tiptap extensions in `extensions/` incl. `autopair.ts` and `slash.ts`, `NoteEditor.tsx`, `SlashMenu.tsx` + `slashStore.ts`, `SelectionToolbar.tsx`, store with debounced save/conflicts, `editorRef.ts`, `assets.ts`/`paste.ts` for images, `TableMenu.tsx`, `footnotes.ts`), `properties` (front-matter panel + `frontmatter.ts` helpers), `tabs` (per-Folio tab store with recents, `useTabsSync`, `TabStrip`, `Breadcrumb`), `quickopen` (index store, ranking in `search.ts`, `QuickOpen.tsx`), `spell` (tokeniser, store, `SpellMenu.tsx`; the ProseMirror plugin lives in `editor/extensions/spell.ts`), `sync` (status polling store, `SyncScreen.tsx`), `index` (build progress store, status-bar label), `links` (resolution cache + `[[` picker state + rename dialog + `backlinksStore`/`BacklinksPanel`; the ProseMirror plugins live in `editor/extensions/links.ts` and `linkmenu.ts`). The right panel is `app/shell/ContextPanel.tsx` (Properties + Backlinks sections). `folio` also holds `browserStore.ts` (expanded folders, inline rename target), `ContextMenu.tsx` and `errors.ts`. Cross-feature imports are limited to stores and `src/lib` |
 | `src/lib/markdown/` | The markdown bridge: `mdast.ts` (parse + canonical serialise), `escape.ts`, `inline-syntax.ts` (wiki/tag/cite), `pm.ts` (mdast ⇄ ProseMirror JSON, Raw nodes), `index.ts` API |
 | `src/lib/` | `fuzzy.ts`, `platform.ts`, `wordcount.ts` |
 | `src/ipc/` | Generated bindings + `index.ts` re-export |
@@ -56,6 +56,9 @@ Updated with every work package. If this file and the code disagree, the code is
 | `link_resolve` | from, links[{target, kind}] | `(path \| null)[]` | links |
 | `link_rename_preview` | from, to | `RenamePreview { notes[{path, newPath, edits[{line, before, after}]}], links }` | links |
 | `link_rename_apply` | notes (from a preview) | lines rewritten | links |
+| `backlinks` | path | `Backlink[] { source, sourceTitle, line, context, section?, kind }` | links |
+| `unlinked_mentions` | path | `Mention[] { source, sourceTitle, line, context, matched, section? }` | links |
+| `link_mention_apply` | source, line, matched, target | true if rewritten | links |
 | `note_read` | path | `NoteContent { path, text, mtime, size }` | folio |
 | `note_write` | path, text, expectedMtime? | `NoteMeta` (Conflict error if mtime moved) | folio |
 | `entry_create_note` / `entry_create_folder` / `entry_rename` / `entry_trash` | paths | — | folio |
@@ -82,7 +85,7 @@ All results are `{status:"ok",data}|{status:"error",error:FolioError}`; `FolioEr
 
 ## Shell model (WP-0.5)
 
-- **Panels:** `left` (Browser) and `right` (Context). Each is closed, open-as-overlay, or pinned. Overlay closes on Escape or backdrop click; pinned takes layout space and is resizable.
+- **Panels:** `left` (Browser) and `right` (Context: Properties + Backlinks sections). Each is closed, open-as-overlay, or pinned. Overlay closes on Escape or backdrop click; pinned takes layout space and is resizable.
 - **Layouts:** `desk` (Browser pinned) and `page` (nothing pinned). Persisted per device in localStorage key `aml.layout`.
 - **Commands:** everything user-triggerable registers in `commandRegistry` with an optional shortcut (`mod+shift+e` grammar). `useGlobalShortcuts` binds them; `CommandPalette` lists them. Shortcut table lives in `src/app/commands.ts` and is exercised by `e2e/shell.spec.ts`.
 - **Appearance:** `aml.appearance` setting `system|paper|ink` → `<html data-mode>`; tokens in `tokens.css`.
@@ -107,6 +110,7 @@ All results are `{status:"ok",data}|{status:"error",error:FolioError}`; `FolioEr
 - Resolution lives in Rust only (`Index::resolve`): `.md` links relative to the note, wiki targets by path suffix → stem (same folder first) → title → alias. The editor batches `link_resolve` per document change and paints `.aml-link-missing`.
 - `useFolioStore.rename` = preview (`link_rename_preview`) → dialog when links are affected → `entry_rename` → `link_rename_apply` → invalidate the resolution cache. Apply is line-exact and skips lines that changed since the preview.
 - The `[[` picker reads Quick Open's entries; it never talks to Rust while typing.
+- Backlinks (WP-2.3) are `links` rows that `Index::resolve` maps to the note; unlinked mentions are FTS phrase hits re-scanned line by line outside links. `BacklinksPanel` reloads on note change and on the link cache version bump (`folio-changed`).
 
 ## Syncthing sidecar (WP-1.1b)
 

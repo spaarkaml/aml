@@ -39,7 +39,7 @@ test("command palette: open, fuzzy filter, run, close", async ({ page }) => {
   await page.keyboard.press(`${mod}+K`);
   const input = page.getByTestId("palette-input");
   await expect(input).toBeFocused();
-  await input.fill("ink");
+  await input.fill("paper ink");
   await expect(page.getByRole("option")).toHaveCount(1);
   await input.press("Enter");
   await expect(input).toHaveCount(0);

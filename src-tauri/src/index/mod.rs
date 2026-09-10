@@ -3,6 +3,7 @@
 //! table over title and body. Built on a background thread, kept current from the watcher,
 //! rebuilt on demand. Never lives inside the Folio (ADR-004).
 
+pub mod backlinks;
 pub mod extract;
 pub mod links;
 

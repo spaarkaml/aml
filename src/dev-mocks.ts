@@ -34,6 +34,13 @@ const notes = new Map<string, { text: string; mtime: number }>([
   ],
   ["Inbox.md", { text: "Quick thoughts.\n", mtime: 1_700_000_000_000 }],
   [
+    "journal/2026-09-09.md",
+    {
+      text: "# Tuesday\n\nReworked the interviews section of 04 Methods; the methodology needs a table.\n",
+      mtime: 1_700_000_000_000,
+    },
+  ],
+  [
     "Thesis/chapters/04 Methods.md",
     {
       text: "---\naliases: [methodology, interviews]\n---\n\n# Methods\n\n## Interview protocol\n\nText.\n",
@@ -513,6 +520,88 @@ export function installDevMocks(): void {
           notes.set(n.newPath, { text: lines.join("\n"), mtime: Date.now() });
         }
         return applied;
+      }
+      case "backlinks": {
+        if (!state.folio) throw { kind: "noFolioOpen" };
+        const path = String(a.path);
+        const out: Array<{
+          source: string;
+          sourceTitle: string;
+          line: number;
+          context: string;
+          section: string | null;
+          kind: string;
+        }> = [];
+        for (const [source, n] of notes) {
+          if (source === path) continue;
+          let section: string | null = null;
+          n.text.split("\n").forEach((line, i) => {
+            const h = /^#{1,6}\s+(.+?)\s*#*$/.exec(line);
+            if (h) section = h[1] ?? null;
+            for (const m of line.matchAll(/\[\[([^\]|#]+)/g)) {
+              if (mockResolve(source, (m[1] ?? "").trim(), "wiki") === path)
+                out.push({
+                  source,
+                  sourceTitle:
+                    mockStem(source) === "04 methods"
+                      ? "04 Methods"
+                      : (source.split("/").pop() ?? source).replace(/\.md$/i, ""),
+                  line: i + 1,
+                  context: line.trim(),
+                  section,
+                  kind: "wiki",
+                });
+            }
+          });
+        }
+        return out;
+      }
+      case "unlinked_mentions": {
+        if (!state.folio) throw { kind: "noFolioOpen" };
+        const path = String(a.path);
+        const name = (path.split("/").pop() ?? path).replace(/\.md$/i, "");
+        const out: Array<{
+          source: string;
+          sourceTitle: string;
+          line: number;
+          context: string;
+          matched: string;
+          section: string | null;
+        }> = [];
+        for (const [source, n] of notes) {
+          if (source === path) continue;
+          let section: string | null = null;
+          n.text.split("\n").forEach((line, i) => {
+            const h = /^#{1,6}\s+(.+?)\s*#*$/.exec(line);
+            if (h) section = h[1] ?? null;
+            const bare = line.replace(/\[\[[^\]]*\]\]/g, (x) => " ".repeat(x.length));
+            const at = bare.toLowerCase().indexOf(name.toLowerCase());
+            if (at !== -1)
+              out.push({
+                source,
+                sourceTitle: (source.split("/").pop() ?? source).replace(/\.md$/i, ""),
+                line: i + 1,
+                context: line.trim(),
+                matched: line.slice(at, at + name.length),
+                section,
+              });
+          });
+        }
+        return out;
+      }
+      case "link_mention_apply": {
+        const n = notes.get(String(a.source));
+        if (!n) return false;
+        const lines = n.text.split("\n");
+        const idx = Number(a.line) - 1;
+        const matched = String(a.matched);
+        const target = String(a.target);
+        const at = lines[idx]?.indexOf(matched) ?? -1;
+        if (at === -1) return false;
+        const link = matched === target ? `[[${target}]]` : `[[${target}|${matched}]]`;
+        lines[idx] = `${lines[idx]?.slice(0, at)}${link}${lines[idx]?.slice(at + matched.length)}`;
+        notes.set(String(a.source), { text: lines.join("\n"), mtime: Date.now() });
+        return true;
       }
       case "plugin:event|listen":
         return 1;

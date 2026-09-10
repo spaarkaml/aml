@@ -260,6 +260,12 @@ export const SHELL_COMMANDS: Command[] = [
     run: () => useSyncStore.getState().setOpen(true),
   },
   {
+    id: "note.backlinks",
+    title: "Show Backlinks",
+    group: "Note",
+    run: () => useLayoutStore.getState().openPanel("right"),
+  },
+  {
     id: "note.undoRename",
     title: "Undo Last Rename",
     group: "Note",

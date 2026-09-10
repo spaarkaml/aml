@@ -15,6 +15,9 @@ interface IndexState {
 }
 
 let poll: ReturnType<typeof setInterval> | null = null;
+/** Bumped by every status request and by `rebuild`, so a late answer cannot overwrite a
+ *  newer state (a stale "not building" would stop the polling a rebuild just started). */
+let generation = 0;
 
 function stopPolling(): void {
   if (poll) clearInterval(poll);
@@ -32,7 +35,9 @@ export const useIndexStore = create<IndexState>((set, get) => ({
   status: null,
   error: null,
   refresh: async () => {
+    const gen = ++generation;
     const r = await commands.indexStatus();
+    if (gen !== generation) return;
     if (r.status !== "ok") {
       stopPolling();
       set({ status: null });
@@ -49,6 +54,7 @@ export const useIndexStore = create<IndexState>((set, get) => ({
   rebuild: async () => {
     set({ error: null });
     const r = await commands.indexRebuild();
+    generation += 1;
     if (r.status !== "ok") {
       set({
         error: r.error.kind === "noFolioOpen" ? "Open a Folio first." : String(r.error.detail),

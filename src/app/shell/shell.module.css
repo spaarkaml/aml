@@ -189,3 +189,31 @@
 .statusButton:hover {
   background: var(--aml-highlight);
 }
+
+/* Context panel sections (WP-2.3) */
+.context {
+  display: flex;
+  flex-direction: column;
+  gap: var(--aml-space-3);
+}
+
+.section {
+  border-top: 1px solid var(--aml-muted);
+  padding-top: var(--aml-space-2);
+}
+
+.section:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.sectionTitle {
+  cursor: pointer;
+  user-select: none;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.75;
+  margin-bottom: var(--aml-space-2);
+}

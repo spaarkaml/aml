@@ -4,6 +4,11 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### WP-2.3 — Backlinks and unlinked mentions (2026-09-10)
+- Context panel (right side, ⌘⇧I) now holds Properties and Backlinks: linked mentions with line, context and section (click to jump), unlinked mentions with *Link* / *Link all*.
+- Commands `backlinks` / `unlinked_mentions` / `link_mention_apply`; palette **Show Backlinks**.
+- Index status polling ignores stale answers (fixes a rebuild-progress race).
+
 ### WP-2.2 — Links (2026-09-10)
 - `[[` note picker in the editor (titles, aliases, `#` headings, "link to new note"); click a wiki link or a `.md` link to open it, or create the note when it does not exist; links that point nowhere are dashed.
 - Rename propagation: renaming or moving a note or folder previews every link that would change and rewrites them after the move; **Undo Last Rename** in the palette.

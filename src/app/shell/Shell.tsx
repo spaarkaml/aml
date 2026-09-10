@@ -54,7 +54,7 @@ export function Shell({ info, left, right, children }: Props) {
           />
         ) : null}
         <main className={styles.center}>{children}</main>
-        <SidePanel side="right" title="Properties">
+        <SidePanel side="right" title="Context">
           {right}
         </SidePanel>
       </div>
