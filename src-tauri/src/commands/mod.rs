@@ -5,3 +5,4 @@
 pub mod app;
 pub mod folio;
 pub mod spell;
+pub mod sync;

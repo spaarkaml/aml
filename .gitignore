@@ -26,3 +26,6 @@ dist-ssr
 # generated (bindings.ts IS tracked; CI checks it is current)
 coverage/
 test-results/
+
+# Syncthing sidecar binaries are fetched by scripts/fetch-syncthing.mjs
+src-tauri/binaries/

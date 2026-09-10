@@ -123,6 +123,33 @@ const SUGGEST: Record<string, string[]> = {
 };
 const added = new Set<string>();
 
+// Sync mock: a tiny state machine standing in for the Syncthing sidecar.
+const sync = {
+  enabled: false,
+  running: false,
+  devices: [] as Array<{ id: string; name: string; connected: boolean; address: string }>,
+  folders: [] as Array<{
+    id: string;
+    label: string;
+    path: string;
+    state: string;
+    completion: number;
+    needBytes: number;
+    devices: string[];
+    error: string | null;
+  }>,
+  pending: [] as Array<{ id: string; label: string; offeredBy: string; offeredByName: string }>,
+};
+function syncStatus() {
+  return {
+    ...sync,
+    myId: sync.running ? "AAAAAAA-BBBBBBB-CCCCCCC-DDDDDDD-EEEEEEE-FFFFFFF-GGGGGGG-HHHHHHH" : null,
+    version: sync.running ? "v2.1.5" : null,
+    guiUrl: "http://127.0.0.1:41384/",
+    error: null,
+  };
+}
+
 export function installDevMocks(): void {
   // Exposed for e2e assertions on what the app wrote.
   (window as unknown as { __amlMockNotes: typeof notes }).__amlMockNotes = notes;
@@ -277,6 +304,69 @@ export function installDevMocks(): void {
       case "spell_ignore":
         added.add(String(a.word));
         return null;
+      case "sync_status":
+        return syncStatus();
+      case "sync_enable":
+        sync.enabled = true;
+        sync.running = true;
+        return syncStatus();
+      case "sync_disable":
+        sync.enabled = false;
+        sync.running = false;
+        return syncStatus();
+      case "sync_add_device": {
+        const id = String(a.deviceId).toUpperCase();
+        if (id.length < 50)
+          throw { kind: "invalidPath", detail: "That does not look like a Syncthing Device ID" };
+        sync.running = true;
+        sync.enabled = true;
+        sync.devices = [
+          { id, name: String(a.name || "NAS"), connected: true, address: "192.168.1.20:22000" },
+        ];
+        // The mock NAS immediately offers a folder, as a real one does after accepting us.
+        sync.pending = [
+          {
+            id: "p6tn7-qnz4c",
+            label: "Folio",
+            offeredBy: id,
+            offeredByName: String(a.name || "NAS"),
+          },
+        ];
+        return syncStatus();
+      }
+      case "sync_remove_device":
+        sync.devices = [];
+        sync.pending = [];
+        return syncStatus();
+      case "sync_accept_folder":
+        sync.pending = sync.pending.filter((p) => p.id !== a.folderId);
+        sync.folders.push({
+          id: String(a.folderId),
+          label: String(a.label),
+          path: String(a.path),
+          state: "idle",
+          completion: 100,
+          needBytes: 0,
+          devices: [String(a.deviceId)],
+          error: null,
+        });
+        return syncStatus();
+      case "sync_share_folder":
+        sync.folders.push({
+          id: "writing",
+          label: String(a.label ?? "Writing"),
+          path: String(a.path),
+          state: "syncing",
+          completion: 42,
+          needBytes: 1024,
+          devices: [String(a.deviceId)],
+          error: null,
+        });
+        return syncStatus();
+      case "sync_is_synced_path":
+        return sync.folders.some((f) => String(a.path).startsWith(f.path));
+      case "sync_log_tail":
+        return ["[mock] syncthing v2.1.5 starting", "[mock] Ready to synchronize"];
       case "plugin:event|listen":
         return 1;
       case "plugin:event|unlisten":

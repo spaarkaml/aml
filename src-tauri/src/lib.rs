@@ -3,6 +3,7 @@
 
 mod commands;
 mod folio;
+mod sidecar;
 mod spell;
 mod state;
 
@@ -34,6 +35,15 @@ fn specta_builder() -> Builder<tauri::Wry> {
             commands::spell::spell_suggest,
             commands::spell::spell_add,
             commands::spell::spell_ignore,
+            commands::sync::sync_status,
+            commands::sync::sync_enable,
+            commands::sync::sync_disable,
+            commands::sync::sync_add_device,
+            commands::sync::sync_remove_device,
+            commands::sync::sync_accept_folder,
+            commands::sync::sync_share_folder,
+            commands::sync::sync_is_synced_path,
+            commands::sync::sync_log_tail,
         ])
         .events(collect_events![folio::watch::FolioChanged])
 }
@@ -69,10 +79,18 @@ pub fn run() {
             #[cfg(target_os = "macos")]
             install_mac_menu(app.handle())?;
             log::info!("AML {} starting", env!("CARGO_PKG_VERSION"));
+            // The sidecar can take seconds to answer; never block the window from appearing.
+            let handle = app.handle().clone();
+            std::thread::spawn(move || commands::sync::autostart(&handle));
             Ok(())
         })
-        .run(tauri::generate_context!())
-        .expect("error while running AML");
+        .build(tauri::generate_context!())
+        .expect("error while building AML")
+        .run(|app, event| {
+            if let tauri::RunEvent::Exit = event {
+                commands::sync::shutdown(app);
+            }
+        });
 }
 
 /// macOS menu bar without the default "Close Window" (⌘W), which AML uses to close a tab.

@@ -28,7 +28,7 @@ Updated with every work package. If this file and the code disagree, the code is
 | `src-tauri/src/folio/` | Folio model, path safety, atomic writes (`mod.rs`), watcher (`watch.rs`), errors |
 | `src-tauri/src/state.rs` | `AppState { folio, watcher }` managed by Tauri |
 | `src/app/` | `App.tsx`, `commands.ts` (shell commands + `SHORTCUTS` table), `tokens.css`, `global.css`, `shell/` (Shell, TopBar, SidePanel, StatusBar) |
-| `src/features/<feature>/` | Feature folders: components, store, tests. Current: `commands`, `layout`, `appearance`, `folio` (store, Welcome, FolioTree, watcher events), `editor` (Tiptap extensions in `extensions/` incl. `autopair.ts` and `slash.ts`, `NoteEditor.tsx`, `SlashMenu.tsx` + `slashStore.ts`, `SelectionToolbar.tsx`, store with debounced save/conflicts, `editorRef.ts`, `assets.ts`/`paste.ts` for images, `TableMenu.tsx`, `footnotes.ts`), `properties` (front-matter panel + `frontmatter.ts` helpers), `tabs` (per-Folio tab store with recents, `useTabsSync`, `TabStrip`, `Breadcrumb`), `quickopen` (index store, ranking in `search.ts`, `QuickOpen.tsx`), `spell` (tokeniser, store, `SpellMenu.tsx`; the ProseMirror plugin lives in `editor/extensions/spell.ts`). `folio` also holds `browserStore.ts` (expanded folders, inline rename target), `ContextMenu.tsx` and `errors.ts`. Cross-feature imports are limited to stores and `src/lib` |
+| `src/features/<feature>/` | Feature folders: components, store, tests. Current: `commands`, `layout`, `appearance`, `folio` (store, Welcome, FolioTree, watcher events), `editor` (Tiptap extensions in `extensions/` incl. `autopair.ts` and `slash.ts`, `NoteEditor.tsx`, `SlashMenu.tsx` + `slashStore.ts`, `SelectionToolbar.tsx`, store with debounced save/conflicts, `editorRef.ts`, `assets.ts`/`paste.ts` for images, `TableMenu.tsx`, `footnotes.ts`), `properties` (front-matter panel + `frontmatter.ts` helpers), `tabs` (per-Folio tab store with recents, `useTabsSync`, `TabStrip`, `Breadcrumb`), `quickopen` (index store, ranking in `search.ts`, `QuickOpen.tsx`), `spell` (tokeniser, store, `SpellMenu.tsx`; the ProseMirror plugin lives in `editor/extensions/spell.ts`), `sync` (status polling store, `SyncScreen.tsx`). `folio` also holds `browserStore.ts` (expanded folders, inline rename target), `ContextMenu.tsx` and `errors.ts`. Cross-feature imports are limited to stores and `src/lib` |
 | `src/lib/markdown/` | The markdown bridge: `mdast.ts` (parse + canonical serialise), `escape.ts`, `inline-syntax.ts` (wiki/tag/cite), `pm.ts` (mdast ⇄ ProseMirror JSON, Raw nodes), `index.ts` API |
 | `src/lib/` | `fuzzy.ts`, `platform.ts`, `wordcount.ts` |
 | `src/ipc/` | Generated bindings + `index.ts` re-export |
@@ -54,6 +54,7 @@ Updated with every work package. If this file and the code disagree, the code is
 | `asset_import` | notePath, source (absolute) | `AssetInfo` | folio |
 | `asset_resolve` | notePath, target | absolute path (for `convertFileSrc`) | folio |
 | `spell_check` / `spell_suggest` / `spell_add` / `spell_ignore` | words / word | misspelled subset / suggestions / — / — | spell |
+| `sync_status` / `sync_enable` / `sync_disable` / `sync_add_device` / `sync_remove_device` / `sync_accept_folder` / `sync_share_folder` / `sync_is_synced_path` / `sync_log_tail` | see spec WP-1.1b | `SyncStatus` | sync |
 
 Events: `folio-changed` → `FolioChanged { paths }` (debounced watcher).
 
@@ -84,6 +85,12 @@ All results are `{status:"ok",data}|{status:"error",error:FolioError}`; `FolioEr
 - Entry operations (create / rename / move / trash) live in `useFolioStore` and fan out to the editor (`renamed`), tabs (`rename`, `closeWithin`) and Browser state before refreshing the tree from Rust. Trash is always the OS trash, behind a native confirm.
 - Quick Open (⌘O) searches `folio_index` in memory (`quickopen/search.ts`); the index is refreshed on Folio open and after each `FolioChanged`.
 - The watcher echoes the app's own writes; the editor ignores a `FolioChanged` for its note while a save is in flight or when the on-disk mtime equals the one it holds.
+
+## Syncthing sidecar (WP-1.1b)
+
+- `src-tauri/src/sidecar/syncthing.rs` is the only module that touches the bundled `syncthing` binary: spawn with `--home <app-data>/syncthing --gui-address 127.0.0.1:41384 --gui-apikey …`, REST via `ureq`, LAN-only options patched on every start, stop on `RunEvent::Exit`.
+- The binary comes from `scripts/fetch-syncthing.mjs` (pinned version, sha256-checked) into `src-tauri/binaries/` (gitignored) and ships via `bundle.externalBin`.
+- The UI polls `sync_status` every 5 s while a Folio or the sync screen is open.
 
 ## Spell check (WP-1.7)
 

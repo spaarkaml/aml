@@ -44,6 +44,24 @@ export const commands = {
 	spellAdd: (word: string) => typedError<null, FolioError>(__TAURI_INVOKE("spell_add", { word })),
 	/**  Ignores the word until the Folio is closed. */
 	spellIgnore: (word: string) => typedError<null, FolioError>(__TAURI_INVOKE("spell_ignore", { word })),
+	/**  Everything the Sync screen and the status bar show; polled by the UI. */
+	syncStatus: () => typedError<SyncStatus, FolioError>(__TAURI_INVOKE("sync_status")),
+	/**  Starts the sidecar now and remembers to start it on every launch. */
+	syncEnable: () => typedError<SyncStatus, FolioError>(__TAURI_INVOKE("sync_enable")),
+	/**  Stops the sidecar and stops auto-starting it. Existing pairing/config is kept. */
+	syncDisable: () => typedError<SyncStatus, FolioError>(__TAURI_INVOKE("sync_disable")),
+	syncAddDevice: (deviceId: string, name: string, address: string | null) => typedError<SyncStatus, FolioError>(__TAURI_INVOKE("sync_add_device", { deviceId, name, address })),
+	syncRemoveDevice: (deviceId: string) => typedError<SyncStatus, FolioError>(__TAURI_INVOKE("sync_remove_device", { deviceId })),
+	/**  Accepts a folder the NAS offered, placing it at `path` on this machine. */
+	syncAcceptFolder: (folderId: string, label: string, path: string, deviceId: string) => typedError<SyncStatus, FolioError>(__TAURI_INVOKE("sync_accept_folder", { folderId, label, path, deviceId })),
+	/**
+	 *  Offers a local folder (normally an open Folio) to the NAS. The NAS then has to accept it
+	 *  in its own Syncthing UI, choosing where to keep it.
+	 */
+	syncShareFolder: (path: string, deviceId: string, label: string | null) => typedError<SyncStatus, FolioError>(__TAURI_INVOKE("sync_share_folder", { path, deviceId, label })),
+	/**  True when `path` is (inside) a folder the sidecar syncs — used to mark a Folio "Synced". */
+	syncIsSyncedPath: (path: string) => typedError<boolean, FolioError>(__TAURI_INVOKE("sync_is_synced_path", { path })),
+	syncLogTail: () => typedError<string[], FolioError>(__TAURI_INVOKE("sync_log_tail")),
 };
 
 /** Events */
@@ -113,10 +131,49 @@ export type NoteMeta = {
 	size: number,
 };
 
+export type PendingFolder = {
+	id: string,
+	label: string,
+	offeredBy: string,
+	offeredByName: string,
+};
+
 export type RecentFolio = {
 	path: string,
 	name: string,
 	lastOpened: number,
+};
+
+export type SyncDevice = {
+	id: string,
+	name: string,
+	connected: boolean,
+	address: string,
+};
+
+export type SyncFolder = {
+	id: string,
+	label: string,
+	path: string,
+	/**  "idle" | "scanning" | "syncing" | "error" | "unknown" … */
+	state: string,
+	/**  0–100 for this device's copy of the folder. */
+	completion: number | null,
+	needBytes: number,
+	devices: string[],
+	error: string | null,
+};
+
+export type SyncStatus = {
+	enabled: boolean,
+	running: boolean,
+	myId: string | null,
+	version: string | null,
+	devices: SyncDevice[],
+	folders: SyncFolder[],
+	pending: PendingFolder[],
+	guiUrl: string,
+	error: string | null,
 };
 
 export type TreeNode = {

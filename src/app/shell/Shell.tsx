@@ -4,6 +4,7 @@ import { CommandPalette } from "@/features/commands/CommandPalette";
 import { useGlobalShortcuts } from "@/features/commands/useGlobalShortcuts";
 import { useLayoutStore } from "@/features/layout/store";
 import { QuickOpen } from "@/features/quickopen/QuickOpen";
+import { SyncScreen } from "@/features/sync/SyncScreen";
 import type { AppInfo } from "@/ipc";
 import { SidePanel } from "./SidePanel";
 import { StatusBar } from "./StatusBar";
@@ -60,6 +61,7 @@ export function Shell({ info, left, right, children }: Props) {
       <StatusBar info={info} />
       <CommandPalette />
       <QuickOpen />
+      <SyncScreen />
     </div>
   );
 }

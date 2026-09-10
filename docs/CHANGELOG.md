@@ -4,6 +4,11 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### WP-1.1b — Syncthing sidecar (2026-09-10)
+- Bundled Syncthing (pinned v2.1.5, fetched by `pnpm sidecar:fetch`) managed by `sidecar::syncthing`: start on launch when enabled, stop on exit, LAN-only defaults.
+- NAS sync screen: turn on, show/copy Device ID, add the NAS, accept offered folders into a chosen local folder and open them as a Folio, or share the open Folio; sync log.
+- Status bar shows sync state for the open Folio.
+
 ### WP-1.7 — Australian English spell check (2026-09-10)
 - Bundled SCOWL en_AU Hunspell dictionary checked in Rust (`spellbook`); commands `spell_check` / `spell_suggest` / `spell_add` / `spell_ignore`.
 - Wavy underlines in the editor with a right-click menu (suggestions, add to `.aml/dictionary.txt`, ignore); code, links, front matter, atoms and acronyms are skipped.

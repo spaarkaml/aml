@@ -9,6 +9,7 @@ import { activeDir, useFolioStore } from "@/features/folio/store";
 import { useLayoutStore } from "@/features/layout/store";
 import { useQuickOpenStore } from "@/features/quickopen/store";
 import { useSpellStore } from "@/features/spell/store";
+import { useSyncStore } from "@/features/sync/store";
 import { useTabsStore } from "@/features/tabs/store";
 
 /** Single source of truth for shell shortcuts; the e2e suite presses each one. */
@@ -250,6 +251,12 @@ export const SHELL_COMMANDS: Command[] = [
     title: "Pin / Unpin Context Panel",
     group: "View",
     run: () => useLayoutStore.getState().togglePinned("right"),
+  },
+  {
+    id: "sync.setup",
+    title: "NAS Sync…",
+    group: "Folio",
+    run: () => useSyncStore.getState().setOpen(true),
   },
   {
     id: "spell.toggle",

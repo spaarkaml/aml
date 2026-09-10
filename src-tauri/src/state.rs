@@ -3,6 +3,7 @@ use std::sync::Mutex;
 use crate::folio::index::NoteIndex;
 use crate::folio::watch::FolioWatcher;
 use crate::folio::Folio;
+use crate::sidecar::syncthing::Syncthing;
 use crate::spell::Speller;
 
 /// Process-wide state managed by Tauri. One Folio open at a time (v1).
@@ -12,4 +13,6 @@ pub struct AppState {
     pub watcher: Mutex<Option<FolioWatcher>>,
     pub index: Mutex<NoteIndex>,
     pub speller: Mutex<Speller>,
+    /// Created lazily on first use (needs the app-data path).
+    pub syncthing: Mutex<Option<Syncthing>>,
 }

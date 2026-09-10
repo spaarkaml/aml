@@ -23,3 +23,5 @@ Run on both machines against a Folio paired with the DRIVESTOR (or a Local Folio
 | 17 | *(WP-1.4)* Type `(`, `"`, `[[`; select a word and press `*`; type `/` at a line start | Pairs appear and skip; word turns italic; block menu opens and follows filtering | ☐ |
 | 18 | *(WP-1.7)* Type `colour organise recieve teh`; right-click `teh` | Only the last two underlined; suggestions include "the"; Add to dictionary writes `.aml/dictionary.txt` | ☐ |
 | 19 | *(WP-1.7)* Paste a 1,000-word Australian text | No false positives (add any to the Rust test list) | ☐ |
+| 20 | *(WP-1.1b)* NAS sync… → Turn on → add NAS ID → accept on NAS → accept folder → Open as Folio | Status bar `NAS · up to date`; a note edited on the other machine appears within 10 s | ☐ |
+| 21 | *(WP-1.1b)* Quit and relaunch AML | Sync comes back on its own; `Activity Monitor`/Task Manager shows one `syncthing` | ☐ |

@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useSyncStore } from "@/features/sync/store";
 import { useFolioStore } from "./store";
 import styles from "./Welcome.module.css";
 
@@ -12,6 +13,7 @@ export function Welcome() {
   const openPath = useFolioStore((s) => s.openPath);
   const createAt = useFolioStore((s) => s.createAt);
   const bootstrap = useFolioStore((s) => s.bootstrap);
+  const openSync = useSyncStore((s) => s.setOpen);
 
   useEffect(() => {
     void bootstrap();
@@ -27,6 +29,14 @@ export function Welcome() {
         </button>
         <button type="button" className={styles.secondary} onClick={pickAndCreate} disabled={busy}>
           Create Folio…
+        </button>
+        <button
+          type="button"
+          className={styles.secondary}
+          onClick={() => openSync(true)}
+          data-testid="welcome-sync"
+        >
+          NAS sync…
         </button>
       </div>
       {error ? (

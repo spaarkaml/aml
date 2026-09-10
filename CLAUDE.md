@@ -20,4 +20,5 @@ AML is a self-hosted desktop writing environment (macOS + Windows) built on plai
 - Ask before changing an ADR; propose a superseding ADR instead of editing code around it.
 
 ## Status
-Stage 0 done; Stage 1 in progress (all of WP-1.1–1.7 done as of 2026-09-10; WP-1.1b Syncthing pairing waits for the NAS). Next: Stage 1 gate (manual QA on both machines), then Stage 2. NAS setup steps are in `docs/06-NAS-SETUP.md`. `docs/CHANGELOG.md` is the per-WP log.
+Run `pnpm sidecar:fetch` once after cloning (downloads the Syncthing binary; not committed).
+Stage 0 done; Stage 1 in progress (all of WP-1.1–1.7 and WP-1.1b (Syncthing sidecar) done as of 2026-09-10). Next: Stage 1 gate (manual QA on both machines), then Stage 2. NAS setup steps are in `docs/06-NAS-SETUP.md`. `docs/CHANGELOG.md` is the per-WP log.

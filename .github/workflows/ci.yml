@@ -40,6 +40,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Fetch Syncthing sidecar
+        run: pnpm sidecar:fetch
+
       - name: Rust format
         run: cargo fmt --check
         working-directory: src-tauri
