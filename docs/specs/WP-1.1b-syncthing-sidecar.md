@@ -19,7 +19,7 @@ Keep a Folio identical on the Mac, the PC and the NAS without installing anythin
 - [x] Live: sidecar starts, answers, defaults applied, device + folder configured, `.stignore` written, stops (Rust test, `--ignored`, run 2026-09-10 on the Mac).
 - [x] Pairing flow in the UI: turn on → add NAS (bad ID rejected) → accept offered folder → open as Folio → status bar "NAS · up to date" (e2e, mocked sidecar).
 - [x] Share an open Folio from the palette; status bar shows progress (e2e).
-- [ ] Pair with the DRIVESTOR; a note edited on the PC appears on the Mac within 10 s; sidecar survives app restart. *(Bryce, in the app; see `docs/06-NAS-SETUP.md` §4 and §9.)*
+- [x] Paired with the DRIVESTOR from the Mac; files appear on the NAS (Bryce, 2026-09-10). PC pairing and the restart check remain in `qa/stage-1.md` §20–21.
 
 ## Lessons recorded
 - The sidecar must never block `setup`: on a cold start Syncthing takes 1–3 s to answer, so autostart runs on a thread.
