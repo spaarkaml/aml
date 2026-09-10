@@ -4,7 +4,7 @@ import { useLayoutStore } from "@/features/layout/store";
 import { commands, type TagEntry } from "@/ipc";
 import { ancestorsOf } from "./tree";
 
-export type LeftView = "folio" | "tags";
+export type LeftView = "folio" | "tags" | "search";
 
 interface TagsState {
   entries: TagEntry[];

@@ -4,6 +4,12 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### WP-2.5 — Search (2026-09-10)
+- Search is the third left-panel view (`⌘⇧F`, palette **Search Folio**): marked excerpts in context with their section, click a line to open the note there.
+- Query language over the index: word-start words, `"phrases"`, `/regex/flags`, `-exclusions`, `OR`, `(groups)`, and fields `path: file: title: tag: has: bounding:` plus any front-matter property. A half-typed query just matches less; only a bad regex reports an error.
+- **Replace in this note** rewrites the query's text matches in the open note (code spans untouched).
+- Command `search_query`.
+
 ### WP-2.4 — Tags (2026-09-10)
 - Left panel gains a Folio / Tags switch: tag hierarchy with note counts, click a tag to list and open its notes; clicking a `#tag` chip in a note jumps there; palette **Show Tags**.
 - Commands `tags_list` / `tag_notes`.

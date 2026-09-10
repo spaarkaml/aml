@@ -43,6 +43,7 @@ fn specta_builder() -> Builder<tauri::Wry> {
             commands::links::link_mention_apply,
             commands::tags::tags_list,
             commands::tags::tag_notes,
+            commands::search::search_query,
             commands::spell::spell_check,
             commands::spell::spell_suggest,
             commands::spell::spell_add,

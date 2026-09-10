@@ -52,6 +52,8 @@ export const commands = {
 	tagsList: () => typedError<TagEntry[], FolioError>(__TAURI_INVOKE("tags_list")),
 	/**  Paths of the notes carrying `tag` or a tag nested under it. */
 	tagNotes: (tag: string) => typedError<string[], FolioError>(__TAURI_INVOKE("tag_notes", { tag })),
+	/**  Runs a query in the search language (see `index/search.rs`). */
+	searchQuery: (query: string, limit: number | null) => typedError<SearchResponse, FolioError>(__TAURI_INVOKE("search_query", { query, limit })),
 	/**
 	 *  Returns the words from `words` that the en_AU dictionary (plus the personal and ignore
 	 *  lists) does not accept. Tokenising is the editor's job; this only judges words.
@@ -238,6 +240,28 @@ export type SearchHit = {
 	title: string,
 	/**  Matching excerpt with `«»` around the hit terms. */
 	snippet: string,
+};
+
+export type SearchResponse = {
+	results: SearchResult[],
+	total: number,
+	/**  Set when the query could not be parsed (bad regex, …); results are then empty. */
+	error: string | null,
+};
+
+export type SearchResult = {
+	path: string,
+	title: string,
+	/**  Matching occurrences of the text terms (0 for field-only queries). */
+	matches: number,
+	snippets: SearchSnippet[],
+};
+
+export type SearchSnippet = {
+	line: number,
+	/**  The line with matches wrapped in `«»`. */
+	text: string,
+	section: string | null,
 };
 
 export type SyncDevice = {

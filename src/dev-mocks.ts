@@ -128,6 +128,171 @@ function mockRenamePreview(from: string, to: string) {
   return { from, to, notes: out, links };
 }
 
+/* ---- search (WP-2.5): a reduced mirror of the Rust query language. Words,
+   phrases, /regex/, `-` exclusions and field terms are modelled and ANDed;
+   OR and parentheses are not — the real evaluator is the one under test. */
+interface MockTerm {
+  negated: boolean;
+  field: string | null;
+  kind: "word" | "phrase" | "regex";
+  value: string;
+}
+
+const TERM_RE =
+  /(-?)(?:([A-Za-z_][A-Za-z0-9_]{0,23}):(?!\/\/))?(?:"([^"]*)"|\/((?:\\.|[^/])+)\/[A-Za-z]*|([^\s"]+))/g;
+
+function mockTerms(q: string): MockTerm[] {
+  const out: MockTerm[] = [];
+  for (const m of q.matchAll(TERM_RE)) {
+    const negated = m[1] === "-";
+    const field = m[2] ?? null;
+    if (m[3] !== undefined) out.push({ negated, field, kind: "phrase", value: m[3] });
+    else if (m[4] !== undefined) out.push({ negated, field, kind: "regex", value: m[4] });
+    else {
+      const word = (m[5] ?? "").replace(/^\(+|\)+$/g, "");
+      if (!word || (!field && /^(or|and)$/i.test(word))) continue;
+      out.push({ negated, field, kind: "word", value: word });
+    }
+  }
+  return out.filter((t) => t.field !== null || t.value !== "");
+}
+
+function mockTermRegex(t: MockTerm): RegExp | null {
+  const esc = (v: string) => v.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  try {
+    if (t.kind === "regex") return new RegExp(t.value, "gu");
+    if (t.kind === "phrase") return new RegExp(esc(t.value), "giu");
+    // Words match at word starts, and the whole word is highlighted.
+    return new RegExp(`(?<![\\p{L}\\p{N}])${esc(t.value)}[\\p{L}\\p{N}]*`, "giu");
+  } catch {
+    return null;
+  }
+}
+
+function mockTitle(path: string, text: string): string {
+  const fm = /^---\n([\s\S]*?)\n---/.exec(text)?.[1] ?? "";
+  const title = /^title:\s*(.+)$/m
+    .exec(fm)?.[1]
+    ?.trim()
+    .replace(/^["']|["']$/g, "");
+  return title || (path.split("/").pop() ?? path).replace(/\.md$/i, "");
+}
+
+function mockProps(text: string): Array<[string, string]> {
+  const fm = /^---\n([\s\S]*?)\n---/.exec(text)?.[1] ?? "";
+  const out: Array<[string, string]> = [];
+  for (const line of fm.split("\n")) {
+    const m = /^([A-Za-z_][A-Za-z0-9_-]*):\s*(.*)$/.exec(line);
+    if (m?.[1] && m[2]) out.push([m[1].toLowerCase(), m[2].trim().toLowerCase()]);
+  }
+  return out;
+}
+
+function mockTagsOf(text: string): string[] {
+  const tags = new Set<string>();
+  const fm = /^---\n([\s\S]*?)\n---/.exec(text)?.[1] ?? "";
+  for (const t of /^tags:\s*\[(.*)\]$/m.exec(fm)?.[1]?.split(",") ?? [])
+    if (t.trim()) tags.add(t.trim().toLowerCase());
+  for (const m of text.matchAll(/(?:^|[\s(])#([\p{L}\p{N}_][\p{L}\p{N}_\-/]*)/gu))
+    if (m[1] && !/^\d+$/.test(m[1])) tags.add(m[1].replace(/\/+$/, "").toLowerCase());
+  return [...tags];
+}
+
+function mockTermMatches(t: MockTerm, path: string, title: string, text: string): boolean {
+  if (t.field === null) {
+    const re = mockTermRegex(t);
+    return re ? re.test(text) || re.test(title) : false;
+  }
+  const v = t.value.toLowerCase();
+  switch (t.field) {
+    case "path":
+      return path.toLowerCase().includes(v);
+    case "file":
+      return (path.split("/").pop() ?? path).toLowerCase().includes(v);
+    case "title":
+      return title.toLowerCase().includes(v);
+    case "tag": {
+      const want = v.replace(/^#/, "").replace(/^\/|\/$/g, "");
+      return mockTagsOf(text).some((x) => x === want || x.startsWith(`${want}/`));
+    }
+    case "has":
+      if (v === "image") return text.includes("![");
+      if (v === "link") return text.includes("[[") || text.includes("](");
+      if (v === "task") return text.includes("- [ ]") || text.includes("- [x]");
+      if (v === "code") return text.includes("```") || text.includes("~~~");
+      if (v === "table") return text.split("\n").some((l) => l.trimStart().startsWith("|"));
+      return false;
+    // Boundings arrive in WP-2.8; until then no note is in one.
+    case "bounding":
+      return false;
+    default:
+      return mockProps(text).some(
+        ([k, pv]) => k === t.field && (pv === v || (v === "" && pv !== "")),
+      );
+  }
+}
+
+function mockSearchQuery(query: string, limit: number) {
+  const terms = mockTerms(query);
+  for (const t of terms)
+    if (t.kind === "regex" && !mockTermRegex(t))
+      return { results: [], total: 0, error: `bad regex: ${t.value}` };
+  if (terms.length === 0) return { results: [], total: 0, error: null };
+  const highlight = terms.filter((t) => !t.negated && t.field === null);
+  const results: Array<{
+    path: string;
+    title: string;
+    matches: number;
+    snippets: Array<{ line: number; text: string; section: string | null }>;
+  }> = [];
+  for (const [path, n] of notes) {
+    const title = mockTitle(path, n.text);
+    if (!terms.every((t) => mockTermMatches(t, path, title, n.text) !== t.negated)) continue;
+    let matches = 0;
+    let section: string | null = null;
+    let fence: string | null = null;
+    const snippets: Array<{ line: number; text: string; section: string | null }> = [];
+    n.text.split("\n").forEach((line, i) => {
+      const t = line.trimStart();
+      if (fence) {
+        if (t.startsWith(fence)) fence = null;
+      } else if (t.startsWith("```")) fence = "```";
+      else if (t.startsWith("~~~")) fence = "~~~";
+      else {
+        const h = /^(#{1,6})\s+(.+?)\s*#*$/.exec(t);
+        if (h?.[2]) section = h[2];
+      }
+      if (highlight.length === 0) {
+        // A field-only query still shows where the note begins.
+        if (snippets.length === 0 && t && !t.startsWith("---"))
+          snippets.push({ line: i + 1, text: line.trim(), section });
+        return;
+      }
+      const spans: Array<[number, number]> = [];
+      for (const term of highlight) {
+        const re = mockTermRegex(term);
+        if (!re) continue;
+        for (const m of line.matchAll(re)) if (m[0]) spans.push([m.index, m.index + m[0].length]);
+      }
+      if (spans.length === 0) return;
+      matches += spans.length;
+      if (snippets.length >= 3) return;
+      spans.sort((a, b) => a[0] - b[0]);
+      let out = "";
+      let at = 0;
+      for (const [from, to] of spans) {
+        if (from < at) continue;
+        out += `${line.slice(at, from)}«${line.slice(from, to)}»`;
+        at = to;
+      }
+      snippets.push({ line: i + 1, text: `${out}${line.slice(at)}`.trim(), section });
+    });
+    results.push({ path, title, matches, snippets });
+  }
+  results.sort((a, b) => b.matches - a.matches || a.path.localeCompare(b.path));
+  return { results: results.slice(0, limit), total: results.length, error: null };
+}
+
 const index = { building: false, done: 0, total: 0, lastBuilt: 0, lastDurationMs: 0 };
 function indexStatus() {
   return { notes: notes.size, ...index };
@@ -520,6 +685,10 @@ export function installDevMocks(): void {
           notes.set(n.newPath, { text: lines.join("\n"), mtime: Date.now() });
         }
         return applied;
+      }
+      case "search_query": {
+        if (!state.folio) throw { kind: "noFolioOpen" };
+        return mockSearchQuery(String(a.query ?? ""), Number(a.limit ?? 200));
       }
       case "tags_list": {
         if (!state.folio) throw { kind: "noFolioOpen" };

@@ -16,3 +16,5 @@ Run against your real Folio on the Mac (and later the PC). Record results in `do
 | 10 | *(WP-2.3)* Open a well-linked note; ⌘⇧I | Backlinks lists every note you know links here, each with its section; clicking jumps there | ☐ |
 | 11 | *(WP-2.3)* Open a note whose name appears as plain text elsewhere; *Link* one, then *Link all* | Text becomes `[[Name]]` (alias kept when the case differs); counts move from unlinked to linked; nothing inside code or existing links is touched | ☐ |
 | 12 | *(WP-2.4)* Left panel → Tags; expand a nested tag; select it; click a `#tag` chip in a note | Hierarchy and counts match your notes; the note list opens notes; the chip selects its tag | ☐ |
+| 13 | *(WP-2.5)* Left panel → Search (⌘⇧F); type a word you use often, then narrow it with `tag:` and `-`; try `/regex/` and a deliberately broken one | Results and excerpts appear as you type without stutter; fields narrow correctly; the broken regex shows an error and the field stays usable | ☐ |
+| 14 | *(WP-2.5)* With a note open, search a word in it and use **Replace in this note** | Every match outside code is replaced, the count is right, and ⌘Z undoes it in one step | ☐ |

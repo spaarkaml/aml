@@ -6,6 +6,7 @@
 pub mod backlinks;
 pub mod extract;
 pub mod links;
+pub mod search;
 pub mod tags;
 
 use std::collections::HashMap;

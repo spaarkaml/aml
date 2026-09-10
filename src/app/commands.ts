@@ -9,6 +9,7 @@ import { activeDir, useFolioStore } from "@/features/folio/store";
 import { useIndexStore } from "@/features/index/store";
 import { useLayoutStore } from "@/features/layout/store";
 import { useQuickOpenStore } from "@/features/quickopen/store";
+import { useSearchStore } from "@/features/search/store";
 import { useSpellStore } from "@/features/spell/store";
 import { useSyncStore } from "@/features/sync/store";
 import { useTabsStore } from "@/features/tabs/store";
@@ -29,6 +30,7 @@ export const SHORTCUTS = {
   forward: "mod+]",
   newNote: "mod+n",
   quickOpen: "mod+o",
+  search: "mod+shift+f",
   rename: "f2",
 } as const;
 
@@ -259,6 +261,14 @@ export const SHELL_COMMANDS: Command[] = [
     title: "NAS Sync…",
     group: "Folio",
     run: () => useSyncStore.getState().setOpen(true),
+  },
+  {
+    id: "search.show",
+    title: "Search Folio",
+    group: "View",
+    shortcut: SHORTCUTS.search,
+    global: true,
+    run: () => useSearchStore.getState().show(),
   },
   {
     id: "tags.show",
