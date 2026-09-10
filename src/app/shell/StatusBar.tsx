@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useEditorStore } from "@/features/editor/store";
 import { useFolioStore } from "@/features/folio/store";
+import { describeIndex, listenIndexProgress, useIndexStore } from "@/features/index/store";
 import { useSpellStore } from "@/features/spell/store";
 import { describeSync, startSyncPolling, useSyncStore } from "@/features/sync/store";
 import type { AppInfo } from "@/ipc";
@@ -17,10 +18,17 @@ export function StatusBar({ info }: { info: AppInfo | null }) {
   const folioRoot = useFolioStore((s) => s.folio?.root ?? null);
   const syncStatus = useSyncStore((s) => s.status);
   const openSync = useSyncStore((s) => s.setOpen);
+  const indexStatus = useIndexStore((s) => s.status);
   useEffect(() => {
     if (!folioRoot) return;
-    return startSyncPolling();
+    const stopSync = startSyncPolling();
+    const stopIndex = listenIndexProgress();
+    return () => {
+      stopSync();
+      stopIndex();
+    };
   }, [folioRoot]);
+  const indexLabel = describeIndex(indexStatus);
   const syncLabel = folioRoot ? describeSync(syncStatus, folioRoot) : null;
   return (
     <footer className={styles.statusbar}>
@@ -45,6 +53,11 @@ export function StatusBar({ info }: { info: AppInfo | null }) {
       {path ? (
         <span data-testid="save-state" title={path}>
           {saving ? "Saving…" : dirty ? "● Unsaved" : "Saved"}
+        </span>
+      ) : null}
+      {indexLabel ? (
+        <span data-testid="index-state" role="status">
+          {indexLabel}
         </span>
       ) : null}
       {syncLabel ? (

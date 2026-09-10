@@ -4,6 +4,11 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### WP-2.1 — Index (2026-09-10)
+- SQLite FTS5 index per Folio in local app-data (`src-tauri/src/index/`): notes, aliases, headings, tags, links, front-matter properties and full text; built on a thread with progress, kept current by the watcher, `Rebuild Index` in the palette; 5,000 notes in under a second.
+- Commands `index_status` / `index_rebuild` / `index_search`; event `index-progress`; `folio_index` (Quick Open) now reads from SQLite.
+- Status bar shows `Indexing n / total` while a build runs.
+
 ### WP-1.1b — Syncthing sidecar (2026-09-10)
 - Bundled Syncthing (pinned v2.1.5, fetched by `pnpm sidecar:fetch`) managed by `sidecar::syncthing`: start on launch when enabled, stop on exit, LAN-only defaults.
 - NAS sync screen: turn on, show/copy Device ID, add the NAS, accept offered folders into a chosen local folder and open them as a Folio, or share the open Folio; sync log.

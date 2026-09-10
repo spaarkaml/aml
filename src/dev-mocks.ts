@@ -42,6 +42,11 @@ const notes = new Map<string, { text: string; mtime: number }>([
   ],
 ]);
 
+const index = { building: false, done: 0, total: 0, lastBuilt: 0, lastDurationMs: 0 };
+function indexStatus() {
+  return { notes: notes.size, ...index };
+}
+
 const state: { folio: FolioInfo | null; tree: TreeNode[]; recent: RecentFolio[] } = {
   folio: null,
   tree: [
@@ -367,6 +372,41 @@ export function installDevMocks(): void {
         return sync.folders.some((f) => String(a.path).startsWith(f.path));
       case "sync_log_tail":
         return ["[mock] syncthing v2.1.5 starting", "[mock] Ready to synchronize"];
+      case "index_status":
+        if (!state.folio) throw { kind: "noFolioOpen" };
+        return indexStatus();
+      case "index_rebuild": {
+        if (!state.folio) throw { kind: "noFolioOpen" };
+        index.building = true;
+        index.done = 0;
+        index.total = notes.size;
+        // A mock build takes about a second so the status bar can be seen to change.
+        const tick = () => {
+          index.done += 1;
+          if (index.done >= index.total) {
+            index.building = false;
+            index.lastBuilt = Date.now();
+            index.lastDurationMs = 900;
+          } else setTimeout(tick, 300);
+        };
+        setTimeout(tick, 300);
+        return null;
+      }
+      case "index_search": {
+        if (!state.folio) throw { kind: "noFolioOpen" };
+        const q = String(a.query ?? "")
+          .toLowerCase()
+          .trim();
+        if (!q) return [];
+        return [...notes.entries()]
+          .filter(([, n]) => n.text.toLowerCase().includes(q))
+          .slice(0, Number(a.limit ?? 40))
+          .map(([path, n]) => {
+            const at = n.text.toLowerCase().indexOf(q);
+            const snippet = `${n.text.slice(Math.max(0, at - 30), at)}«${n.text.slice(at, at + q.length)}»${n.text.slice(at + q.length, at + q.length + 30)}`;
+            return { path, title: path.split("/").pop()?.replace(/\.md$/i, "") ?? path, snippet };
+          });
+      }
       case "plugin:event|listen":
         return 1;
       case "plugin:event|unlisten":

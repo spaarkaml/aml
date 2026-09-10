@@ -18,11 +18,6 @@ export const commands = {
 } | null, FolioError>(__TAURI_INVOKE("folio_current")),
 	folioRecent: () => __TAURI_INVOKE<RecentFolio[]>("folio_recent"),
 	folioTree: () => typedError<TreeNode[], FolioError>(__TAURI_INVOKE("folio_tree")),
-	/**
-	 *  Quick Open index: every note's title, aliases and headings. Cached by mtime in AppState;
-	 *  the UI calls it on Folio open and after each `FolioChanged`.
-	 */
-	folioIndex: () => typedError<NoteIndexEntry[], FolioError>(__TAURI_INVOKE("folio_index")),
 	noteRead: (path: string) => typedError<NoteContent, FolioError>(__TAURI_INVOKE("note_read", { path })),
 	noteWrite: (path: string, text: string, expectedMtime: number | null) => typedError<NoteMeta, FolioError>(__TAURI_INVOKE("note_write", { path, text, expectedMtime })),
 	entryCreateNote: (path: string) => typedError<NoteMeta, FolioError>(__TAURI_INVOKE("entry_create_note", { path })),
@@ -34,6 +29,13 @@ export const commands = {
 	assetResolve: (notePath: string, target: string) => typedError<string, FolioError>(__TAURI_INVOKE("asset_resolve", { notePath, target })),
 	/**  Copies a file chosen in the native dialog into the note's assets folder. */
 	assetImport: (notePath: string, source: string) => typedError<AssetInfo, FolioError>(__TAURI_INVOKE("asset_import", { notePath, source })),
+	/**  Quick Open's entries: every note's title, aliases and headings, straight from SQLite. */
+	folioIndex: () => typedError<NoteIndexEntry[], FolioError>(__TAURI_INVOKE("folio_index")),
+	indexStatus: () => typedError<IndexStatus, FolioError>(__TAURI_INVOKE("index_status")),
+	/**  Drops the database contents and indexes every note again, on a thread. */
+	indexRebuild: () => typedError<null, FolioError>(__TAURI_INVOKE("index_rebuild")),
+	/**  Plain full-text search (words, `"phrases"`); the query language lands in WP-2.5. */
+	indexSearch: (query: string, limit: number | null) => typedError<SearchHit[], FolioError>(__TAURI_INVOKE("index_search", { query, limit })),
 	/**
 	 *  Returns the words from `words` that the en_AU dictionary (plus the personal and ignore
 	 *  lists) does not accept. Tokenising is the editor's job; this only judges words.
@@ -67,6 +69,7 @@ export const commands = {
 /** Events */
 export const events = {
 	folioChanged: makeEvent<FolioChanged>("folio-changed"),
+	indexProgress: makeEvent<IndexProgress>("index-progress"),
 };
 
 /* Types */
@@ -109,6 +112,25 @@ export type FolioInfo = {
 	noteCount: number,
 };
 
+/**  Emitted while a build or refresh runs; `done == total` marks the end. */
+export type IndexProgress = {
+	done: number,
+	total: number,
+};
+
+export type IndexStatus = {
+	/**  Notes currently in the index. */
+	notes: number,
+	building: boolean,
+	/**  Progress of the running build, if any. */
+	done: number,
+	total: number,
+	/**  Unix ms of the last completed build or refresh; 0 if never. */
+	lastBuilt: number,
+	/**  Milliseconds the last build or refresh took. */
+	lastDurationMs: number,
+};
+
 export type NoteContent = {
 	path: string,
 	text: string,
@@ -116,6 +138,7 @@ export type NoteContent = {
 	size: number,
 };
 
+/**  Quick Open's view of a note (ADR-007: fuzzy ranking stays in memory on the UI side). */
 export type NoteIndexEntry = {
 	path: string,
 	/**  Front-matter `title:` if present, else the file name without `.md`. */
@@ -142,6 +165,13 @@ export type RecentFolio = {
 	path: string,
 	name: string,
 	lastOpened: number,
+};
+
+export type SearchHit = {
+	path: string,
+	title: string,
+	/**  Matching excerpt with `«»` around the hit terms. */
+	snippet: string,
 };
 
 export type SyncDevice = {

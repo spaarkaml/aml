@@ -24,11 +24,14 @@ Updated with every work package. If this file and the code disagree, the code is
 | Path | Owns |
 |---|---|
 | `src-tauri/src/lib.rs` | App bootstrap, plugin registration, command registry |
-| `src-tauri/src/commands/<domain>.rs` | One file per command domain (`app`, `folio`; later `index`, `snapshots`, `sync`, `compile`) |
+| `src-tauri/src/commands/<domain>.rs` | One file per command domain (`app`, `folio`, `index`, `spell`, `sync`; later `snapshots`, `compile`) |
 | `src-tauri/src/folio/` | Folio model, path safety, atomic writes (`mod.rs`), watcher (`watch.rs`), errors |
-| `src-tauri/src/state.rs` | `AppState { folio, watcher }` managed by Tauri |
+| `src-tauri/src/index/` | SQLite FTS5 index (ADR-007): `extract.rs` (note facts from markdown), `mod.rs` (schema, build/refresh, watcher updates, Quick Open entries, search) |
+| `src-tauri/src/sidecar/` | `syncthing.rs`, the only module that touches the Syncthing binary |
+| `src-tauri/src/spell.rs` | Hunspell en_AU checker |
+| `src-tauri/src/state.rs` | `AppState { folio, watcher, index, speller, syncthing }` managed by Tauri |
 | `src/app/` | `App.tsx`, `commands.ts` (shell commands + `SHORTCUTS` table), `tokens.css`, `global.css`, `shell/` (Shell, TopBar, SidePanel, StatusBar) |
-| `src/features/<feature>/` | Feature folders: components, store, tests. Current: `commands`, `layout`, `appearance`, `folio` (store, Welcome, FolioTree, watcher events), `editor` (Tiptap extensions in `extensions/` incl. `autopair.ts` and `slash.ts`, `NoteEditor.tsx`, `SlashMenu.tsx` + `slashStore.ts`, `SelectionToolbar.tsx`, store with debounced save/conflicts, `editorRef.ts`, `assets.ts`/`paste.ts` for images, `TableMenu.tsx`, `footnotes.ts`), `properties` (front-matter panel + `frontmatter.ts` helpers), `tabs` (per-Folio tab store with recents, `useTabsSync`, `TabStrip`, `Breadcrumb`), `quickopen` (index store, ranking in `search.ts`, `QuickOpen.tsx`), `spell` (tokeniser, store, `SpellMenu.tsx`; the ProseMirror plugin lives in `editor/extensions/spell.ts`), `sync` (status polling store, `SyncScreen.tsx`). `folio` also holds `browserStore.ts` (expanded folders, inline rename target), `ContextMenu.tsx` and `errors.ts`. Cross-feature imports are limited to stores and `src/lib` |
+| `src/features/<feature>/` | Feature folders: components, store, tests. Current: `commands`, `layout`, `appearance`, `folio` (store, Welcome, FolioTree, watcher events), `editor` (Tiptap extensions in `extensions/` incl. `autopair.ts` and `slash.ts`, `NoteEditor.tsx`, `SlashMenu.tsx` + `slashStore.ts`, `SelectionToolbar.tsx`, store with debounced save/conflicts, `editorRef.ts`, `assets.ts`/`paste.ts` for images, `TableMenu.tsx`, `footnotes.ts`), `properties` (front-matter panel + `frontmatter.ts` helpers), `tabs` (per-Folio tab store with recents, `useTabsSync`, `TabStrip`, `Breadcrumb`), `quickopen` (index store, ranking in `search.ts`, `QuickOpen.tsx`), `spell` (tokeniser, store, `SpellMenu.tsx`; the ProseMirror plugin lives in `editor/extensions/spell.ts`), `sync` (status polling store, `SyncScreen.tsx`), `index` (build progress store, status-bar label). `folio` also holds `browserStore.ts` (expanded folders, inline rename target), `ContextMenu.tsx` and `errors.ts`. Cross-feature imports are limited to stores and `src/lib` |
 | `src/lib/markdown/` | The markdown bridge: `mdast.ts` (parse + canonical serialise), `escape.ts`, `inline-syntax.ts` (wiki/tag/cite), `pm.ts` (mdast ⇄ ProseMirror JSON, Raw nodes), `index.ts` API |
 | `src/lib/` | `fuzzy.ts`, `platform.ts`, `wordcount.ts` |
 | `src/ipc/` | Generated bindings + `index.ts` re-export |
@@ -46,7 +49,10 @@ Updated with every work package. If this file and the code disagree, the code is
 | `folio_create` | path, name? | `FolioInfo` | folio |
 | `folio_close` / `folio_current` / `folio_recent` | — | — / `FolioInfo?` / `RecentFolio[]` | folio |
 | `folio_tree` | — | `TreeNode[]` | folio |
-| `folio_index` | — | `NoteIndexEntry[] { path, title, aliases, headings, mtime }` (mtime-cached) | folio |
+| `folio_index` | — | `NoteIndexEntry[] { path, title, aliases, headings, mtime }` from SQLite | index |
+| `index_status` | — | `IndexStatus { notes, building, done, total, lastBuilt, lastDurationMs }` | index |
+| `index_rebuild` | — | — (runs on a thread; progress by event) | index |
+| `index_search` | query, limit? | `SearchHit[] { path, title, snippet }` (FTS5, bm25) | index |
 | `note_read` | path | `NoteContent { path, text, mtime, size }` | folio |
 | `note_write` | path, text, expectedMtime? | `NoteMeta` (Conflict error if mtime moved) | folio |
 | `entry_create_note` / `entry_create_folder` / `entry_rename` / `entry_trash` | paths | — | folio |
@@ -56,14 +62,14 @@ Updated with every work package. If this file and the code disagree, the code is
 | `spell_check` / `spell_suggest` / `spell_add` / `spell_ignore` | words / word | misspelled subset / suggestions / — / — | spell |
 | `sync_status` / `sync_enable` / `sync_disable` / `sync_add_device` / `sync_remove_device` / `sync_accept_folder` / `sync_share_folder` / `sync_is_synced_path` / `sync_log_tail` | see spec WP-1.1b | `SyncStatus` | sync |
 
-Events: `folio-changed` → `FolioChanged { paths }` (debounced watcher).
+Events: `folio-changed` → `FolioChanged { paths }` (debounced watcher, emitted after the index has applied the change); `index-progress` → `IndexProgress { done, total }` during builds.
 
 All results are `{status:"ok",data}|{status:"error",error:FolioError}`; `FolioError` is `{kind, detail}`.
 
 ## Data on disk
 
 - **Folio:** `<root>/.aml/config.yaml`, `<root>/.aml/snapshots/`, `<root>/.stignore` (created by `Folio::create`). Everything else in the root is user content; dotfiles, `node_modules` and `.aml-tmp-*` are invisible to the tree.
-- **Per device (app-data dir):** `recent-folios.json`. Layout/appearance in webview localStorage.
+- **Per device (app-data dir):** `recent-folios.json`, `index/<hash>.sqlite` (one per Folio, rebuildable, safe to delete), `syncthing/` (sidecar home), `sync-settings.json`. Layout/appearance in webview localStorage.
 - **Writes** always go through `folio::write_atomic` (temp + fsync + rename).
 - **Assets:** `<top-level folder>/assets/YYYYMMDD-HHMMSS-<slug>.<ext>`; notes reference them relatively; displayed via the Tauri asset protocol (scope = Folio root, set on open).
 
@@ -85,6 +91,13 @@ All results are `{status:"ok",data}|{status:"error",error:FolioError}`; `FolioEr
 - Entry operations (create / rename / move / trash) live in `useFolioStore` and fan out to the editor (`renamed`), tabs (`rename`, `closeWithin`) and Browser state before refreshing the tree from Rust. Trash is always the OS trash, behind a native confirm.
 - Quick Open (⌘O) searches `folio_index` in memory (`quickopen/search.ts`); the index is refreshed on Folio open and after each `FolioChanged`.
 - The watcher echoes the app's own writes; the editor ignores a `FolioChanged` for its note while a save is in flight or when the on-disk mtime equals the one it holds.
+
+## Index (WP-2.1)
+
+- One SQLite file per Folio (`index::db_path_for`), opened with the Folio and refreshed on a thread; `AppState.index` holds the query handle, builds use `Index::for_thread()` on the same file (WAL) and share `Progress` atomics.
+- Tables `notes / aliases / headings / tags / links / props` (cascade on delete) + FTS5 `notes_fts(title, body)`. `notes.stem` and `links.key` are lower-case file stems: backlinks and rename propagation are a join.
+- The watcher calls `commands::index::apply_changes(paths)` before emitting `FolioChanged`; a rebuild is `DELETE` + `refresh`. Everything is derived: deleting the file rebuilds on next open.
+- `extract.rs` is the single markdown fact-extractor for Rust (front matter, headings, tags, links, body, words); it is line-based and never fails.
 
 ## Syncthing sidecar (WP-1.1b)
 

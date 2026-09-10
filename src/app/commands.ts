@@ -6,6 +6,7 @@ import { insertFootnote } from "@/features/editor/footnotes";
 import { useEditorStore } from "@/features/editor/store";
 import { useBrowserStore } from "@/features/folio/browserStore";
 import { activeDir, useFolioStore } from "@/features/folio/store";
+import { useIndexStore } from "@/features/index/store";
 import { useLayoutStore } from "@/features/layout/store";
 import { useQuickOpenStore } from "@/features/quickopen/store";
 import { useSpellStore } from "@/features/spell/store";
@@ -257,6 +258,12 @@ export const SHELL_COMMANDS: Command[] = [
     title: "NAS Sync…",
     group: "Folio",
     run: () => useSyncStore.getState().setOpen(true),
+  },
+  {
+    id: "index.rebuild",
+    title: "Rebuild Index",
+    group: "Folio",
+    run: () => void useIndexStore.getState().rebuild(),
   },
   {
     id: "spell.toggle",

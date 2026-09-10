@@ -1,8 +1,8 @@
 use std::sync::Mutex;
 
-use crate::folio::index::NoteIndex;
 use crate::folio::watch::FolioWatcher;
 use crate::folio::Folio;
+use crate::index::Index;
 use crate::sidecar::syncthing::Syncthing;
 use crate::spell::Speller;
 
@@ -11,7 +11,8 @@ use crate::spell::Speller;
 pub struct AppState {
     pub folio: Mutex<Option<Folio>>,
     pub watcher: Mutex<Option<FolioWatcher>>,
-    pub index: Mutex<NoteIndex>,
+    /// SQLite index of the open Folio (ADR-007); `None` until a Folio is open.
+    pub index: Mutex<Option<Index>>,
     pub speller: Mutex<Speller>,
     /// Created lazily on first use (needs the app-data path).
     pub syncthing: Mutex<Option<Syncthing>>,

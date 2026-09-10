@@ -3,6 +3,7 @@
 
 mod commands;
 mod folio;
+mod index;
 mod sidecar;
 mod spell;
 mod state;
@@ -21,7 +22,6 @@ fn specta_builder() -> Builder<tauri::Wry> {
             commands::folio::folio_current,
             commands::folio::folio_recent,
             commands::folio::folio_tree,
-            commands::folio::folio_index,
             commands::folio::note_read,
             commands::folio::note_write,
             commands::folio::entry_create_note,
@@ -31,6 +31,10 @@ fn specta_builder() -> Builder<tauri::Wry> {
             commands::folio::asset_write,
             commands::folio::asset_resolve,
             commands::folio::asset_import,
+            commands::index::folio_index,
+            commands::index::index_status,
+            commands::index::index_rebuild,
+            commands::index::index_search,
             commands::spell::spell_check,
             commands::spell::spell_suggest,
             commands::spell::spell_add,
@@ -45,7 +49,10 @@ fn specta_builder() -> Builder<tauri::Wry> {
             commands::sync::sync_is_synced_path,
             commands::sync::sync_log_tail,
         ])
-        .events(collect_events![folio::watch::FolioChanged])
+        .events(collect_events![
+            folio::watch::FolioChanged,
+            commands::index::IndexProgress
+        ])
 }
 
 fn export_bindings(builder: &Builder<tauri::Wry>) {

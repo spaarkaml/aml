@@ -43,6 +43,9 @@ pub fn start(app: AppHandle, folio: &Folio) -> Result<FolioWatcher> {
                 if paths.is_empty() {
                     return;
                 }
+                // Keep the index current before the UI hears about the change, so anything
+                // it re-queries (Quick Open, panels) already sees the new state.
+                crate::commands::index::apply_changes(&app, &paths);
                 if let Err(e) = (FolioChanged { paths }).emit(&app) {
                     log::warn!("failed to emit FolioChanged: {e}");
                 }
