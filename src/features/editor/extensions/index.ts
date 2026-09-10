@@ -18,6 +18,7 @@ import { AutoPair } from "./autopair";
 import { AmlImage } from "./image";
 import { LinkMenu } from "./linkmenu";
 import { NoteLinks } from "./links";
+import { Outline } from "./outline";
 import { SlashMenu } from "./slash";
 import { SpellCheck } from "./spell";
 import { TagClicks } from "./tags";
@@ -81,6 +82,7 @@ export function amlExtensions(): Extensions {
     SlashMenu,
     LinkMenu,
     NoteLinks,
+    Outline,
     TagClicks,
     SpellCheck,
   ];

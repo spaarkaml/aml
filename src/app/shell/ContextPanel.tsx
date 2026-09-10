@@ -1,4 +1,5 @@
 import { BacklinksPanel } from "@/features/links/BacklinksPanel";
+import { OutlinePanel } from "@/features/outline/OutlinePanel";
 import { PropertiesPanel } from "@/features/properties/PropertiesPanel";
 import styles from "./shell.module.css";
 
@@ -6,6 +7,10 @@ import styles from "./shell.module.css";
 export function ContextPanel() {
   return (
     <div className={styles.context}>
+      <details open className={styles.section} data-testid="context-outline">
+        <summary className={styles.sectionTitle}>Outline</summary>
+        <OutlinePanel />
+      </details>
       <details open className={styles.section} data-testid="context-properties">
         <summary className={styles.sectionTitle}>Properties</summary>
         <PropertiesPanel />

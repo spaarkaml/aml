@@ -8,6 +8,7 @@ import { useBrowserStore } from "@/features/folio/browserStore";
 import { activeDir, useFolioStore } from "@/features/folio/store";
 import { useIndexStore } from "@/features/index/store";
 import { useLayoutStore } from "@/features/layout/store";
+import { useOutlineStore } from "@/features/outline/store";
 import { useQuickOpenStore } from "@/features/quickopen/store";
 import { useSearchStore } from "@/features/search/store";
 import { useSpellStore } from "@/features/spell/store";
@@ -261,6 +262,28 @@ export const SHELL_COMMANDS: Command[] = [
     title: "NAS Sync…",
     group: "Folio",
     run: () => useSyncStore.getState().setOpen(true),
+  },
+  {
+    id: "outline.show",
+    title: "Show Outline",
+    group: "View",
+    run: () => useOutlineStore.getState().show(),
+  },
+  {
+    id: "outline.up",
+    title: "Move Section Up",
+    group: "Note",
+    shortcut: "mod+shift+arrowup",
+    global: true,
+    run: () => void useOutlineStore.getState().step(-1),
+  },
+  {
+    id: "outline.down",
+    title: "Move Section Down",
+    group: "Note",
+    shortcut: "mod+shift+arrowdown",
+    global: true,
+    run: () => void useOutlineStore.getState().step(1),
   },
   {
     id: "search.show",

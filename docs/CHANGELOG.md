@@ -4,6 +4,11 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### WP-2.6 — Outline (2026-09-10)
+- Context panel gains an Outline: the open note's headings, indented by level, with the caret's section highlighted; click to jump.
+- Drag a row to move a whole section (subheadings and content included) elsewhere in the note, or use **Move Section Up / Down** (`⌘⇧↑` / `⌘⇧↓`); one undo step either way.
+- Built from the live editor document, so it follows unsaved edits.
+
 ### WP-2.5 — Search (2026-09-10)
 - Search is the third left-panel view (`⌘⇧F`, palette **Search Folio**): marked excerpts in context with their section, click a line to open the note there.
 - Query language over the index: word-start words, `"phrases"`, `/regex/flags`, `-exclusions`, `OR`, `(groups)`, and fields `path: file: title: tag: has: bounding:` plus any front-matter property. A half-typed query just matches less; only a bad regex reports an error.

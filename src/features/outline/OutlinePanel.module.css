@@ -1,0 +1,86 @@
+.empty {
+  margin: 0;
+  opacity: 0.6;
+  font-size: 12px;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-size: 12px;
+}
+
+.row,
+.rowActive {
+  display: flex;
+  align-items: baseline;
+  gap: var(--aml-space-2);
+  width: 100%;
+  font: inherit;
+  text-align: left;
+  padding: 3px 6px;
+  border: 0;
+  border-top: 2px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+  color: inherit;
+  cursor: default;
+}
+
+.row:hover,
+.rowActive:hover,
+.row:focus-visible,
+.rowActive:focus-visible {
+  background: var(--aml-highlight);
+  outline: none;
+}
+
+.rowActive {
+  background: var(--aml-highlight);
+  color: var(--aml-primary);
+  font-weight: 600;
+}
+
+/* Where the dragged section would land. */
+.row[data-over],
+.rowActive[data-over] {
+  border-top-color: var(--aml-primary);
+}
+
+.level {
+  flex: none;
+  opacity: 0.45;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tail {
+  width: 100%;
+  font: inherit;
+  font-size: 11px;
+  text-align: left;
+  padding: 3px 6px;
+  border: 1px dashed var(--aml-muted);
+  border-radius: 3px;
+  background: transparent;
+  color: inherit;
+  opacity: 0.7;
+  cursor: default;
+}
+
+.tail[data-over] {
+  border-style: solid;
+  border-color: var(--aml-primary);
+  opacity: 1;
+}
