@@ -1,6 +1,7 @@
 //! AML core. Rust owns all file-system, indexing and sidecar work; the webview
 //! only talks to it through the commands collected here (ADR-001).
 
+mod boundings;
 mod commands;
 mod folio;
 mod index;
@@ -45,6 +46,13 @@ fn specta_builder() -> Builder<tauri::Wry> {
             commands::tags::tags_list,
             commands::tags::tag_notes,
             commands::search::search_query,
+            commands::boundings::boundings_list,
+            commands::boundings::bounding_create,
+            commands::boundings::bounding_update,
+            commands::boundings::bounding_delete,
+            commands::boundings::bounding_add,
+            commands::boundings::bounding_remove,
+            commands::boundings::projects_list,
             commands::templates::templates_list,
             commands::templates::note_from_template,
             commands::templates::daily_note,

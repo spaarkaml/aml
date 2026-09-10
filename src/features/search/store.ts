@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { getActiveEditor } from "@/features/editor/editorRef";
 import { useLayoutStore } from "@/features/layout/store";
-import { useTagsStore } from "@/features/tags/store";
 import { commands, type SearchResult } from "@/ipc";
 import { termsToRegex, textTermsOf } from "./terms";
 
@@ -85,7 +84,7 @@ export const useSearchStore = create<SearchState>((set, get) => ({
 
   show: (query) => {
     if (query !== undefined) get().setQuery(query);
-    useTagsStore.getState().setView("search");
+    useLayoutStore.getState().setLeftView("search");
     useLayoutStore.getState().openPanel("left");
     set((s) => ({ focusRequest: s.focusRequest + 1 }));
   },

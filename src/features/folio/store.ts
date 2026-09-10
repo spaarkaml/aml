@@ -1,5 +1,6 @@
 import { confirm, open as openDialog } from "@tauri-apps/plugin-dialog";
 import { create } from "zustand";
+import { useBoundingsStore } from "@/features/boundings/store";
 import { useEditorStore } from "@/features/editor/store";
 import { askRenameDecision, type RenameDecision, useLinkStore } from "@/features/links/store";
 import { useTabsStore } from "@/features/tabs/store";
@@ -202,6 +203,8 @@ export const useFolioStore = create<FolioState>((set, get) => ({
     }
     useLinkStore.getState().set({ lastRename: { from, to } });
     useLinkStore.getState().invalidate();
+    // Boundings hold paths; Rust has already followed the move, so re-read them.
+    void useBoundingsStore.getState().refresh();
     await get().refreshTree();
     return true;
   },

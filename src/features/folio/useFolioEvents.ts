@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useBoundingsStore } from "@/features/boundings/store";
 import { useDailyStore } from "@/features/daily/store";
 import { useEditorStore } from "@/features/editor/store";
 import { useLinkStore } from "@/features/links/store";
@@ -22,6 +23,7 @@ export function useFolioEvents(): void {
         useLinkStore.getState().invalidate();
         void useTagsStore.getState().refresh();
         void useDailyStore.getState().refresh();
+        void useBoundingsStore.getState().refresh();
         for (const p of e.payload.paths) useEditorStore.getState().noteChangedOnDisk(p);
       })
       .then((off) => {

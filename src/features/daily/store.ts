@@ -2,7 +2,6 @@ import { create } from "zustand";
 import { useFolioStore } from "@/features/folio/store";
 import { useLayoutStore } from "@/features/layout/store";
 import { useTabsStore } from "@/features/tabs/store";
-import { useTagsStore } from "@/features/tags/store";
 import { commands } from "@/ipc";
 import { addDays, type Iso, nowTime, todayIso } from "./dates";
 
@@ -52,7 +51,7 @@ export const useDailyStore = create<DailyState>((set, get) => ({
   page: (weeks) => set({ anchor: weeks === 0 ? todayIso() : addDays(get().anchor, weeks * 7) }),
 
   show: () => {
-    useTagsStore.getState().setView("daily");
+    useLayoutStore.getState().setLeftView("daily");
     useLayoutStore.getState().openPanel("left");
   },
 }));

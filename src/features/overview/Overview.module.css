@@ -1,0 +1,232 @@
+.overview {
+  height: 100%;
+  overflow-y: auto;
+  padding: var(--aml-space-8) var(--aml-space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--aml-space-6);
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--aml-space-3);
+}
+
+.name {
+  margin: 0;
+  font-family: var(--aml-font-editor);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--aml-primary);
+}
+
+.count {
+  margin: 0;
+  font-size: 12px;
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--aml-space-2);
+}
+
+.title {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.empty {
+  margin: 0;
+  font-size: 12px;
+  opacity: 0.6;
+  line-height: 1.6;
+  max-width: 60ch;
+}
+
+/* ---- week bar ---- */
+
+.week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 88px));
+  gap: var(--aml-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.day,
+.dayToday {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font: inherit;
+  font-size: 12px;
+  padding: var(--aml-space-2) 0;
+  border: 1px solid var(--aml-muted);
+  border-radius: var(--aml-radius);
+  background: var(--aml-surface);
+  color: inherit;
+  cursor: default;
+}
+
+.day:hover,
+.dayToday:hover,
+.day:focus-visible,
+.dayToday:focus-visible {
+  background: var(--aml-highlight);
+  outline: none;
+}
+
+.dayToday {
+  border-color: var(--aml-primary);
+  color: var(--aml-primary);
+  font-weight: 600;
+}
+
+.weekday {
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.number {
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+}
+
+.day[data-has]::after,
+.dayToday[data-has]::after {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--aml-accent);
+}
+
+/* ---- clusters ---- */
+
+.tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--aml-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tile {
+  display: flex;
+  align-items: center;
+  gap: var(--aml-space-2);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  padding: var(--aml-space-2) var(--aml-space-3);
+  border: 1px solid var(--aml-muted);
+  border-left-width: 4px;
+  border-radius: var(--aml-radius);
+  background: var(--aml-surface);
+  color: inherit;
+  cursor: default;
+  min-width: 180px;
+}
+
+.tile:hover,
+.tile:focus-visible {
+  background: var(--aml-highlight);
+  outline: none;
+}
+
+.tileIcon {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  font-size: 13px;
+}
+
+.tileName {
+  flex-grow: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.tileCount {
+  flex: none;
+  font-size: 11px;
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- recents ---- */
+
+.recent {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  max-width: 60ch;
+}
+
+.note {
+  width: 100%;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--aml-space-3);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: inherit;
+  cursor: default;
+}
+
+.note:hover,
+.note:focus-visible {
+  background: var(--aml-highlight);
+  outline: none;
+}
+
+.noteName {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--aml-primary);
+}
+
+.noteFolder {
+  flex: none;
+  font-size: 11px;
+  opacity: 0.55;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 45%;
+}

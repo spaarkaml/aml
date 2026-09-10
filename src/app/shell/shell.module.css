@@ -228,6 +228,8 @@
 
 .segmented {
   display: flex;
+  /* Five views do not fit a narrow panel on one line. */
+  flex-wrap: wrap;
   gap: 2px;
   padding: 2px;
   border-radius: var(--aml-radius);
@@ -239,7 +241,7 @@
 .segmentActive {
   font: inherit;
   font-size: 11px;
-  padding: 2px 10px;
+  padding: 2px 8px;
   border: 0;
   border-radius: 3px;
   background: transparent;

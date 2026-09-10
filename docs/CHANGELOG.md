@@ -4,6 +4,15 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### WP-2.8 — Boundings and the Overview (2026-09-11)
+- **Boundings** (ADR-011): virtual, many-to-many groups of notes kept in `.aml/boundings.yaml` inside the Folio, one note per line so synced copies merge cleanly. Colour, icon and name; a note can be in as many as you like.
+- Boundings panel (fifth left-panel view): create, rename, recolour, delete, add or remove the open note with `+`/`−`, and list a Bounding's notes. Each Bounding is also a palette command, "Add to Bounding: …".
+- Membership follows the note: renaming or moving a note (or a folder above it) keeps it in its Boundings, and trashing it takes it out.
+- `bounding:Academic` searches now match (the field was reserved in WP-2.5).
+- **Overview** replaces the placeholder home screen: the Folio and its size, this week's Dailies, Bounding and Project tiles, and recent notes.
+- Command `boundings_list` / `bounding_create` / `bounding_update` / `bounding_delete` / `bounding_add` / `bounding_remove` / `projects_list`.
+- Which list the left panel shows is now layout state (it had been living in the tags store); **Rename Note** and **Reveal Note in Browser** now switch to the Browser view, not just open the panel.
+
 ### WP-2.7 — Templates and Daily notes (2026-09-10)
 - Templates in `_templates/` with `{{title}}`, `{{date}}`, `{{time}}`, `{{yesterday}}` and `{{tomorrow}}` placeholders, each date one taking a format (`{{date:dddd D MMMM YYYY}}`); an unknown placeholder is left exactly as written. Every template becomes a palette command ("New Scene Note").
 - Daily notes at `journal/YYYY/YYYY-MM-DD.md`: `⌘⇧D` / **Today's Daily Note** opens today's, creating it from `_templates/daily.md` (or a built-in default) the first time.

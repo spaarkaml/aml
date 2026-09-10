@@ -1,4 +1,5 @@
 import { useAppearanceStore } from "@/features/appearance/store";
+import { useBoundingsStore } from "@/features/boundings/store";
 import { usePaletteStore } from "@/features/commands/paletteStore";
 import { type Command, commandRegistry } from "@/features/commands/registry";
 import { useDailyStore } from "@/features/daily/store";
@@ -130,6 +131,7 @@ const TAB_COMMANDS: Command[] = [
       const p = activeTab();
       if (!p) return;
       useBrowserStore.getState().reveal(p);
+      useLayoutStore.getState().setLeftView("folio");
       useLayoutStore.getState().openPanel("left");
       useBrowserStore.getState().startRename(p);
     },
@@ -151,6 +153,7 @@ const TAB_COMMANDS: Command[] = [
       const p = activeTab();
       if (!p) return;
       useBrowserStore.getState().reveal(p);
+      useLayoutStore.getState().setLeftView("folio");
       useLayoutStore.getState().openPanel("left");
     },
   },
@@ -264,6 +267,21 @@ export const SHELL_COMMANDS: Command[] = [
     title: "NAS Sync…",
     group: "Folio",
     run: () => useSyncStore.getState().setOpen(true),
+  },
+  {
+    id: "bounding.new",
+    title: "New Bounding…",
+    group: "Folio",
+    run: () => {
+      useBoundingsStore.getState().show();
+      useBoundingsStore.getState().startDraft();
+    },
+  },
+  {
+    id: "bounding.show",
+    title: "Show Boundings",
+    group: "View",
+    run: () => useBoundingsStore.getState().show(),
   },
   {
     id: "daily.today",

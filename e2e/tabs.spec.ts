@@ -45,7 +45,7 @@ test("Close Tab shortcut closes the active tab and activates its neighbour", asy
   await expect(page.getByRole("tab", { selected: true })).toContainText("Inbox");
   await page.keyboard.press(`${mod}+W`);
   await expect(page.getByRole("tab")).toHaveCount(0);
-  await expect(page.getByTestId("editor-placeholder")).toBeVisible();
+  await expect(page.getByTestId("overview")).toBeVisible();
 });
 
 test("back and forward walk the visit history; number keys jump to tabs", async ({ page }) => {

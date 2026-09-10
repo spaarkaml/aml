@@ -332,6 +332,8 @@ struct Doc<'a> {
     lower: String,
     tags: &'a [String],
     props: &'a [(String, String)],
+    /// Names of the Boundings holding this note (WP-2.8).
+    boundings: &'a [String],
 }
 
 fn word_at_boundary(lower: &str, needle: &str) -> bool {
@@ -398,8 +400,7 @@ fn term_matches(t: &Term, d: &Doc, cx: &mut Cx) -> bool {
                     "table" => d.text.lines().any(|l| l.trim_start().starts_with('|')),
                     _ => false,
                 },
-                // Boundings arrive in WP-2.8; until then no note is in one.
-                "bounding" => false,
+                "bounding" => d.boundings.iter().any(|b| b.to_lowercase() == v),
                 key => d
                     .props
                     .iter()
@@ -652,6 +653,10 @@ impl Index {
                 .map_err(sql_err)?;
             rows.flatten().collect()
         };
+        let boundings = crate::boundings::by_note(&crate::boundings::parse(
+            &fs::read_to_string(self.root.join(crate::boundings::BOUNDINGS_FILE))
+                .unwrap_or_default(),
+        ));
         let tags = self.all_tags()?;
         let props = self.all_props()?;
         let mut highlight = Vec::new();
@@ -661,6 +666,7 @@ impl Index {
         };
         let empty_tags: Vec<String> = Vec::new();
         let empty_props: Vec<(String, String)> = Vec::new();
+        let empty_boundings: Vec<String> = Vec::new();
         let mut results = Vec::new();
         for (path, title) in candidates {
             let text = fs::read_to_string(self.root.join(&path)).unwrap_or_default();
@@ -671,6 +677,7 @@ impl Index {
                 lower: text.to_lowercase(),
                 tags: tags.get(&path).unwrap_or(&empty_tags),
                 props: props.get(&path).unwrap_or(&empty_props),
+                boundings: boundings.get(&path).unwrap_or(&empty_boundings),
             };
             if !eval(&expr, &doc, &mut cx) {
                 continue;
@@ -837,7 +844,7 @@ mod tests {
 
     #[test]
     fn evaluates_words_phrases_regex_fields_and_boolean_logic() {
-        let (_d, idx) = folio_with(&[
+        let (d, idx) = folio_with(&[
             (
                 "Thesis/ch3.md",
                 "---\ntype: chapter\nstatus: drafting\ntags: [research]\n---\n# Influence\nInformation operations and persuasion. #ops/info\n![[pic.png]]\n",
@@ -848,6 +855,17 @@ mod tests {
             ),
             ("Inbox.md", "Quick thoughts on persuasive design.\n"),
         ]);
+        fs::write(
+            d.path().join(crate::boundings::BOUNDINGS_FILE),
+            crate::boundings::to_yaml(&[crate::boundings::Bounding {
+                id: "academic".into(),
+                name: "Academic".into(),
+                colour: "#006078".into(),
+                icon: "🎓".into(),
+                notes: vec!["Thesis/ch3.md".into()],
+            }]),
+        )
+        .unwrap();
         let s = |q: &str| idx.search_query(q, 50).unwrap();
         assert_eq!(
             paths(&s("information")),
@@ -893,7 +911,15 @@ mod tests {
             paths(&s("(persuasion OR interviews) -tag:research")),
             vec!["Thesis/ch4.md"]
         );
-        assert_eq!(paths(&s("bounding:Academic")), Vec::<&str>::new());
+        assert_eq!(
+            paths(&s("bounding:academic")),
+            vec!["Thesis/ch3.md"],
+            "Boundings match by name, case-insensitively"
+        );
+        assert_eq!(
+            paths(&s("-bounding:Academic")),
+            vec!["Inbox.md", "Thesis/ch4.md"]
+        );
         assert_eq!(paths(&s("")), Vec::<&str>::new());
         let r = s("/(/");
         assert!(r.error.as_deref().unwrap_or("").contains("Bad regular"));

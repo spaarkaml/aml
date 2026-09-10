@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useBoundingsStore } from "@/features/boundings/store";
 import { useDailyStore } from "@/features/daily/store";
 import { useEditorStore } from "@/features/editor/store";
 import { useBrowserStore } from "@/features/folio/browserStore";
@@ -28,11 +29,13 @@ export function useTabsSync(): void {
       void useTagsStore.getState().refresh();
       void useDailyStore.getState().refresh();
       void useTemplatesStore.getState().refresh();
+      void useBoundingsStore.getState().refresh();
     } else {
       useQuickOpenStore.getState().clear();
       useTagsStore.getState().clear();
       useDailyStore.getState().clear();
       useTemplatesStore.getState().clear();
+      useBoundingsStore.getState().clear();
     }
   }, [root]);
 

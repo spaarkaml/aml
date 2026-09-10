@@ -54,6 +54,18 @@ export const commands = {
 	tagNotes: (tag: string) => typedError<string[], FolioError>(__TAURI_INVOKE("tag_notes", { tag })),
 	/**  Runs a query in the search language (see `index/search.rs`). */
 	searchQuery: (query: string, limit: number | null) => typedError<SearchResponse, FolioError>(__TAURI_INVOKE("search_query", { query, limit })),
+	/**  Every Bounding in the Folio, in file order. */
+	boundingsList: () => typedError<Bounding[], FolioError>(__TAURI_INVOKE("boundings_list")),
+	/**  Creates a Bounding, giving it the next unused colour from the palette. */
+	boundingCreate: (name: string) => typedError<Bounding, FolioError>(__TAURI_INVOKE("bounding_create", { name })),
+	/**  Renames, recolours or re-icons a Bounding. Fields left out are unchanged. */
+	boundingUpdate: (id: string, name: string | null, colour: string | null, icon: string | null) => typedError<Bounding[], FolioError>(__TAURI_INVOKE("bounding_update", { id, name, colour, icon })),
+	boundingDelete: (id: string) => typedError<Bounding[], FolioError>(__TAURI_INVOKE("bounding_delete", { id })),
+	/**  Adds notes to a Bounding. Notes already in it are left where they are. */
+	boundingAdd: (id: string, paths: string[]) => typedError<Bounding[], FolioError>(__TAURI_INVOKE("bounding_add", { id, paths })),
+	boundingRemove: (id: string, paths: string[]) => typedError<Bounding[], FolioError>(__TAURI_INVOKE("bounding_remove", { id, paths })),
+	/**  Every folder in the Folio holding a `project.aml.yaml`. */
+	projectsList: () => typedError<ProjectInfo[], FolioError>(__TAURI_INVOKE("projects_list")),
 	/**  The templates in `_templates/`. */
 	templatesList: () => typedError<TemplateInfo[], FolioError>(__TAURI_INVOKE("templates_list")),
 	/**  Creates `path` from the named template, expanding its placeholders. Fails if it exists. */
@@ -132,6 +144,18 @@ export type Backlink = {
 	/**  Nearest heading above the link, for jumping to the right section. */
 	section: string | null,
 	kind: string,
+};
+
+export type Bounding = {
+	/**  Stable slug; renaming the Bounding does not change it. */
+	id: string,
+	name: string,
+	/**  `#rrggbb`. */
+	colour: string,
+	/**  One or two characters, usually an emoji. */
+	icon: string,
+	/**  Folio-relative note paths, in the order they were added. */
+	notes: string[],
 };
 
 export type DailyNote = {
@@ -236,6 +260,13 @@ export type PendingFolder = {
 	label: string,
 	offeredBy: string,
 	offeredByName: string,
+};
+
+export type ProjectInfo = {
+	path: string,
+	name: string,
+	/**  Notes anywhere under the Project folder. */
+	notes: number,
 };
 
 export type RecentFolio = {

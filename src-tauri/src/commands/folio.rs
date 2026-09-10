@@ -195,13 +195,31 @@ pub fn entry_create_folder(state: State<AppState>, path: String) -> Result<()> {
 #[tauri::command]
 #[specta::specta]
 pub fn entry_rename(state: State<AppState>, from: String, to: String) -> Result<()> {
-    with_folio(&state, |f| f.rename(&from, &to))
+    with_folio(&state, |f| {
+        f.rename(&from, &to)?;
+        // Boundings hold paths, so a move would silently drop a note out of its groups.
+        f.edit_boundings(|list| {
+            crate::boundings::remap(list, &from, &to);
+            Ok(())
+        })?;
+        Ok(())
+    })
 }
 
 #[tauri::command]
 #[specta::specta]
 pub fn entry_trash(state: State<AppState>, path: String) -> Result<()> {
-    with_folio(&state, |f| f.trash(&path))
+    with_folio(&state, |f| {
+        f.trash(&path)?;
+        f.edit_boundings(|list| {
+            for b in list.iter_mut() {
+                b.notes
+                    .retain(|n| n != &path && !n.starts_with(&format!("{path}/")));
+            }
+            Ok(())
+        })?;
+        Ok(())
+    })
 }
 
 #[tauri::command]

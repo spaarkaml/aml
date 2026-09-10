@@ -21,4 +21,4 @@ AML is a self-hosted desktop writing environment (macOS + Windows) built on plai
 
 ## Status
 Run `pnpm sidecar:fetch` once after cloning (downloads the Syncthing binary; not committed).
-Stage 0 and Stage 1 done (WP-1.1–1.7 + 1.1b; NAS pairing confirmed 2026-09-10). Stage 2 in progress: WP-2.1–2.7 (index, links, backlinks, tags, search, outline, templates + Daily) done 2026-09-10; next 2.8 Boundings + Overview, then 2.9 (WP-2.10 Obsidian migration is skipped by decision). Gate 1 manual QA (`docs/qa/stage-1.md`) and the Windows install are Bryce's pending tasks. NAS setup steps are in `docs/06-NAS-SETUP.md`. `docs/CHANGELOG.md` is the per-WP log.
+Stage 0 and Stage 1 done (WP-1.1–1.7 + 1.1b; NAS pairing confirmed 2026-09-10). Stage 2 in progress: WP-2.1–2.8 (index, links, backlinks, tags, search, outline, templates + Daily, Boundings + Overview) done 2026-09-11; next 2.9 command palette pass (WP-2.10 Obsidian migration is skipped by decision). Gate 1 manual QA (`docs/qa/stage-1.md`) and the Windows install are Bryce's pending tasks. NAS setup steps are in `docs/06-NAS-SETUP.md`. `docs/CHANGELOG.md` is the per-WP log.

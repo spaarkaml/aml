@@ -5,9 +5,9 @@ import { useFolioStore } from "@/features/folio/store";
 import { useFolioEvents } from "@/features/folio/useFolioEvents";
 import { Welcome } from "@/features/folio/Welcome";
 import { RenameLinksDialog } from "@/features/links/RenameLinksDialog";
+import { Overview } from "@/features/overview/Overview";
 import { useTabsSync } from "@/features/tabs/useTabsSync";
 import { type AppInfo, commands } from "@/ipc";
-import styles from "./App.module.css";
 import { registerShellCommands } from "./commands";
 import { ContextPanel } from "./shell/ContextPanel";
 import { LeftPanel } from "./shell/LeftPanel";
@@ -28,19 +28,7 @@ export function App() {
 
   return (
     <Shell info={info} left={<LeftPanel />} right={<ContextPanel />}>
-      {folio ? (
-        notePath ? (
-          <NoteEditor />
-        ) : (
-          <div className={styles.welcome} data-testid="editor-placeholder">
-            <p className={styles.tagline}>
-              {folio.noteCount} notes in {folio.name}. Pick one from the Browser.
-            </p>
-          </div>
-        )
-      ) : (
-        <Welcome />
-      )}
+      {folio ? notePath ? <NoteEditor /> : <Overview /> : <Welcome />}
       <RenameLinksDialog />
     </Shell>
   );

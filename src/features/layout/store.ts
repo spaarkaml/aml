@@ -8,6 +8,8 @@ import { persist } from "zustand/middleware";
  */
 export type LayoutName = "desk" | "page";
 export type Side = "left" | "right";
+/** Which list the left panel shows. Lives here because it is layout, not any one feature. */
+export type LeftView = "folio" | "tags" | "search" | "daily" | "boundings";
 
 export interface PanelState {
   open: boolean;
@@ -19,6 +21,8 @@ interface LayoutState {
   layout: LayoutName;
   left: PanelState;
   right: PanelState;
+  leftView: LeftView;
+  setLeftView: (view: LeftView) => void;
   setLayout: (name: LayoutName) => void;
   toggleLayout: () => void;
   togglePanel: (side: Side) => void;
@@ -48,6 +52,8 @@ export const useLayoutStore = create<LayoutState>()(
     (set) => ({
       layout: "desk",
       ...LAYOUT_PRESETS.desk,
+      leftView: "folio",
+      setLeftView: (leftView) => set({ leftView }),
       setLayout: (name) => set({ layout: name, ...LAYOUT_PRESETS[name] }),
       toggleLayout: () =>
         set((s) => {

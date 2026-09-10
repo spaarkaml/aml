@@ -23,7 +23,8 @@ test("opening a Folio fills the Browser tree and the breadcrumb", async ({ page 
   await expect(tree.getByText("03 Influence networks")).toHaveCount(0);
   await tree.getByText("chapters").click();
   await expect(tree.getByText("03 Influence networks")).toBeVisible();
-  await expect(page.getByTestId("editor-placeholder")).toContainText("5 notes in Writing");
+  // With no note open, the home screen is the Overview (WP-2.8).
+  await expect(page.getByTestId("overview")).toContainText("5 notes");
 });
 
 test("Close Folio from the palette returns to the welcome screen", async ({ page }) => {

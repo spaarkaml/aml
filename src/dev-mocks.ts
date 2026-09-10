@@ -222,9 +222,8 @@ function mockTermMatches(t: MockTerm, path: string, title: string, text: string)
       if (v === "code") return text.includes("```") || text.includes("~~~");
       if (v === "table") return text.split("\n").some((l) => l.trimStart().startsWith("|"));
       return false;
-    // Boundings arrive in WP-2.8; until then no note is in one.
     case "bounding":
-      return false;
+      return boundings.some((b) => b.name.toLowerCase() === v && b.notes.includes(path));
     default:
       return mockProps(text).some(
         ([k, pv]) => k === t.field && (pv === v || (v === "" && pv !== "")),
@@ -406,6 +405,55 @@ function ensureFolder(path: string): void {
   }
 }
 
+/* ---- Boundings and Projects (WP-2.8): the shape of src-tauri/src/boundings.rs ---- */
+interface MockBounding {
+  id: string;
+  name: string;
+  colour: string;
+  icon: string;
+  notes: string[];
+}
+
+const BOUNDING_PALETTE = ["#006078", "#e37c78", "#82bac4", "#7a5c9e", "#4c8b5a", "#c08a2e"];
+
+const boundings: MockBounding[] = [
+  {
+    id: "academic",
+    name: "Academic",
+    colour: "#006078",
+    icon: "🎓",
+    notes: ["Thesis/chapters/03 Influence networks.md", "Thesis/chapters/04 Methods.md"],
+  },
+];
+
+function mockSlug(name: string, taken: string[]): string {
+  const base =
+    name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "bounding";
+  if (!taken.includes(base)) return base;
+  for (let n = 2; ; n++) if (!taken.includes(`${base}-${n}`)) return `${base}-${n}`;
+}
+
+function mockBounding(id: string): MockBounding {
+  const b = boundings.find((x) => x.id === id);
+  if (!b) throw { kind: "notFound", detail: id };
+  return b;
+}
+
+/** Mocks must mirror the real commands' reference semantics: hand back copies. */
+function boundingsCopy(): MockBounding[] {
+  return boundings.map((b) => ({ ...b, notes: [...b.notes] }));
+}
+
+function mockRemapBoundings(from: string, to: string): void {
+  for (const b of boundings)
+    b.notes = b.notes.map((n) =>
+      n === from ? to : n.startsWith(`${from}/`) ? to + n.slice(from.length) : n,
+    );
+}
+
 const index = { building: false, done: 0, total: 0, lastBuilt: 0, lastDurationMs: 0 };
 function indexStatus() {
   return { notes: notes.size, ...index };
@@ -558,6 +606,7 @@ export function installDevMocks(): void {
       case "entry_rename": {
         const from = String(a.from);
         const to = String(a.to);
+        mockRemapBoundings(from, to);
         const n = removeNode(from);
         if (!n) throw { kind: "notFound", detail: from };
         if (findNode(state.tree, to)) throw { kind: "alreadyExists", detail: to };
@@ -575,6 +624,8 @@ export function installDevMocks(): void {
         if (!removeNode(path)) throw { kind: "notFound", detail: path };
         for (const p of [...notes.keys()])
           if (p === path || p.startsWith(`${path}/`)) notes.delete(p);
+        for (const b of boundings)
+          b.notes = b.notes.filter((n) => n !== path && !n.startsWith(`${path}/`));
         return null;
       }
       case "folio_current":
@@ -802,6 +853,57 @@ export function installDevMocks(): void {
       case "search_query": {
         if (!state.folio) throw { kind: "noFolioOpen" };
         return mockSearchQuery(String(a.query ?? ""), Number(a.limit ?? 200));
+      }
+      case "boundings_list":
+        if (!state.folio) throw { kind: "noFolioOpen" };
+        return boundingsCopy();
+      case "bounding_create": {
+        if (!state.folio) throw { kind: "noFolioOpen" };
+        const name = String(a.name).trim();
+        if (!name) throw { kind: "invalidPath", detail: "a Bounding needs a name" };
+        const used = boundings.map((b) => b.colour);
+        const created: MockBounding = {
+          id: mockSlug(
+            name,
+            boundings.map((b) => b.id),
+          ),
+          name,
+          colour:
+            BOUNDING_PALETTE.find((c) => !used.includes(c)) ??
+            (BOUNDING_PALETTE[boundings.length % BOUNDING_PALETTE.length] as string),
+          icon: "",
+          notes: [],
+        };
+        boundings.push(created);
+        return { ...created, notes: [] };
+      }
+      case "bounding_update": {
+        const b = mockBounding(String(a.id));
+        if (typeof a.name === "string" && a.name.trim()) b.name = a.name.trim();
+        if (typeof a.colour === "string") b.colour = a.colour;
+        if (typeof a.icon === "string") b.icon = [...a.icon].slice(0, 2).join("");
+        return boundingsCopy();
+      }
+      case "bounding_delete": {
+        const i = boundings.findIndex((b) => b.id === String(a.id));
+        if (i === -1) throw { kind: "notFound", detail: String(a.id) };
+        boundings.splice(i, 1);
+        return boundingsCopy();
+      }
+      case "bounding_add": {
+        const b = mockBounding(String(a.id));
+        for (const p of a.paths as string[]) if (!b.notes.includes(p)) b.notes.push(p);
+        return boundingsCopy();
+      }
+      case "bounding_remove": {
+        const b = mockBounding(String(a.id));
+        b.notes = b.notes.filter((n) => !(a.paths as string[]).includes(n));
+        return boundingsCopy();
+      }
+      case "projects_list": {
+        if (!state.folio) throw { kind: "noFolioOpen" };
+        // No note in the mock Folio carries a project.aml.yaml yet (Projects are Stage 5).
+        return [];
       }
       case "templates_list": {
         if (!state.folio) throw { kind: "noFolioOpen" };
