@@ -11,7 +11,7 @@
 import { execFileSync } from "node:child_process";
 /* biome-ignore-all lint/suspicious/noConsole: build script talks through stdout */
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -91,7 +91,7 @@ async function main() {
   }
   const extracted = join(work, `${spec.dir}-${SYNCTHING_VERSION}`, spec.exe);
   if (!existsSync(extracted)) throw new Error(`expected ${extracted} after extraction`);
-  renameSync(extracted, out);
+  copyFileSync(extracted, out); // copy, not rename: temp and repo may be on different drives (CI)
   writeFileSync(stamp, `${SYNCTHING_VERSION}\n`);
   rmSync(work, { recursive: true, force: true });
   console.log(`wrote ${out}`);
