@@ -78,6 +78,21 @@ export const commands = {
 	 *  anywhere but inside the Folio.
 	 */
 	preferencesWrite: (preferences: Preferences) => typedError<Preferences, FolioError>(__TAURI_INVOKE("preferences_write", { preferences })),
+	/**
+	 *  Every type the Folio knows about — saved, templated or simply in use — with its colour,
+	 *  its icon, the fields its template declares and how many notes carry it.
+	 */
+	typesList: () => typedError<NoteType[], FolioError>(__TAURI_INVOKE("types_list")),
+	/**
+	 *  Every note that declares a type, as `path → type id`. One query answers the Browser, the
+	 *  Properties panel and anywhere else a note is named, so none of them has to ask per note.
+	 */
+	typesByNote: () => typedError<{ [key in string]: string }, FolioError>(__TAURI_INVOKE("types_by_note")),
+	/**
+	 *  Saves a type's name, colour and icon. Anything equal to AML's own is forgotten rather
+	 *  than written, so `.aml/types.yaml` stays a list of your decisions.
+	 */
+	typeWrite: (type: NoteType) => typedError<NoteType[], FolioError>(__TAURI_INVOKE("type_write", { type })),
 	/**  The templates in `_templates/`. */
 	templatesList: () => typedError<TemplateInfo[], FolioError>(__TAURI_INVOKE("templates_list")),
 	/**  Creates `path` from the named template, expanding its placeholders. Fails if it exists. */
@@ -286,6 +301,28 @@ export type NoteMeta = {
 	path: string,
 	mtime: number,
 	size: number,
+};
+
+/**  A type as the UI sees it: what the file says, filled in with what can be worked out. */
+export type NoteType = {
+	/**  Exactly what goes in `type:` — lower case, no spaces. */
+	id: string,
+	name: string,
+	/**
+	 *  `#rrggbb`. Deterministic from the id until someone chooses otherwise, so the same
+	 *  type is the same colour on both machines before either has an opinion.
+	 */
+	colour: string,
+	/**  An emoji, or empty for the plain coloured dot. */
+	icon: string,
+	/**  The template that makes one, when a template declares this type. */
+	template: string | null,
+	/**  Property keys that template carries, in its own order — the type's own fields. */
+	fields: string[],
+	/**  Notes carrying this type, from the index. */
+	notes: number,
+	/**  True when `types.yaml` has an entry for it, rather than it being found in use. */
+	custom: boolean,
 };
 
 export type PendingFolder = {

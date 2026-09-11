@@ -19,3 +19,5 @@ Run against your real Folio on the Mac (and later the PC). Record results in `do
 | 13 | *(WP-3.10)* In Settings, type a folder that leaves the Folio (`../elsewhere`) | It is refused on screen and nothing is written; correcting it saves | ☐ |
 | 14 | *(WP-3.10)* With a note open, click Home in the breadcrumb, then ⌘[ | The Overview appears and your tabs are all still open; ⌘[ returns you to the note you were writing | ☐ |
 | 15 | *(WP-3.10)* Scroll a long Folio tree to the bottom, and switch to Search | The week and *Open today's note* stay in reach at the foot of the Browser however far you scroll; the tags are at the foot of the Search view | ☐ |
+| 16 | *(WP-3.3)* In Settings → Note types, give three types an icon and a colour; open the same Folio on the PC | They arrived through `.aml/types.yaml`; the file is readable, one field per line, and holds only the three you changed | ☐ |
+| 17 | *(WP-3.3)* In a real chapter note, change its type with the picker, then add a field the type offers | The note's own `type:` changed (check the YAML view); the Browser shows the new mark; the added property is plain YAML | ☐ |

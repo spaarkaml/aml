@@ -4,6 +4,16 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### WP-3.3 — Note Types (2026-09-11)
+- **A note can say what it is** — `type: chapter` in its own front matter, as Q9 settled, so nothing leaves plain markdown and nothing has to be migrated. It was already indexed and already searchable as `type:chapter`; what this adds is everything around it.
+- **Nothing is seeded.** A type exists the moment a note or a template says it does. AML finds them three ways — the `type:` a template declares, the `type:` values notes are actually using, and anything you have customised — and the union is the list.
+- **A type's two halves are kept apart on purpose.** What a type *means* lives in `_templates/`: the template that declares `type: chapter` is what makes a chapter, and the front-matter keys it carries are the properties a chapter has. What a type *looks like* — a colour and an icon — lives in `.aml/types.yaml`, synced, one field per line.
+- **That file holds only your decisions.** A type back at AML's own colour and icon is removed from it rather than written out, and a Folio where nothing has been customised has no file at all. Until you choose, a type's colour is a hash of its name over the ADR-010 palette — so it is the same colour on both machines before the file has even travelled.
+- **In the Browser**, a typed note wears its type's mark instead of the generic page icon, in the same slot, so rows do not shuffle. An untyped note is the ordinary case and keeps the page.
+- **In the Properties panel**, a picker over the types the Folio knows — a value you can choose rather than one you have to spell. `type` no longer appears twice: the picker is the editor for it, and the YAML view still shows everything.
+- **Type-specific properties:** under the picker, the fields this type's template declares and this note has not got, each one click away. The type says what a chapter carries; the note keeps plain YAML.
+- **Settings → Note types** lists every type found with its notes count, the command that makes one, its fields, and a colour well and an icon box. There is deliberately no "New type" button — you make a type by writing one.
+
 ### WP-3.10 — Home, a three-tab Browser, and Settings (2026-09-11)
 - **The Overview is a place you can go.** The root breadcrumb — which was the Folio's name, saying what the window title already says — is now Home. It shows the Overview without closing a thing: your tabs stay open and `⌘[` returns you to what you were writing. Also `⌘⇧H` and *Go to Overview* in the palette.
 - **The Browser has three tabs, on one line: Folio, Boundings, Search.** Five never fit a 260px panel, and the two-row control read as two controls. Nothing was lost — each of the other two moved next to what it is reached from, which is one fewer tab *and* one fewer click:

@@ -6,6 +6,7 @@ mod commands;
 mod config;
 mod folio;
 mod index;
+mod note_types;
 mod sidecar;
 mod spell;
 mod state;
@@ -58,6 +59,9 @@ fn specta_builder() -> Builder<tauri::Wry> {
             commands::config::appearance_write,
             commands::config::preferences_read,
             commands::config::preferences_write,
+            commands::note_types::types_list,
+            commands::note_types::types_by_note,
+            commands::note_types::type_write,
             commands::templates::templates_list,
             commands::templates::note_from_template,
             commands::templates::daily_note,

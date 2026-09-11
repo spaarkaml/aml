@@ -49,6 +49,10 @@
 .kind {
   flex: none;
   color: var(--aml-text-3);
+  /* The type badge stands in for the page icon, so it takes the same slot width and the
+     row does not shuffle as notes gain and lose a type. */
+  width: 14px;
+  justify-content: center;
 }
 
 .folder .kind {

@@ -63,6 +63,60 @@ impl Index {
     }
 }
 
+/* ---------------- note types (WP-3.3) ---------------- */
+
+impl Index {
+    /// `type` → how many notes declare it. The index is the only thing that knows, because
+    /// the answer is a fact about every note's front matter, not about any file on its own.
+    pub fn type_counts(&self) -> Result<std::collections::HashMap<String, u32>> {
+        let mut stmt = self
+            .conn
+            .prepare(
+                "SELECT value, COUNT(DISTINCT note) FROM props WHERE key = 'type' GROUP BY value",
+            )
+            .map_err(sql_err)?;
+        let rows = stmt
+            .query_map([], |r| {
+                Ok((
+                    crate::note_types::slug(&r.get::<_, String>(0)?),
+                    r.get::<_, i64>(1)? as u32,
+                ))
+            })
+            .map_err(sql_err)?;
+        let mut out: std::collections::HashMap<String, u32> = std::collections::HashMap::new();
+        for row in rows {
+            let (id, n) = row.map_err(sql_err)?;
+            if !id.is_empty() {
+                *out.entry(id).or_default() += n;
+            }
+        }
+        Ok(out)
+    }
+
+    /// Every note that declares a type, as `path → type id`.
+    pub fn types_by_note(&self) -> Result<std::collections::HashMap<String, String>> {
+        let mut stmt = self
+            .conn
+            .prepare(
+                "SELECT n.path, p.value FROM props p JOIN notes n ON n.id = p.note
+                 WHERE p.key = 'type' ORDER BY n.path",
+            )
+            .map_err(sql_err)?;
+        let rows = stmt
+            .query_map([], |r| Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?)))
+            .map_err(sql_err)?;
+        let mut out = std::collections::HashMap::new();
+        for row in rows {
+            let (path, value) = row.map_err(sql_err)?;
+            let id = crate::note_types::slug(&value);
+            if !id.is_empty() {
+                out.insert(path, id);
+            }
+        }
+        Ok(out)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

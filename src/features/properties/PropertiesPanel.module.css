@@ -130,3 +130,66 @@
   box-shadow: 0 0 0 2px var(--aml-primary);
   outline: none;
 }
+
+/* The note's type, above its properties: what this note *is*, before what it says. */
+.type {
+  display: flex;
+  flex-direction: column;
+  gap: var(--aml-space-1);
+  padding-bottom: var(--aml-space-2);
+  margin-bottom: var(--aml-space-1);
+  border-bottom: 1px solid var(--aml-muted);
+}
+
+.typePick {
+  display: flex;
+  align-items: center;
+  gap: var(--aml-space-15);
+}
+
+.select {
+  flex-grow: 1;
+  font: inherit;
+  height: var(--aml-row-sm);
+  color: var(--aml-text);
+  background: var(--aml-highlight);
+  border: 0;
+  border-radius: var(--aml-radius-sm);
+  padding: 0 var(--aml-space-1);
+}
+
+.missing {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--aml-space-1);
+  margin: 0;
+}
+
+.missingLabel {
+  font-size: var(--aml-size-xs);
+  color: var(--aml-text-3);
+}
+
+/* A property the type expects and this note has not got: one click puts it there. */
+.fieldButton {
+  font: inherit;
+  font-size: var(--aml-size-xs);
+  padding: 1px var(--aml-space-1);
+  border: 0;
+  border-radius: var(--aml-radius-xs);
+  background: var(--aml-highlight);
+  color: var(--aml-text-2);
+  cursor: default;
+  transition: color var(--aml-dur-1) var(--aml-ease);
+}
+
+.fieldButton::before {
+  content: "+";
+  margin-right: 3px;
+  color: var(--aml-text-3);
+}
+
+.fieldButton:hover {
+  color: var(--aml-primary);
+}

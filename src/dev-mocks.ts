@@ -299,7 +299,102 @@ const templates = new Map<string, string>([
     "---\ntype: daily\n---\n\n# {{date:dddd D MMMM YYYY}}\n\n## Today\n\nYesterday: [[{{yesterday}}]]\n",
   ],
   ["Scene", "---\ntype: scene\n---\n\n# {{title}}\n\nWritten {{date}}.\n"],
+  // Declares two properties beyond `type`, which is what makes them a chapter's own fields.
+  ["Chapter", "---\ntype: chapter\nstatus: drafting\npov:\n---\n\n# {{title}}\n"],
 ]);
+
+/* ---- note types (WP-3.3): mirrors src-tauri/src/note_types.rs ---- */
+const TYPES_KEY = "aml.mock.types";
+const TYPE_PALETTE = ["#006078", "#e37c78", "#82bac4", "#7a5c9e", "#4c8b5a", "#c08a2e"];
+
+function typeSlug(raw: string): string {
+  return raw
+    .trim()
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function typeName(id: string): string {
+  return id
+    .split("-")
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
+function typeColour(id: string): string {
+  let hash = 0;
+  for (const b of new TextEncoder().encode(id)) hash = (Math.imul(hash, 31) + b) >>> 0;
+  return TYPE_PALETTE[hash % TYPE_PALETTE.length] as string;
+}
+
+interface MockSavedType {
+  name?: string;
+  colour?: string;
+  icon?: string;
+}
+
+function savedTypes(): Record<string, MockSavedType> {
+  try {
+    const raw = localStorage.getItem(TYPES_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+/** Front-matter keys of a template, in order, without `type` — the type's own fields. */
+function templateFields(text: string): string[] {
+  const fm = /^---\n([\s\S]*?)\n---/.exec(text)?.[1] ?? "";
+  return fm
+    .split("\n")
+    .filter((l) => l && !/^\s/.test(l))
+    .map((l) => l.split(":")[0]?.trim() ?? "")
+    .filter((k) => k && k !== "type");
+}
+
+function mockTypesByNote(): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [path, n] of notes) {
+    const fm = /^---\n([\s\S]*?)\n---/.exec(n.text)?.[1] ?? "";
+    const id = typeSlug(/^type:\s*(.+)$/m.exec(fm)?.[1]?.replace(/["']/g, "") ?? "");
+    if (id) out[path] = id;
+  }
+  return out;
+}
+
+function mockTypes() {
+  const saved = savedTypes();
+  const counts: Record<string, number> = {};
+  for (const id of Object.values(mockTypesByNote())) counts[id] = (counts[id] ?? 0) + 1;
+
+  const ids = new Set<string>(Object.keys(saved));
+  for (const text of templates.values()) {
+    const id = typeSlug(/^type:\s*(.+)$/m.exec(text)?.[1] ?? "");
+    if (id) ids.add(id);
+  }
+  for (const id of Object.keys(counts)) ids.add(id);
+
+  return [...ids]
+    .map((id) => {
+      const s = saved[id];
+      const entry = [...templates.entries()].find(
+        ([, text]) => typeSlug(/^type:\s*(.+)$/m.exec(text)?.[1] ?? "") === id,
+      );
+      return {
+        id,
+        name: s?.name ?? typeName(id),
+        colour: s?.colour ?? typeColour(id),
+        icon: s?.icon ?? "",
+        template: entry?.[0] ?? null,
+        fields: entry ? templateFields(entry[1]) : [],
+        notes: counts[id] ?? 0,
+        custom: s !== undefined,
+      };
+    })
+    .sort((a, b) => b.notes - a.notes || a.name.localeCompare(b.name));
+}
 
 const MOCK_WEEKDAYS = [
   "Sunday",
@@ -1002,6 +1097,28 @@ export function installDevMocks(): void {
         if (!state.folio) throw { kind: "noFolioOpen" };
         localStorage.setItem(APPEARANCE_KEY, JSON.stringify(a.appearance));
         return null;
+      }
+      case "types_list":
+        if (!state.folio) throw { kind: "noFolioOpen" };
+        return mockTypes();
+      case "types_by_note":
+        if (!state.folio) throw { kind: "noFolioOpen" };
+        return mockTypesByNote();
+      case "type_write": {
+        if (!state.folio) throw { kind: "noFolioOpen" };
+        const t = a.type as { id: string; name: string; colour: string; icon: string };
+        const id = typeSlug(t.id);
+        if (!id) throw { kind: "invalidPath", detail: t.id };
+        const saved = savedTypes();
+        const entry: MockSavedType = {};
+        if (t.name.trim() && t.name.trim() !== typeName(id)) entry.name = t.name.trim();
+        if (t.colour && t.colour !== typeColour(id)) entry.colour = t.colour;
+        if (t.icon) entry.icon = t.icon;
+        // Only decisions are remembered; a type back at its defaults leaves the file.
+        if (Object.keys(entry).length === 0) delete saved[id];
+        else saved[id] = entry;
+        localStorage.setItem(TYPES_KEY, JSON.stringify(saved));
+        return mockTypes();
       }
       case "preferences_read":
         if (!state.folio) throw { kind: "noFolioOpen" };

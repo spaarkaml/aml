@@ -80,9 +80,10 @@ Fiction typically uses none, academic uses footnotes, some publishers want endno
 Which trim sizes and platforms? (KDP and IngramSpark both accept standard PDF with embedded fonts; IngramSpark *prefers* PDF/X-1a.) Note: **MOBI is dead** — Amazon stopped accepting MOBI uploads in 2022 and KDP wants EPUB. Plan drops MOBI unless you object.
 **Working assumption:** Trim presets for 5×8, 5.5×8.5, 6×9, A5, A4, US Letter; PDF with embedded fonts; EPUB 3; DOCX. PDF/X-1a as a stretch goal.
 
-### Q9. Note "types" (Stage 3)
+### Q9. Note "types" (Stage 3)  ✅ built in WP-3.3, list no longer needed
 You suggested planning boards may work best as templated, colour-coded note types. Which types do you want initially? Proposal: `note`, `daily`, `scene`, `chapter`, `character`, `location`, `plot-thread`, `source` (reference/reading note), `task-board`, `project-brief`. Types are declared in front matter (`type: character`) so they stay plain markdown.
 **Working assumption:** The list above, user-extensible via a `types/` folder of templates.
+**Built (WP-3.3):** front matter as proposed, and templates as the extension point — but `_templates/` itself rather than a second `types/` folder, since a template already declares a type and is already a "New X Note" command. **The initial list turned out not to be a question that needed answering:** nothing is seeded, a type exists the moment a note or a template says it does, and `.aml/types.yaml` holds only the colours and icons you choose. Write `type: character` in a note and the type is there. Planning boards as a *view over* a type remain open (Stage 5/7).
 
 ### Q10. Groupings (Stage 2) — Boundings are the virtual grouping (decided); the open part is whether automatic clusters are wanted
 Three mechanisms can coexist; which are must-haves?

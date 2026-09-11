@@ -4,6 +4,7 @@ import { useKeymapStore } from "@/features/commands/keymapStore";
 import { todayIso } from "@/features/daily/dates";
 import { useFolioStore } from "@/features/folio/store";
 import { useSyncStore } from "@/features/sync/store";
+import { TypesSettings } from "@/features/types/TypesSettings";
 import styles from "./SettingsScreen.module.css";
 import { DEFAULT_DAILY_FOLDER, useSettingsStore } from "./store";
 
@@ -107,6 +108,11 @@ export function SettingsScreen() {
               stay where they are.
             </p>
           )}
+        </section>
+
+        <section className={styles.section}>
+          <h3 className={styles.heading}>Note types</h3>
+          <TypesSettings />
         </section>
 
         <section className={styles.section}>

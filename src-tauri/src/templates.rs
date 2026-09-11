@@ -325,6 +325,23 @@ fn collect_dailies(dir: &std::path::Path, depth: usize, out: &mut Vec<String>) {
     }
 }
 
+/// The top-level keys of a template's front matter, in the order it writes them.
+/// Nested keys are not offered as fields: a property the panel cannot edit is not a property.
+pub fn front_matter_keys(text: &str) -> Vec<String> {
+    let Some(rest) = text.strip_prefix("---\n") else {
+        return Vec::new();
+    };
+    let Some(end) = rest.find("\n---") else {
+        return Vec::new();
+    };
+    rest[..end]
+        .lines()
+        .filter(|l| !l.starts_with(char::is_whitespace) && !l.trim_start().starts_with('#'))
+        .filter_map(|l| l.split_once(':').map(|(k, _)| k.trim().to_string()))
+        .filter(|k| !k.is_empty() && !k.starts_with('-'))
+        .collect()
+}
+
 fn front_matter_type(text: &str) -> Option<String> {
     let rest = text.strip_prefix("---\n")?;
     let end = rest.find("\n---")?;

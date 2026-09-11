@@ -9,6 +9,8 @@ import {
 import { Icon } from "@/app/icons";
 import { useEditorStore } from "@/features/editor/store";
 import { useTabsStore } from "@/features/tabs/store";
+import { useTypesStore } from "@/features/types/store";
+import { TypeBadge } from "@/features/types/TypeBadge";
 import type { TreeNode } from "@/ipc";
 import { baseName, isWithin, joinPath, noteTitle, parentDir } from "@/lib/paths";
 import { useBrowserStore } from "./browserStore";
@@ -121,6 +123,9 @@ function Node({ node, depth, openMenu }: NodeProps) {
   const [dropTarget, setDropTarget] = useState(false);
 
   const label = isFolder ? node.name : node.kind === "note" ? noteTitle(node.path) : node.name;
+  // A typed note wears its type's mark instead of the generic page icon; an untyped one is
+  // the ordinary case and keeps the page. `list` is the dependency that makes a recolour show.
+  const type = useTypesStore((s) => (node.kind === "note" ? s.ofNote(node.path) : null));
 
   const items: MenuItem[] = [
     ...(isFolder
@@ -196,7 +201,11 @@ function Node({ node, depth, openMenu }: NodeProps) {
             className={isFolder ? styles.twisty : styles.twistyNone}
             data-expanded={isFolder && expanded ? "" : undefined}
           />
-          <Icon name={isFolder ? "folder" : "file"} size={14} className={styles.kind} />
+          {type ? (
+            <TypeBadge type={type} className={styles.kind} />
+          ) : (
+            <Icon name={isFolder ? "folder" : "file"} size={14} className={styles.kind} />
+          )}
           <span className={styles.name}>{label}</span>
           {dirty ? <span className={styles.dot} role="img" aria-label="Unsaved changes" /> : null}
         </button>

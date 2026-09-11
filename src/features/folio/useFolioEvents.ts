@@ -5,6 +5,7 @@ import { useEditorStore } from "@/features/editor/store";
 import { useLinkStore } from "@/features/links/store";
 import { useQuickOpenStore } from "@/features/quickopen/store";
 import { useTagsStore } from "@/features/tags/store";
+import { useTypesStore } from "@/features/types/store";
 import { events } from "@/ipc";
 import { useFolioStore } from "./store";
 
@@ -24,6 +25,7 @@ export function useFolioEvents(): void {
         void useTagsStore.getState().refresh();
         void useDailyStore.getState().refresh();
         void useBoundingsStore.getState().refresh();
+        void useTypesStore.getState().refresh();
         for (const p of e.payload.paths) useEditorStore.getState().noteChangedOnDisk(p);
       })
       .then((off) => {

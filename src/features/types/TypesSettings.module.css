@@ -1,0 +1,75 @@
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--aml-space-1);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--aml-space-2);
+  padding: var(--aml-space-05) 0;
+}
+
+/* The OS colour well, trimmed to a swatch — the same control the Appearance screen uses. */
+.colour {
+  flex: none;
+  width: var(--aml-row-sm);
+  height: var(--aml-row-sm);
+  padding: 0;
+  border: 0;
+  border-radius: var(--aml-radius-sm);
+  background: transparent;
+  cursor: default;
+}
+
+.icon {
+  flex: none;
+  width: var(--aml-row-sm);
+  height: var(--aml-row-sm);
+  font: inherit;
+  text-align: center;
+  color: var(--aml-text);
+  background: var(--aml-highlight);
+  border: 0;
+  border-radius: var(--aml-radius-sm);
+}
+
+.text {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.name {
+  color: var(--aml-text);
+}
+
+.meta {
+  font-size: var(--aml-size-xs);
+  color: var(--aml-text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.count {
+  flex: none;
+  font-size: var(--aml-size-xs);
+  color: var(--aml-text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.empty {
+  margin: 0;
+  font-size: var(--aml-size-xs);
+  color: var(--aml-text-3);
+}
+
+.empty code {
+  font-family: var(--aml-font-mono);
+}

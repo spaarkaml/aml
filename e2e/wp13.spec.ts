@@ -44,7 +44,8 @@ test("properties panel edits front matter and the saved YAML follows", async ({ 
   await openNote(page);
   await page.keyboard.press(`${mod}+Shift+I`);
   const panel = page.getByTestId("properties-panel");
-  await expect(panel.getByLabel("type", { exact: true })).toHaveValue("chapter");
+  // `type` is edited by the picker now (WP-3.3), not as a text field among the rest.
+  await expect(panel.getByTestId("type-select")).toHaveValue("chapter");
   await panel.getByLabel("status", { exact: true }).fill("final");
   await panel.getByLabel("status", { exact: true }).press("Enter");
   await expect(page.getByTestId("note-editor").locator(".aml-front-matter")).toContainText(

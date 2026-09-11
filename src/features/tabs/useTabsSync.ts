@@ -9,6 +9,7 @@ import { useQuickOpenStore } from "@/features/quickopen/store";
 import { useSettingsStore } from "@/features/settings/store";
 import { useTagsStore } from "@/features/tags/store";
 import { useTemplatesStore } from "@/features/templates/store";
+import { useTypesStore } from "@/features/types/store";
 import { useTabsStore } from "./store";
 
 /**
@@ -29,6 +30,7 @@ export function useTabsSync(): void {
     if (root) {
       void useQuickOpenStore.getState().refresh();
       void useTagsStore.getState().refresh();
+      void useTypesStore.getState().refresh();
       void useDailyStore.getState().refresh();
       void useTemplatesStore.getState().refresh();
       void useBoundingsStore.getState().refresh();
@@ -37,6 +39,7 @@ export function useTabsSync(): void {
     } else {
       useQuickOpenStore.getState().clear();
       useTagsStore.getState().clear();
+      useTypesStore.getState().clear();
       useDailyStore.getState().clear();
       useTemplatesStore.getState().clear();
       useBoundingsStore.getState().clear();

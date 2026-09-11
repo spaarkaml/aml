@@ -8,6 +8,7 @@ pub mod config;
 pub mod folio;
 pub mod index;
 pub mod links;
+pub mod note_types;
 pub mod search;
 pub mod spell;
 pub mod sync;
