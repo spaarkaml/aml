@@ -56,6 +56,8 @@ fn specta_builder() -> Builder<tauri::Wry> {
             commands::boundings::projects_list,
             commands::config::appearance_read,
             commands::config::appearance_write,
+            commands::config::preferences_read,
+            commands::config::preferences_write,
             commands::templates::templates_list,
             commands::templates::note_from_template,
             commands::templates::daily_note,

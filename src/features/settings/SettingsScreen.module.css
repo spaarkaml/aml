@@ -1,0 +1,142 @@
+/* The same modal shape as Appearance (ADR-013): a raised card on a scrim, no chrome of
+   its own. Narrower, because everything here is one line of text. */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--aml-scrim);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 12vh;
+  z-index: 100;
+}
+
+.backdropButton {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.panel {
+  position: relative;
+  width: min(520px, 92vw);
+  max-height: 82vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--aml-space-4);
+  padding: var(--aml-space-3) var(--aml-space-4) var(--aml-space-4);
+  background: var(--aml-surface);
+  border-radius: var(--aml-radius-xl);
+  box-shadow: var(--aml-shadow-3);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--aml-space-2);
+}
+
+.title {
+  flex-grow: 1;
+  margin: 0;
+  font-size: var(--aml-size-lg);
+  font-weight: var(--aml-weight-semi);
+  color: var(--aml-primary);
+}
+
+.where {
+  margin: 0;
+  font-size: var(--aml-size-xs);
+  color: var(--aml-text-3);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--aml-space-2);
+}
+
+.heading {
+  margin: 0;
+  font-size: var(--aml-size-xs);
+  font-weight: var(--aml-weight-semi);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--aml-text-3);
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: var(--aml-space-2);
+}
+
+.label {
+  flex: none;
+  width: 4.5rem;
+  color: var(--aml-text-2);
+}
+
+.input {
+  flex-grow: 1;
+  font: inherit;
+  height: var(--aml-row);
+  padding: 0 var(--aml-space-2);
+  color: var(--aml-text);
+  background: var(--aml-highlight);
+  border: 0;
+  border-radius: var(--aml-radius-sm);
+}
+
+.input:disabled {
+  color: var(--aml-text-3);
+}
+
+.saved {
+  flex: none;
+  font-size: var(--aml-size-xs);
+  color: var(--aml-text-3);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--aml-space-2);
+}
+
+.small {
+  font: inherit;
+  font-size: var(--aml-size-xs);
+  padding: 2px 8px;
+  height: var(--aml-row-sm);
+  border: 0;
+  box-shadow: var(--aml-shadow-1);
+  border-radius: var(--aml-radius-sm);
+  background: var(--aml-surface);
+  color: var(--aml-text);
+  cursor: default;
+  transition: background var(--aml-dur-1) var(--aml-ease);
+}
+
+.small:hover {
+  background: var(--aml-highlight);
+}
+
+.note {
+  margin: 0;
+  font-size: var(--aml-size-xs);
+  color: var(--aml-text-3);
+}
+
+.note code {
+  font-family: var(--aml-font-mono);
+}
+
+.error {
+  margin: 0;
+  font-size: var(--aml-size-xs);
+  color: var(--aml-accent);
+}

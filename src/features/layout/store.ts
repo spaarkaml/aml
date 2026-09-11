@@ -8,8 +8,12 @@ import { persist } from "zustand/middleware";
  */
 export type LayoutName = "desk" | "page";
 export type Side = "left" | "right";
-/** Which list the left panel shows. Lives here because it is layout, not any one feature. */
-export type LeftView = "folio" | "tags" | "search" | "daily" | "boundings";
+/**
+ * Which list the left panel shows. Lives here because it is layout, not any one feature.
+ * Three, so they fit one line: Tags now sit under Search, and the Daily strip under the Folio
+ * tree, because that is where each is reached for (WP-3.10).
+ */
+export type LeftView = "folio" | "boundings" | "search";
 
 export interface PanelState {
   open: boolean;
@@ -47,6 +51,19 @@ export const LAYOUT_PRESETS: Record<LayoutName, Pick<LayoutState, "left" | "righ
 export const MIN_PANEL_WIDTH = 200;
 export const MAX_PANEL_WIDTH = 560;
 
+/**
+ * v1 had five left views. A device left on one of the two that went away lands on the tab
+ * that now holds it — Tags under Search, the Daily strip under the Folio tree — rather than
+ * on an empty panel.
+ */
+export function migrateLayout(state: unknown, version: number): LayoutState {
+  const s = (state ?? {}) as Partial<LayoutState> & { leftView?: string };
+  if (version >= 2) return s as LayoutState;
+  const moved: Record<string, LeftView> = { tags: "search", daily: "folio" };
+  const view = s.leftView ?? "folio";
+  return { ...s, leftView: moved[view] ?? (view as LeftView) } as LayoutState;
+}
+
 export const useLayoutStore = create<LayoutState>()(
   persist(
     (set) => ({
@@ -82,6 +99,10 @@ export const useLayoutStore = create<LayoutState>()(
           right: s.right.pinned ? s.right : { ...s.right, open: false },
         })),
     }),
-    { name: "aml.layout", version: 1 },
+    {
+      name: "aml.layout",
+      version: 2,
+      migrate: migrateLayout,
+    },
   ),
 );

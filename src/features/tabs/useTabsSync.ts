@@ -6,6 +6,7 @@ import { useEditorStore } from "@/features/editor/store";
 import { useBrowserStore } from "@/features/folio/browserStore";
 import { useFolioStore } from "@/features/folio/store";
 import { useQuickOpenStore } from "@/features/quickopen/store";
+import { useSettingsStore } from "@/features/settings/store";
 import { useTagsStore } from "@/features/tags/store";
 import { useTemplatesStore } from "@/features/templates/store";
 import { useTabsStore } from "./store";
@@ -32,6 +33,7 @@ export function useTabsSync(): void {
       void useTemplatesStore.getState().refresh();
       void useBoundingsStore.getState().refresh();
       void useAppearanceStore.getState().load();
+      void useSettingsStore.getState().load();
     } else {
       useQuickOpenStore.getState().clear();
       useTagsStore.getState().clear();
@@ -39,6 +41,7 @@ export function useTabsSync(): void {
       useTemplatesStore.getState().clear();
       useBoundingsStore.getState().clear();
       useAppearanceStore.getState().clear();
+      useSettingsStore.getState().clear();
     }
   }, [root]);
 

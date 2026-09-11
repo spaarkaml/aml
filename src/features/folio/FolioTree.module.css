@@ -95,9 +95,12 @@
   opacity: 0.8;
 }
 
+/* Grows to fill the Browser, so dropping a note on the space below the tree still means
+   "move it to the root" however short the tree is. */
 .browser,
 .browserDrop {
-  min-height: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
   padding-bottom: var(--aml-space-8);
 }
 

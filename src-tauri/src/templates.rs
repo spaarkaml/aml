@@ -219,10 +219,27 @@ pub fn render(text: &str, vars: &RenderVars) -> String {
 
 /* ---------------- the Folio side ---------------- */
 
-/// The canonical location of a Daily note: `journal/YYYY/YYYY-MM-DD.md`.
-pub fn daily_path(date: &str) -> Result<String> {
+/// The folder Daily notes are written into, from the Folio's `daily.folder` setting.
+/// Anything that is not a plain relative folder inside the Folio is refused, so a
+/// hand-edited config file can never send a note outside it.
+pub fn daily_folder(setting: Option<&str>) -> Option<String> {
+    let cleaned = setting?.replace('\\', "/");
+    let cleaned = cleaned.trim().trim_matches('/');
+    if cleaned.is_empty()
+        || cleaned
+            .split('/')
+            .any(|s| s.is_empty() || s == "." || s == "..")
+    {
+        return None;
+    }
+    Some(cleaned.to_string())
+}
+
+/// The canonical location of a Daily note: `<folder>/YYYY/YYYY-MM-DD.md`, where the folder
+/// is the Folio's own (`journal` unless Settings says otherwise).
+pub fn daily_path(folder: &str, date: &str) -> Result<String> {
     let d = Civil::parse(date).ok_or_else(|| FolioError::InvalidPath(date.to_string()))?;
-    Ok(format!("{JOURNAL_DIR}/{:04}/{}.md", d.y, d.iso()))
+    Ok(format!("{folder}/{:04}/{}.md", d.y, d.iso()))
 }
 
 impl Folio {
@@ -264,11 +281,20 @@ impl Folio {
         fs::read_to_string(self.root().join(TEMPLATES_DIR).join(format!("{name}.md"))).ok()
     }
 
-    /// Dates of every Daily note in the Folio, newest first. `journal/YYYY/` is where they are
-    /// written, but a flat `journal/YYYY-MM-DD.md` (as other apps write them) is read too.
+    /// The folder this Folio keeps its Daily notes in; `journal` unless Settings says otherwise.
+    pub fn daily_dir(&self) -> String {
+        self.settings()
+            .ok()
+            .and_then(|s| s.get("daily.folder").cloned())
+            .and_then(|v| daily_folder(Some(&v)))
+            .unwrap_or_else(|| JOURNAL_DIR.to_string())
+    }
+
+    /// Dates of every Daily note in the Folio, newest first. `<folder>/YYYY/` is where they are
+    /// written, but a flat `<folder>/YYYY-MM-DD.md` (as other apps write them) is read too.
     pub fn daily_dates(&self) -> Result<Vec<String>> {
         let mut out = Vec::new();
-        collect_dailies(&self.root().join(JOURNAL_DIR), 0, &mut out);
+        collect_dailies(&self.root().join(self.daily_dir()), 0, &mut out);
         out.sort();
         out.dedup();
         out.reverse();
@@ -376,10 +402,49 @@ mod tests {
     #[test]
     fn daily_paths_are_year_foldered() {
         assert_eq!(
-            daily_path("2026-09-10").unwrap(),
+            daily_path(JOURNAL_DIR, "2026-09-10").unwrap(),
             "journal/2026/2026-09-10.md"
         );
-        assert!(daily_path("2026-13-01").is_err());
+        assert_eq!(
+            daily_path("Notes/Days", "2026-09-10").unwrap(),
+            "Notes/Days/2026/2026-09-10.md"
+        );
+        assert!(daily_path(JOURNAL_DIR, "2026-13-01").is_err());
+    }
+
+    #[test]
+    fn the_daily_folder_setting_is_cleaned_and_never_escapes_the_folio() {
+        assert_eq!(
+            daily_folder(Some("Notes/Days")).as_deref(),
+            Some("Notes/Days")
+        );
+        // Tidied rather than refused: a trailing slash or a Windows separator is a typo.
+        assert_eq!(daily_folder(Some(" /Days/ ")).as_deref(), Some("Days"));
+        assert_eq!(
+            daily_folder(Some("Notes\\Days")).as_deref(),
+            Some("Notes/Days")
+        );
+        // Absent, empty or an attempt to climb out falls back to the Folio's own `journal`.
+        assert_eq!(daily_folder(None), None);
+        assert_eq!(daily_folder(Some("   ")), None);
+        assert_eq!(daily_folder(Some("../elsewhere")), None);
+        assert_eq!(daily_folder(Some("Notes/../../etc")), None);
+    }
+
+    #[test]
+    fn dailies_follow_the_folder_the_settings_name() {
+        let dir = tempfile::tempdir().unwrap();
+        let folio = Folio::create(dir.path(), Some("Writing")).unwrap();
+        assert_eq!(folio.daily_dir(), JOURNAL_DIR);
+
+        let mut settings = folio.settings().unwrap();
+        settings.insert("daily.folder".into(), "Days".into());
+        folio.write_settings(&settings).unwrap();
+        assert_eq!(folio.daily_dir(), "Days");
+
+        fs::create_dir_all(folio.root().join("Days/2026")).unwrap();
+        fs::write(folio.root().join("Days/2026/2026-09-10.md"), "moved").unwrap();
+        assert_eq!(folio.daily_dates().unwrap(), ["2026-09-10"]);
     }
 
     #[test]

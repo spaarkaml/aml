@@ -14,7 +14,7 @@ interface TagsState {
   clear: () => void;
   toggle: (tag: string) => void;
   select: (tag: string | null) => void;
-  /** Opens the left panel on the Tags view with `tag` expanded and selected. */
+  /** Opens the left panel on the Search view — where the tags live — with `tag` selected. */
   show: (tag: string | null) => void;
 }
 
@@ -36,7 +36,7 @@ export const useTagsStore = create<TagsState>()(
         const expanded = { ...get().expanded };
         if (tag) for (const a of ancestorsOf(tag)) expanded[a] = true;
         set({ selected: tag, expanded });
-        useLayoutStore.getState().setLeftView("tags");
+        useLayoutStore.getState().setLeftView("search");
         useLayoutStore.getState().openPanel("left");
       },
     }),

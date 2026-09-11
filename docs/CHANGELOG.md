@@ -4,6 +4,16 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### WP-3.10 — Home, a three-tab Browser, and Settings (2026-09-11)
+- **The Overview is a place you can go.** The root breadcrumb — which was the Folio's name, saying what the window title already says — is now Home. It shows the Overview without closing a thing: your tabs stay open and `⌘[` returns you to what you were writing. Also `⌘⇧H` and *Go to Overview* in the palette.
+- **The Browser has three tabs, on one line: Folio, Boundings, Search.** Five never fit a 260px panel, and the two-row control read as two controls. Nothing was lost — each of the other two moved next to what it is reached from, which is one fewer tab *and* one fewer click:
+  - **Tags** are at the foot of the Search view. A tag is a way of searching.
+  - **The week** is the tray at the foot of the Folio view, sticky, so it stays in reach however far the tree is scrolled — the strip and one button, **Open today's note**. The list of recent Dailies went: every one is a note in the tree just above it, and the Overview already lists what you were last writing.
+  - Search is the magnifier rather than the word; a device left on Tags or Daily is migrated to the tab that holds them now.
+- **Settings (`⌘,`)**, with a button in the toolbar. Appearance keeps its own screen — it is long and it previews live — and Settings links to it, to NAS Sync and to the shortcuts dialog, so there is one door to all of them. Appearance's own key moves to `⌥⌘,`.
+- **You choose where Daily notes go.** `journal/YYYY/…` was hard-coded; the folder is now a setting, saved in the Folio (`daily.folder` in `.aml/config.yaml`) so both machines write to the same place — a per-device answer would leave the two calendar strips disagreeing. What you type is tidied, anything that would leave the Folio is refused and said so on screen, and notes already written are left where they are. The strip and its dots read the folder you chose.
+- `config.rs` gained `Preferences` alongside `Appearance`: same shape, same file, each keeping the other's settings intact.
+
 ### Drag-and-drop actually works, and a note asks where it belongs (2026-09-11)
 - **Dragging a note onto a folder now works in the app.** The code and its e2e test had been there since WP-1.1 and passed in the browser — two things stopped it reaching the desktop. Tauri installs an OS file-drop handler on the webview by default (`dragDropEnabled`), which swallows HTML5 drag events; AML accepts no dropped files from the desktop, so it is now off. And WebKit refuses to begin a drag from a `<button>` on `draggable` alone, which is why macOS was silent while every other engine was fine — the tree rows now carry `-webkit-user-drag: element`.
 - **A note in no Bounding is offered one**, as a floating capsule centred at the top of the page: a chip per Bounding in its own colour, click to file it. It never appears when there are no Boundings to offer, nor on a note that already has one, and dismissing it lasts while that note is open.

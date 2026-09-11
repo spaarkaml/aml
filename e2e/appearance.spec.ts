@@ -15,7 +15,8 @@ test.beforeEach(async ({ page }) => {
   await expect(page.getByTestId("layout-toggle")).toBeVisible();
   await page.getByRole("button", { name: "Open Folio…" }).click();
   await expect(page.getByTestId("breadcrumb")).toHaveText("Writing");
-  await page.keyboard.press(`${mod}+,`);
+  // ⌘, is Settings now (WP-3.10); Appearance keeps its own screen one key along.
+  await page.keyboard.press(`${mod}+Alt+,`);
   await expect(page.getByTestId("tokens")).toBeVisible();
 });
 
@@ -40,7 +41,7 @@ test("a colour is previewed as it changes, saved to the Folio, and resettable", 
   expect(await token(page, "bg")).toBe("#101820");
 
   // Reset puts AML's own colour back by removing the override entirely.
-  await page.keyboard.press(`${mod}+,`);
+  await page.keyboard.press(`${mod}+Alt+,`);
   await page.getByTestId("edit-ink").click();
   await page.getByTestId("reset-ink-bg").click();
   // Removing the override lets tokens.css win again — ADR-010's own Ink background.

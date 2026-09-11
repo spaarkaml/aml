@@ -104,67 +104,25 @@
   background: var(--aml-accent);
 }
 
+/* The one thing most often wanted from this tray, so it is a full-width button rather than
+   a chip: nothing else in the Browser competes with it. */
 .today {
   font: inherit;
-  font-size: var(--aml-size-xs);
-  padding: 3px 8px;
+  font-size: var(--aml-size-sm);
+  font-weight: var(--aml-weight-medium);
+  width: 100%;
+  height: var(--aml-row);
   border: 0;
   box-shadow: var(--aml-shadow-1);
   border-radius: var(--aml-radius-sm);
   background: var(--aml-surface);
   color: var(--aml-primary);
   cursor: default;
+  transition: background var(--aml-dur-1) var(--aml-ease);
 }
 
 .today:hover,
 .today:focus-visible {
   background: var(--aml-highlight);
   outline: none;
-}
-
-.title {
-  margin: var(--aml-space-1) 0 0;
-  font-size: var(--aml-size-xs);
-  font-weight: var(--aml-weight-semi);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--aml-text-3);
-}
-
-.list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.entry {
-  width: 100%;
-  font: inherit;
-  text-align: left;
-  padding: 3px 6px;
-  border: 0;
-  border-radius: var(--aml-radius-sm);
-  background: transparent;
-  color: inherit;
-  cursor: default;
-}
-
-.entry:hover,
-.entry:focus-visible {
-  background: var(--aml-highlight);
-  outline: none;
-}
-
-.entry[aria-current] {
-  background: var(--aml-highlight);
-  color: var(--aml-primary);
-  font-weight: var(--aml-weight-semi);
-}
-
-.empty {
-  margin: 0;
-  color: var(--aml-text-3);
 }

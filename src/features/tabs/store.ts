@@ -22,6 +22,8 @@ interface TabsState {
   setFolio: (root: string | null) => void;
   open: (path: string) => void;
   activate: (path: string, opts?: { history?: boolean }) => void;
+  /** Leaves the editor for the Overview without closing anything; Back returns (WP-3.10). */
+  showOverview: () => void;
   close: (path: string) => void;
   /** Closes every tab at `path` or inside it (after a folder is trashed). */
   closeWithin: (path: string) => void;
@@ -88,6 +90,18 @@ export const useTabsStore = create<TabsState>()(
           },
           back: pushHistory ? [...s.back, cur.active as string].slice(-MAX_HISTORY) : s.back,
           forward: pushHistory ? [] : s.forward,
+        }));
+      },
+
+      showOverview: () => {
+        const root = get().folioRoot;
+        if (!root) return;
+        const cur = get().current();
+        if (cur.active === null) return;
+        set((s) => ({
+          byFolio: { ...s.byFolio, [root]: { ...cur, active: null } },
+          back: [...s.back, cur.active as string].slice(-MAX_HISTORY),
+          forward: [],
         }));
       },
 

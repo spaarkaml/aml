@@ -130,3 +130,39 @@
   mask: var(--aml-chevron) center / contain no-repeat;
   transform: rotate(-90deg);
 }
+
+/* Home. The Folio's name is kept for screen readers and stays out of the way on screen —
+   the icon is the affordance, and the trail is shorter for it (WP-3.10). */
+.home {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  border: 0;
+  background: transparent;
+  color: var(--aml-text-2);
+  font: inherit;
+  padding: 2px var(--aml-space-1);
+  border-radius: var(--aml-radius-sm);
+  cursor: default;
+  transition:
+    background var(--aml-dur-1) var(--aml-ease),
+    color var(--aml-dur-1) var(--aml-ease);
+}
+
+.home:hover {
+  background: var(--aml-highlight);
+  color: var(--aml-text);
+}
+
+.home[aria-current="page"] {
+  color: var(--aml-text);
+}
+
+.homeName {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

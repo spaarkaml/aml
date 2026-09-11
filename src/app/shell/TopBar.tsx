@@ -2,6 +2,7 @@ import { current, type ModeSetting, useAppearanceStore } from "@/features/appear
 import { usePaletteStore } from "@/features/commands/paletteStore";
 import { commandRegistry, formatShortcut } from "@/features/commands/registry";
 import { useLayoutStore } from "@/features/layout/store";
+import { useSettingsStore } from "@/features/settings/store";
 import { Breadcrumb } from "@/features/tabs/Breadcrumb";
 import { TabStrip } from "@/features/tabs/TabStrip";
 import { SHORTCUTS } from "../commands";
@@ -19,6 +20,7 @@ export function TopBar() {
   const setting = useAppearanceStore((s) => (current(s).mode ?? "system") as ModeSetting);
   const cycleMode = useAppearanceStore((s) => s.cycle);
   const openPalette = usePaletteStore((s) => s.setOpen);
+  const openSettings = useSettingsStore((s) => s.setOpen);
 
   return (
     <header className={styles.topbar}>
@@ -54,6 +56,16 @@ export function TopBar() {
           data-testid="layout-toggle"
         >
           {layout === "desk" ? "Desk" : "Page"}
+        </button>
+        <button
+          type="button"
+          className={styles.iconButton}
+          onClick={() => openSettings(true)}
+          title={`Settings (${formatShortcut(commandRegistry.shortcutOf("settings.open") ?? SHORTCUTS.settings)})`}
+          aria-label="Settings"
+          data-testid="settings-open"
+        >
+          <Icon name="settings" />
         </button>
         <button
           type="button"

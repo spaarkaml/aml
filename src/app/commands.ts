@@ -15,6 +15,7 @@ import { useLayoutStore } from "@/features/layout/store";
 import { useOutlineStore } from "@/features/outline/store";
 import { useQuickOpenStore } from "@/features/quickopen/store";
 import { useSearchStore } from "@/features/search/store";
+import { useSettingsStore } from "@/features/settings/store";
 import { useSpellStore } from "@/features/spell/store";
 import { useSyncStore } from "@/features/sync/store";
 import { useTabsStore } from "@/features/tabs/store";
@@ -43,7 +44,9 @@ export const SHORTCUTS = {
   focus: "mod+alt+d",
   typewriter: "mod+alt+t",
   zen: "mod+alt+z",
-  appearance: "mod+,",
+  settings: "mod+,",
+  appearance: "mod+alt+,",
+  overview: "mod+shift+h",
 } as const;
 
 function activeTab(): string | null {
@@ -413,6 +416,22 @@ export const SHELL_COMMANDS: Command[] = [
     shortcut: SHORTCUTS.zen,
     global: true,
     run: () => useWritingStore.getState().toggleZen(),
+  },
+  {
+    id: "settings.open",
+    title: "Settings…",
+    group: "View",
+    shortcut: SHORTCUTS.settings,
+    global: true,
+    run: () => useSettingsStore.getState().setOpen(true),
+  },
+  {
+    id: "view.overview",
+    title: "Go to Overview",
+    group: "View",
+    shortcut: SHORTCUTS.overview,
+    global: true,
+    run: () => useTabsStore.getState().showOverview(),
   },
   {
     id: "appearance.settings",

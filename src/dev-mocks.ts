@@ -388,12 +388,40 @@ function mockRender(text: string, vars: { title: string; date: string; time: str
 const DAILY_RE = /(?:^|\/)(\d{4}-\d{2}-\d{2})\.md$/;
 
 function mockDailyDates(): string[] {
+  const dir = `${mockDailyFolder()}/`;
   const out = new Set<string>();
   for (const path of notes.keys()) {
-    const m = path.startsWith("journal/") ? DAILY_RE.exec(path) : null;
+    const m = path.startsWith(dir) ? DAILY_RE.exec(path) : null;
     if (m?.[1]) out.add(m[1]);
   }
   return [...out].sort().reverse();
+}
+
+/* ---- preferences (WP-3.10): the other half of .aml/config.yaml ---- */
+const PREFS_KEY = "aml.mock.preferences";
+const DEFAULT_DAILY_FOLDER = "journal";
+
+/** Mirrors `templates::daily_folder`: tidied, or refused for anything that leaves the Folio. */
+function mockCleanFolder(value: string | null): string | null {
+  const cleaned = (value ?? "")
+    .replace(/\\/g, "/")
+    .trim()
+    .replace(/^\/+|\/+$/g, "");
+  if (!cleaned || cleaned.split("/").some((p) => !p || p === "." || p === "..")) return null;
+  return cleaned;
+}
+
+function mockPreferences(): { dailyFolder: string | null } {
+  try {
+    const raw = localStorage.getItem(PREFS_KEY);
+    return raw ? { dailyFolder: null, ...JSON.parse(raw) } : { dailyFolder: null };
+  } catch {
+    return { dailyFolder: null };
+  }
+}
+
+function mockDailyFolder(): string {
+  return mockCleanFolder(mockPreferences().dailyFolder) ?? DEFAULT_DAILY_FOLDER;
 }
 
 /** The mock tree is nested, so a note in a new year folder needs that folder first. */
@@ -975,6 +1003,18 @@ export function installDevMocks(): void {
         localStorage.setItem(APPEARANCE_KEY, JSON.stringify(a.appearance));
         return null;
       }
+      case "preferences_read":
+        if (!state.folio) throw { kind: "noFolioOpen" };
+        return mockPreferences();
+      case "preferences_write": {
+        if (!state.folio) throw { kind: "noFolioOpen" };
+        const asked = ((a.preferences as { dailyFolder: string | null }).dailyFolder ?? "").trim();
+        const cleaned = mockCleanFolder(asked);
+        if (asked && !cleaned) throw { kind: "invalidPath", detail: asked };
+        const prefs = { dailyFolder: cleaned };
+        localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+        return prefs;
+      }
       case "templates_list": {
         if (!state.folio) throw { kind: "noFolioOpen" };
         return [...templates.entries()]
@@ -1000,18 +1040,19 @@ export function installDevMocks(): void {
         if (!state.folio) throw { kind: "noFolioOpen" };
         const date = String(a.date);
         const year = date.slice(0, 4);
-        const existing = [`journal/${year}/${date}.md`, `journal/${date}.md`].find((p) =>
+        const dir = mockDailyFolder();
+        const existing = [`${dir}/${year}/${date}.md`, `${dir}/${date}.md`].find((p) =>
           notes.has(p),
         );
         if (existing) return { path: existing, created: false };
-        const path = `journal/${year}/${date}.md`;
+        const path = `${dir}/${year}/${date}.md`;
         const text = mockRender(templates.get("daily") ?? "", {
           title: date,
           date,
           time: String(a.time),
         });
         notes.set(path, { text, mtime: Date.now() });
-        ensureFolder(`journal/${year}`);
+        ensureFolder(`${dir}/${year}`);
         insertNode(node(`${date}.md`, path, "note"));
         return { path, created: true };
       }

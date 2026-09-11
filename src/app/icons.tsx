@@ -25,7 +25,9 @@ export type IconName =
   | "folder"
   | "file"
   | "check"
-  | "trash";
+  | "trash"
+  | "home"
+  | "settings";
 
 /** Path data on a 16×16 grid. Stroked, never filled — see `Icon` below. */
 const PATHS: Record<IconName, string> = {
@@ -45,6 +47,11 @@ const PATHS: Record<IconName, string> = {
     "M2.2 4.5a1.5 1.5 0 0 1 1.5-1.5h2.2l1.4 1.6h5a1.5 1.5 0 0 1 1.5 1.5v5.4a1.5 1.5 0 0 1-1.5 1.5H3.7a1.5 1.5 0 0 1-1.5-1.5z",
   file: "M3.6 3.1a1 1 0 0 1 1-1h3.9l3.5 3.6v7.2a1 1 0 0 1-1 1H4.6a1 1 0 0 1-1-1zM8.4 2.2v3.6h3.6",
   check: "m3.4 8.4 3 3 6.2-6.6",
+  home: "M2.4 7.1 8 2.4l5.6 4.7M4.1 6.2v6.3a1 1 0 0 0 1 1h5.8a1 1 0 0 0 1-1V6.2",
+  // Sliders rather than a cog: at 16px a cog's teeth turn to mush, and macOS itself
+  // uses sliders for "the settings of this thing".
+  settings:
+    "M2.4 4.4h2.2M7.8 4.4h5.8M7.8 4.4a1.6 1.6 0 1 0-3.2 0 1.6 1.6 0 1 0 3.2 0M2.4 8h6.6M12.2 8h1.4M12.2 8a1.6 1.6 0 1 0-3.2 0 1.6 1.6 0 1 0 3.2 0M2.4 11.6h2.2M7.8 11.6h5.8M7.8 11.6a1.6 1.6 0 1 0-3.2 0 1.6 1.6 0 1 0 3.2 0",
   trash:
     "M2.8 4.4h10.4M6.2 4.4V3.1a1 1 0 0 1 1-1h1.6a1 1 0 0 1 1 1v1.3M4.2 4.4l.6 8.4a1 1 0 0 0 1 .9h4.4a1 1 0 0 0 1-.9l.6-8.4",
 };

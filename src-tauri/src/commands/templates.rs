@@ -57,7 +57,7 @@ pub struct DailyNote {
 #[specta::specta]
 pub fn daily_note(state: State<AppState>, date: String, time: String) -> Result<DailyNote> {
     with_folio(&state, |folio| {
-        let path = daily_path(&date)?;
+        let path = daily_path(&folio.daily_dir(), &date)?;
         if folio.resolve(&path)?.exists() {
             return Ok(DailyNote {
                 path,

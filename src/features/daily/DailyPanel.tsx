@@ -1,18 +1,18 @@
 import { Icon } from "@/app/icons";
-import { useEditorStore } from "@/features/editor/store";
 import styles from "./DailyPanel.module.css";
 import { dayOfMonth, longDate, todayIso, weekdayShort, weekLabel, weekOf } from "./dates";
 import { useDailyStore } from "./store";
 
-const RECENT = 10;
-
-/** The calendar strip: a week of Daily notes, and the ones you wrote most recently (WP-2.7). */
+/**
+ * The calendar strip and today's note, in the tray under the Folio tree (WP-3.10).
+ * The list of recent Dailies went: every one of them is a note in the tree above, and the
+ * Overview already lists what you were last writing.
+ */
 export function DailyPanel() {
   const dates = useDailyStore((s) => s.dates);
   const anchor = useDailyStore((s) => s.anchor);
   const open = useDailyStore((s) => s.open);
   const page = useDailyStore((s) => s.page);
-  const openPath = useEditorStore((s) => s.path);
   const today = todayIso();
   const has = new Set(dates);
   const week = weekOf(anchor);
@@ -66,32 +66,11 @@ export function DailyPanel() {
         type="button"
         className={styles.today}
         onClick={() => void open(today)}
+        title={longDate(today)}
         data-testid="daily-today"
       >
-        {has.has(today) ? "Open today" : "Start today"}
+        Open today&rsquo;s note
       </button>
-
-      {dates.length > 0 ? (
-        <>
-          <p className={styles.title}>Recent</p>
-          <ul className={styles.list} data-testid="daily-recent">
-            {dates.slice(0, RECENT).map((iso) => (
-              <li key={iso}>
-                <button
-                  type="button"
-                  className={styles.entry}
-                  onClick={() => void open(iso)}
-                  aria-current={openPath?.endsWith(`${iso}.md`) ? "true" : undefined}
-                >
-                  {longDate(iso)}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </>
-      ) : (
-        <p className={styles.empty}>No Daily notes yet.</p>
-      )}
     </div>
   );
 }

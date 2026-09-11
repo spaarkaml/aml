@@ -5,6 +5,7 @@ import { CommandPalette } from "@/features/commands/CommandPalette";
 import { useGlobalShortcuts } from "@/features/commands/useGlobalShortcuts";
 import { useLayoutStore } from "@/features/layout/store";
 import { QuickOpen } from "@/features/quickopen/QuickOpen";
+import { SettingsScreen } from "@/features/settings/SettingsScreen";
 import { SyncScreen } from "@/features/sync/SyncScreen";
 import { useWritingStore } from "@/features/writing/store";
 import type { AppInfo } from "@/ipc";
@@ -90,6 +91,7 @@ export function Shell({ info, left, right, children }: Props) {
       <QuickOpen />
       <SyncScreen />
       <AppearanceScreen />
+      <SettingsScreen />
     </div>
   );
 }

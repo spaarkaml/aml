@@ -17,7 +17,7 @@ interface DailyState {
   openToday: () => Promise<string | null>;
   /** Moves the strip by `weeks`; 0 returns it to today. */
   page: (weeks: number) => void;
-  /** Opens the left panel on the Daily view. */
+  /** Opens the left panel on the Folio view, where the calendar strip lives. */
   show: () => void;
 }
 
@@ -51,7 +51,7 @@ export const useDailyStore = create<DailyState>((set, get) => ({
   page: (weeks) => set({ anchor: weeks === 0 ? todayIso() : addDays(get().anchor, weeks * 7) }),
 
   show: () => {
-    useLayoutStore.getState().setLeftView("daily");
+    useLayoutStore.getState().setLeftView("folio");
     useLayoutStore.getState().openPanel("left");
   },
 }));

@@ -36,6 +36,15 @@ pub struct Appearance {
     pub ink: BTreeMap<String, String>,
 }
 
+/// Everything the Settings screen owns that is not appearance (WP-3.10). Optional in the same
+/// way: absent means the built-in behaviour, and is left out of the file entirely.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct Preferences {
+    /// Folder new Daily notes are written into. Absent means `journal`.
+    pub daily_folder: Option<String>,
+}
+
 /* ---------------- the file ---------------- */
 
 fn quote(value: &str) -> String {
@@ -147,6 +156,12 @@ pub fn appearance_of(settings: &BTreeMap<String, String>) -> Appearance {
     }
 }
 
+pub fn preferences_of(settings: &BTreeMap<String, String>) -> Preferences {
+    Preferences {
+        daily_folder: settings.get("daily.folder").cloned(),
+    }
+}
+
 fn put(settings: &mut BTreeMap<String, String>, key: &str, value: Option<String>) {
     match value {
         Some(v) if !v.is_empty() => {
@@ -200,6 +215,18 @@ pub fn with_appearance(
     settings
 }
 
+pub fn with_preferences(
+    mut settings: BTreeMap<String, String>,
+    preferences: &Preferences,
+) -> BTreeMap<String, String> {
+    put(
+        &mut settings,
+        "daily.folder",
+        preferences.daily_folder.clone(),
+    );
+    settings
+}
+
 impl Folio {
     pub fn settings(&self) -> Result<BTreeMap<String, String>> {
         let path = self.root().join(CONFIG_FILE);
@@ -250,6 +277,31 @@ mod tests {
         // A setting AML has nothing for is left out entirely rather than written empty.
         assert!(!text.contains("uiFont"));
         assert!(!text.contains("paragraphSpacing"));
+    }
+
+    #[test]
+    fn preferences_share_the_file_with_appearance() {
+        let settings = with_appearance(BTreeMap::new(), &sample());
+        let settings = with_preferences(
+            settings,
+            &Preferences {
+                daily_folder: Some("Notes/Days".into()),
+            },
+        );
+        let text = to_yaml(&settings);
+        // Its own section, one setting per line, alongside appearance rather than inside it.
+        assert!(text.contains("daily:\n  folder: \"Notes/Days\"\n"));
+        let read = parse(&text);
+        assert_eq!(
+            preferences_of(&read).daily_folder.as_deref(),
+            Some("Notes/Days")
+        );
+        assert_eq!(appearance_of(&read), sample());
+
+        // Clearing it removes the line rather than writing an empty one: absent means `journal`.
+        let cleared = with_preferences(read, &Preferences::default());
+        assert!(!to_yaml(&cleared).contains("daily:"));
+        assert_eq!(preferences_of(&cleared).daily_folder, None);
     }
 
     #[test]

@@ -337,16 +337,18 @@
 
 /* ---- left panel view switch (WP-2.4) ---- */
 
+/* Fills the panel body so the Browser's tray can sit at the foot of it rather than
+   wherever the tree happens to end. */
 .left {
   display: flex;
   flex-direction: column;
   gap: var(--aml-space-2);
-  min-height: 0;
+  min-height: 100%;
 }
 
-/* macOS segmented control: a recessed track with one raised segment. Five views never fit a
-   narrow panel on one line, and a ragged wrap reads as two controls — so it is a grid, and
-   the empty sixth cell is a deliberate gap rather than an accident of width. */
+/* macOS segmented control: a recessed track with one raised segment. Three views fit one
+   line in the narrowest panel, which is why there are three (WP-3.10); the grid keeps them
+   the same width whatever their labels, so Search's icon sits dead centre of its third. */
 .segmented {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -358,6 +360,10 @@
 
 .segment,
 .segmentActive {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--aml-row-sm);
   font: inherit;
   font-size: var(--aml-size-xs);
   font-weight: var(--aml-weight-medium);
@@ -384,6 +390,32 @@
   color: var(--aml-text);
   font-weight: var(--aml-weight-semi);
   box-shadow: var(--aml-shadow-1);
+}
+
+/* The bottom tray of the Browser: the week and today's note stay in reach however far the
+   tree is scrolled, the way a Finder sidebar keeps its footer. */
+.leftFooter {
+  position: sticky;
+  bottom: 0;
+  margin-top: auto;
+  padding: var(--aml-space-2) 0 var(--aml-space-1);
+  border-top: 1px solid var(--aml-muted);
+  background: var(--aml-bg);
+}
+
+/* A second list under the first (Tags below Search): separated, not boxed. */
+.leftSection {
+  padding-top: var(--aml-space-2);
+  border-top: 1px solid var(--aml-muted);
+}
+
+.leftLabel {
+  margin: 0 0 var(--aml-space-1);
+  font-size: var(--aml-size-xs);
+  font-weight: var(--aml-weight-semi);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--aml-text-3);
 }
 
 .placeholder {

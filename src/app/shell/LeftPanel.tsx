@@ -5,23 +5,39 @@ import { useFolioStore } from "@/features/folio/store";
 import { type LeftView, useLayoutStore } from "@/features/layout/store";
 import { SearchPanel } from "@/features/search/SearchPanel";
 import { TagsPanel } from "@/features/tags/TagsPanel";
+import { Icon } from "../icons";
 import styles from "./shell.module.css";
 
-const VIEWS: Array<{ id: LeftView; label: string }> = [
+/**
+ * Three views, so the control fits one line (WP-3.10). Tags and the Daily strip did not go
+ * away: each moved next to the thing it is reached from — tags under Search, the week under
+ * the Folio tree — which is one fewer tab and one fewer click to either.
+ */
+const VIEWS: Array<{ id: LeftView; label: string; icon?: "search" }> = [
   { id: "folio", label: "Folio" },
-  { id: "tags", label: "Tags" },
-  { id: "search", label: "Search" },
-  { id: "daily", label: "Daily" },
   { id: "boundings", label: "Boundings" },
+  { id: "search", label: "Search", icon: "search" },
 ];
 
-/** Left panel: Folio Browser, Tags, Search, Daily or Boundings, switched by a segmented control. */
 const PANELS: Record<LeftView, React.ReactNode> = {
-  folio: <FolioTree />,
-  tags: <TagsPanel />,
-  search: <SearchPanel />,
-  daily: <DailyPanel />,
+  folio: (
+    <>
+      <FolioTree />
+      <div className={styles.leftFooter}>
+        <DailyPanel />
+      </div>
+    </>
+  ),
   boundings: <BoundingsPanel />,
+  search: (
+    <>
+      <SearchPanel />
+      <section className={styles.leftSection} aria-label="Tags">
+        <p className={styles.leftLabel}>Tags</p>
+        <TagsPanel />
+      </section>
+    </>
+  ),
 };
 
 export function LeftPanel() {
@@ -37,11 +53,13 @@ export function LeftPanel() {
             key={v.id}
             type="button"
             aria-pressed={view === v.id}
+            aria-label={v.icon ? v.label : undefined}
+            title={v.icon ? v.label : undefined}
             className={view === v.id ? styles.segmentActive : styles.segment}
             onClick={() => setView(v.id)}
             data-testid={`left-view-${v.id}`}
           >
-            {v.label}
+            {v.icon ? <Icon name={v.icon} size={14} /> : v.label}
           </button>
         ))}
       </div>

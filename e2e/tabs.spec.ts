@@ -75,3 +75,21 @@ test("tabs are restored when the same Folio is opened again", async ({ page }) =
   await expect(page.getByRole("tab", { selected: true })).toContainText("Three");
   await expect(page.getByTestId("note-editor")).toBeVisible();
 });
+
+test("the Home crumb shows the Overview without closing anything, and Back returns", async ({
+  page,
+}) => {
+  await openNote(page, "Inbox");
+  await expect(page.getByTestId("note-editor")).toBeVisible();
+
+  await page.getByTestId("home").click();
+  await expect(page.getByTestId("overview")).toBeVisible();
+  await expect(page.getByTestId("note-editor")).toHaveCount(0);
+  // The tab is still open; Home is a place to go, not a way to close your work.
+  await expect(page.getByRole("tab")).toHaveCount(1);
+  await expect(page.getByTestId("home")).toHaveAttribute("aria-current", "page");
+
+  await page.keyboard.press(`${mod}+[`);
+  await expect(page.getByTestId("note-editor")).toContainText("Quick thoughts.");
+  await expect(page.getByTestId("home")).not.toHaveAttribute("aria-current", "page");
+});

@@ -34,7 +34,8 @@ test.beforeEach(async ({ page }) => {
   await page.reload();
   await page.getByRole("button", { name: "Open Folio…" }).click();
   await expect(page.getByTestId("breadcrumb")).toHaveText("Writing");
-  await page.getByTestId("left-view-daily").click();
+  // The strip is the tray under the Folio tree now, which is the Browser's default view.
+  await page.getByTestId("left-view-folio").click();
 });
 
 test("the calendar strip starts today's Daily from the template and marks the day", async ({
@@ -44,8 +45,6 @@ test("the calendar strip starts today's Daily from the template and marks the da
   await expect(page.getByTestId("daily-label")).toHaveText("This week");
   await expect(page.getByTestId(`day-${iso}`)).toHaveAttribute("aria-current", "date");
   await expect(page.getByTestId(`day-${iso}`)).not.toHaveAttribute("data-has", "");
-  // The Folio already has one Daily, written on a fixed date in the mock.
-  await expect(page.getByTestId("daily-recent")).toContainText("9 September 2026");
 
   await page.getByTestId("daily-today").click();
   await expect(page.getByRole("tab", { selected: true })).toContainText(iso);
@@ -53,7 +52,7 @@ test("the calendar strip starts today's Daily from the template and marks the da
   await expect(page.getByTestId("note-editor").locator("h1")).toHaveText(heading);
   await expect(page.getByTestId("note-editor")).toContainText("Yesterday:");
   await expect(page.getByTestId(`day-${iso}`)).toHaveAttribute("data-has", "");
-  await expect(page.getByTestId("daily-today")).toHaveText("Open today");
+  await expect(page.getByTestId("daily-today")).toHaveText("Open today\u2019s note");
 
   // Asking again opens the same note rather than writing over it.
   await page.getByTestId("note-editor").locator("h1").click();

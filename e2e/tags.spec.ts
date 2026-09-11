@@ -11,7 +11,8 @@ test.beforeEach(async ({ page }) => {
 test("Tags view nests tags with counts; selecting a tag lists and opens its notes", async ({
   page,
 }) => {
-  await page.getByTestId("left-view-tags").click();
+  // Tags live under Search now: one click to the tab, and they are at the foot of it.
+  await page.getByTestId("left-view-search").click();
   const tree = page.getByTestId("tags-tree");
   await expect(tree.getByTestId("tag-thesis")).toContainText("#thesis");
   await expect(tree.getByTestId("tag-thesis")).toContainText("2");

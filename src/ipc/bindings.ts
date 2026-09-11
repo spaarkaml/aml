@@ -70,6 +70,14 @@ export const commands = {
 	appearanceRead: () => typedError<Appearance, FolioError>(__TAURI_INVOKE("appearance_read")),
 	/**  Saves appearance to `.aml/config.yaml`, leaving every other setting in the file alone. */
 	appearanceWrite: (appearance: Appearance) => typedError<null, FolioError>(__TAURI_INVOKE("appearance_write", { appearance })),
+	/**  The Folio's preferences, or all-absent when it has none of its own. */
+	preferencesRead: () => typedError<Preferences, FolioError>(__TAURI_INVOKE("preferences_read")),
+	/**
+	 *  Saves preferences to `.aml/config.yaml`, leaving every other setting in the file alone.
+	 *  A Daily folder is tidied before it is written, and refused outright if it would put notes
+	 *  anywhere but inside the Folio.
+	 */
+	preferencesWrite: (preferences: Preferences) => typedError<Preferences, FolioError>(__TAURI_INVOKE("preferences_write", { preferences })),
 	/**  The templates in `_templates/`. */
 	templatesList: () => typedError<TemplateInfo[], FolioError>(__TAURI_INVOKE("templates_list")),
 	/**  Creates `path` from the named template, expanding its placeholders. Fails if it exists. */
@@ -285,6 +293,15 @@ export type PendingFolder = {
 	label: string,
 	offeredBy: string,
 	offeredByName: string,
+};
+
+/**
+ *  Everything the Settings screen owns that is not appearance (WP-3.10). Optional in the same
+ *  way: absent means the built-in behaviour, and is left out of the file entirely.
+ */
+export type Preferences = {
+	/**  Folder new Daily notes are written into. Absent means `journal`. */
+	dailyFolder: string | null,
 };
 
 export type ProjectInfo = {
