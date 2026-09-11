@@ -1,5 +1,6 @@
 import { EditorContent, useEditor } from "@tiptap/react";
 import { useCallback, useEffect, useMemo } from "react";
+import { BoundingPrompt } from "@/features/boundings/BoundingPrompt";
 import { LinkMenu } from "@/features/links/LinkMenu";
 import { SpellMenu } from "@/features/spell/SpellMenu";
 import { useWritingStore } from "@/features/writing/store";
@@ -83,6 +84,7 @@ export function NoteEditor() {
       data-scroll="editor"
       data-testid="note-editor"
     >
+      <BoundingPrompt />
       {conflict ? (
         <div className={styles.banner} role="alert">
           <span>

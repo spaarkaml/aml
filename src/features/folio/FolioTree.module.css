@@ -29,6 +29,10 @@
   overflow: hidden;
   text-overflow: ellipsis;
   transition: background var(--aml-dur-1) var(--aml-ease);
+  /* WebKit will not begin a drag from a <button> on `draggable` alone — it keeps the native
+     button behaviour instead — so dragging a note onto a folder did nothing on macOS while
+     working in every other engine. Chromium ignores this property. */
+  -webkit-user-drag: element;
 }
 
 .file {

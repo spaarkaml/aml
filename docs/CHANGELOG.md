@@ -4,6 +4,10 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### Drag-and-drop actually works, and a note asks where it belongs (2026-09-11)
+- **Dragging a note onto a folder now works in the app.** The code and its e2e test had been there since WP-1.1 and passed in the browser — two things stopped it reaching the desktop. Tauri installs an OS file-drop handler on the webview by default (`dragDropEnabled`), which swallows HTML5 drag events; AML accepts no dropped files from the desktop, so it is now off. And WebKit refuses to begin a drag from a `<button>` on `draggable` alone, which is why macOS was silent while every other engine was fine — the tree rows now carry `-webkit-user-drag: element`.
+- **A note in no Bounding is offered one**, as a floating capsule centred at the top of the page: a chip per Bounding in its own colour, click to file it. It never appears when there are no Boundings to offer, nor on a note that already has one, and dismissing it lasts while that note is open.
+
 ### Launch into your last Folio, and honest sync progress (2026-09-11)
 - **AML reopens the Folio you were last in.** The Welcome screen is now what it says it is — a first run. After that, launch lands you in your work; `folio.open` in the palette (⌘K → "Open Folio…") is the way to another one, and *Close Folio* brings Welcome back with your recent list. A Folio that has moved or been deleted falls through to Welcome with the reason on screen.
 - The shell renders nothing in the centre until it has decided where to land, so there is no flash of a screen you were not meant to see again.

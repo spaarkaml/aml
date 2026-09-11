@@ -1,0 +1,114 @@
+/* A floating capsule over the page: it belongs to the note, not to the chrome, so it rides
+   the page's own scroller and keeps the shell's hairlines out of the reading area. */
+.bar {
+  position: sticky;
+  top: var(--aml-space-2);
+  z-index: 5;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  gap: var(--aml-space-2);
+  max-width: 100%;
+  padding: var(--aml-space-1) var(--aml-space-15) var(--aml-space-1) var(--aml-space-3);
+  margin-bottom: var(--aml-space-4);
+  border-radius: var(--aml-radius-pill);
+  background: var(--aml-surface);
+  box-shadow: var(--aml-shadow-2);
+  animation: prompt-in var(--aml-dur-3) var(--aml-ease);
+}
+
+@keyframes prompt-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+.label {
+  flex: none;
+  font-size: var(--aml-size-xs);
+  font-weight: var(--aml-weight-semi);
+  color: var(--aml-text-3);
+}
+
+.chips {
+  display: flex;
+  align-items: center;
+  gap: var(--aml-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.chips::-webkit-scrollbar {
+  display: none;
+}
+
+/* Each chip carries its own Bounding's colour, tinted for the ground and full for the mark. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--aml-space-15);
+  height: var(--aml-row-sm);
+  padding: 0 var(--aml-space-2);
+  border: 0;
+  border-radius: var(--aml-radius-pill);
+  background: color-mix(in srgb, var(--chip) 14%, transparent);
+  color: var(--aml-text);
+  font: inherit;
+  font-size: var(--aml-size-sm);
+  font-weight: var(--aml-weight-medium);
+  white-space: nowrap;
+  cursor: default;
+  transition:
+    background var(--aml-dur-1) var(--aml-ease),
+    transform var(--aml-dur-1) var(--aml-ease);
+}
+
+.chip:hover {
+  background: color-mix(in srgb, var(--chip) 26%, transparent);
+}
+
+.chip:active {
+  transform: scale(0.97);
+}
+
+.swatch {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--aml-radius-sm);
+  background: var(--chip);
+  font-size: var(--aml-size-xs);
+  line-height: 1;
+}
+
+.more,
+.close {
+  flex: none;
+  width: var(--aml-row-sm);
+  height: var(--aml-row-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--aml-text-3);
+  cursor: default;
+  transition:
+    background var(--aml-dur-1) var(--aml-ease),
+    color var(--aml-dur-1) var(--aml-ease);
+}
+
+.more:hover,
+.close:hover {
+  background: var(--aml-highlight);
+  color: var(--aml-text);
+}

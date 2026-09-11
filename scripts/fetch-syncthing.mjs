@@ -8,8 +8,8 @@
  *   node scripts/fetch-syncthing.mjs x86_64-pc-windows-msvc
  */
 
-import { execFileSync } from "node:child_process";
 /* biome-ignore-all lint/suspicious/noConsole: build script talks through stdout */
+import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";

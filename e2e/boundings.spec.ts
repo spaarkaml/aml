@@ -99,3 +99,18 @@ test("renaming a note keeps it in its Boundings, and the palette can add to one"
   await expect(page.getByTestId("bounding-notes-academic")).toContainText("04 Method work");
   await expect(page.getByTestId("bounding-academic")).toContainText("2");
 });
+
+test("a note in no Bounding is offered the choice at the top of the page", async ({ page }) => {
+  const tree = page.getByTestId("folio-tree");
+  await tree.getByText("Inbox", { exact: true }).click();
+  const prompt = page.getByTestId("bounding-prompt");
+  await expect(prompt).toBeVisible();
+
+  // Picking one files the note and the prompt has nothing left to ask.
+  await page.getByTestId("bounding-prompt-academic").click();
+  await expect(prompt).toHaveCount(0);
+
+  // A note that is already in a Bounding is never asked.
+  await tree.getByText("Inbox", { exact: true }).click();
+  await expect(page.getByTestId("bounding-prompt")).toHaveCount(0);
+});
