@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ShortcutsDialog } from "@/features/commands/ShortcutsDialog";
 import { NoteEditor } from "@/features/editor/NoteEditor";
 import { useEditorStore } from "@/features/editor/store";
 import { useFolioStore } from "@/features/folio/store";
@@ -30,6 +31,7 @@ export function App() {
     <Shell info={info} left={<LeftPanel />} right={<ContextPanel />}>
       {folio ? notePath ? <NoteEditor /> : <Overview /> : <Welcome />}
       <RenameLinksDialog />
+      <ShortcutsDialog />
     </Shell>
   );
 }

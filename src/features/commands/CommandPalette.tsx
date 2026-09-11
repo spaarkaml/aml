@@ -114,7 +114,11 @@ export function CommandPalette() {
                   {c.group ? <span className={styles.group}>{c.group}</span> : null}
                   {c.title}
                 </span>
-                {c.shortcut ? <kbd className={styles.kbd}>{formatShortcut(c.shortcut)}</kbd> : null}
+                {commandRegistry.shortcutOf(c) ? (
+                  <kbd className={styles.kbd}>
+                    {formatShortcut(commandRegistry.shortcutOf(c) as string)}
+                  </kbd>
+                ) : null}
               </div>
             ))
           )}

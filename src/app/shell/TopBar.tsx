@@ -1,6 +1,6 @@
 import { useAppearanceStore } from "@/features/appearance/store";
 import { usePaletteStore } from "@/features/commands/paletteStore";
-import { formatShortcut } from "@/features/commands/registry";
+import { commandRegistry, formatShortcut } from "@/features/commands/registry";
 import { useLayoutStore } from "@/features/layout/store";
 import { Breadcrumb } from "@/features/tabs/Breadcrumb";
 import { TabStrip } from "@/features/tabs/TabStrip";
@@ -27,7 +27,7 @@ export function TopBar() {
         className={styles.iconButton}
         aria-pressed={left.open}
         onClick={() => togglePanel("left")}
-        title={`Browser (${formatShortcut(SHORTCUTS.leftPanel)})`}
+        title={`Browser (${formatShortcut(commandRegistry.shortcutOf("panel.left.toggle") ?? SHORTCUTS.leftPanel)})`}
       >
         ◧
       </button>
@@ -40,7 +40,7 @@ export function TopBar() {
           type="button"
           className={styles.iconButton}
           onClick={cycleMode}
-          title={`Appearance (${formatShortcut(SHORTCUTS.mode)})`}
+          title={`Appearance (${formatShortcut(commandRegistry.shortcutOf("appearance.cycle") ?? SHORTCUTS.mode)})`}
         >
           {MODE_LABEL[setting]}
         </button>
@@ -48,7 +48,7 @@ export function TopBar() {
           type="button"
           className={styles.iconButton}
           onClick={toggleLayout}
-          title={`Layout (${formatShortcut(SHORTCUTS.layout)})`}
+          title={`Layout (${formatShortcut(commandRegistry.shortcutOf("layout.toggle") ?? SHORTCUTS.layout)})`}
           data-testid="layout-toggle"
         >
           {layout === "desk" ? "Desk" : "Page"}
@@ -57,16 +57,16 @@ export function TopBar() {
           type="button"
           className={styles.iconButton}
           onClick={() => openPalette(true)}
-          title={`Commands (${formatShortcut(SHORTCUTS.palette)})`}
+          title={`Commands (${formatShortcut(commandRegistry.shortcutOf("palette.open") ?? SHORTCUTS.palette)})`}
         >
-          {formatShortcut(SHORTCUTS.palette)}
+          {formatShortcut(commandRegistry.shortcutOf("palette.open") ?? SHORTCUTS.palette)}
         </button>
         <button
           type="button"
           className={styles.iconButton}
           aria-pressed={right.open}
           onClick={() => togglePanel("right")}
-          title={`Context (${formatShortcut(SHORTCUTS.rightPanel)})`}
+          title={`Context (${formatShortcut(commandRegistry.shortcutOf("panel.right.toggle") ?? SHORTCUTS.rightPanel)})`}
         >
           ◨
         </button>

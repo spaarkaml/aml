@@ -4,6 +4,13 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### WP-2.9 — Command Palette complete and rebindable (2026-09-11)
+- Every `/` block is now a palette command too (group **Format**), from the same list the slash menu reads.
+- **Keyboard Shortcuts** dialog (`⌘/`, palette): every command with its key, click to record a new one, ↺ for the default, *Reset all*, and a filter. A key another command already holds is refused by name rather than quietly winning.
+- Rebindings are per device (`aml.keymap`) and survive a restart; `mod` records as ⌘ on macOS and Ctrl on Windows, so a binding means the same on both.
+- **Insert Footnote** now works while the caret is in the editor (`⌘⌥F` did nothing there before).
+- The e2e suite presses every bound shortcut and checks the command that ran is the one that owns it.
+
 ### WP-2.8 — Boundings and the Overview (2026-09-11)
 - **Boundings** (ADR-011): virtual, many-to-many groups of notes kept in `.aml/boundings.yaml` inside the Folio, one note per line so synced copies merge cleanly. Colour, icon and name; a note can be in as many as you like.
 - Boundings panel (fifth left-panel view): create, rename, recolour, delete, add or remove the open note with `+`/`−`, and list a Bounding's notes. Each Bounding is also a palette command, "Add to Bounding: …".

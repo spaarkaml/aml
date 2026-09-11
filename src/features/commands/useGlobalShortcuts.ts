@@ -16,6 +16,10 @@ export function useGlobalShortcuts(): void {
       if (!cmd) return;
       e.preventDefault();
       e.stopPropagation();
+      if (import.meta.env.DEV) {
+        // Exposed for e2e only: the suite presses every shortcut and checks what ran.
+        (window as unknown as { __amlLastCommand?: string }).__amlLastCommand = cmd.id;
+      }
       cmd.run();
     };
     window.addEventListener("keydown", onKey);

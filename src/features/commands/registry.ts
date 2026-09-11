@@ -74,6 +74,28 @@ export class CommandRegistry {
   private readonly listeners = new Set<Listener>();
   private cache: Command[] = [];
   private dirty = true;
+  /** Per-device rebindings: a string replaces the default, null unbinds it (WP-2.9). */
+  private overrides: Record<string, string | null> = {};
+
+  /** Replaces every rebinding at once; the keymap store owns this map. */
+  setOverrides(overrides: Record<string, string | null>): void {
+    this.overrides = overrides;
+    this.emit();
+  }
+
+  /** The shortcut a command answers to now: its rebinding if it has one, else its default. */
+  shortcutOf(command: Command | string): string | undefined {
+    const c = typeof command === "string" ? this.map.get(command) : command;
+    if (!c) return undefined;
+    const override = this.overrides[c.id];
+    if (override === null) return undefined;
+    return override ?? c.shortcut;
+  }
+
+  /** True when this command's shortcut is not the one it shipped with. */
+  isRebound(id: string): boolean {
+    return this.overrides[id] !== undefined;
+  }
 
   register(...cmds: Command[]): () => void {
     for (const c of cmds) {
@@ -89,6 +111,11 @@ export class CommandRegistry {
 
   get(id: string): Command | undefined {
     return this.map.get(id);
+  }
+
+  /** Every registered command, hidden ones included (the keymap has to see those too). */
+  all(): Command[] {
+    return [...this.map.values()];
   }
 
   /** Sorted list; the same array instance is returned until the registry changes. */
@@ -112,9 +139,10 @@ export class CommandRegistry {
   /** Returns the first command whose shortcut matches the event. */
   forEvent(e: KeyboardEvent, inTextField: boolean): Command | undefined {
     for (const c of this.map.values()) {
-      if (!c.shortcut) continue;
+      const shortcut = this.shortcutOf(c);
+      if (!shortcut) continue;
       if (inTextField && !c.global) continue;
-      if (matchShortcut(c.shortcut, e)) return c;
+      if (matchShortcut(shortcut, e)) return c;
     }
     return undefined;
   }

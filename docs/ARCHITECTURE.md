@@ -100,7 +100,8 @@ All results are `{status:"ok",data}|{status:"error",error:FolioError}`; `FolioEr
 
 - **Panels:** `left` (Folio Browser, Tags, Search, Daily or Boundings view) and `right` (Context: Outline + Properties + Backlinks sections). Each is closed, open-as-overlay, or pinned. Overlay closes on Escape or backdrop click; pinned takes layout space and is resizable.
 - **Layouts:** `desk` (Browser pinned) and `page` (nothing pinned). Persisted per device in localStorage key `aml.layout`.
-- **Commands:** everything user-triggerable registers in `commandRegistry` with an optional shortcut (`mod+shift+e` grammar). `useGlobalShortcuts` binds them; `CommandPalette` lists them. Shortcut table lives in `src/app/commands.ts` and is exercised by `e2e/shell.spec.ts`.
+- **Commands:** everything user-triggerable registers in `commandRegistry` with an optional default shortcut (`mod+shift+e` grammar). `useGlobalShortcuts` binds them; `CommandPalette` lists them; `ShortcutsDialog` (⌘/) rebinds them. The registry holds per-device overrides (`aml.keymap`, `features/commands/keymapStore.ts`) and `shortcutOf` is the single answer to "what key runs this" — the palette, the top bar and the key handler all ask it. Defaults live in `src/app/commands.ts`; `e2e/shortcuts.spec.ts` presses every bound shortcut and checks which command ran, using the dev-only `__amlCommands` / `__amlLastCommand` globals. Editor formatting keys (⌘B and friends) remain Tiptap's: ProseMirror sees a key press before it reaches the window listener, so one owner per key means leaving those alone for now.
+- **Blocks:** `features/editor/blocks.ts` is the one list of block actions; the `/` menu and the palette's `Format` commands both read it.
 - **Appearance:** `aml.appearance` setting `system|paper|ink` → `<html data-mode>`; tokens in `tokens.css`.
 
 ## Navigation model (WP-1.5)

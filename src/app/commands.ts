@@ -1,8 +1,10 @@
 import { useAppearanceStore } from "@/features/appearance/store";
 import { useBoundingsStore } from "@/features/boundings/store";
+import { useKeymapStore } from "@/features/commands/keymapStore";
 import { usePaletteStore } from "@/features/commands/paletteStore";
 import { type Command, commandRegistry } from "@/features/commands/registry";
 import { useDailyStore } from "@/features/daily/store";
+import { BLOCK_ITEMS } from "@/features/editor/blocks";
 import { getActiveEditor } from "@/features/editor/editorRef";
 import { insertFootnote } from "@/features/editor/footnotes";
 import { useEditorStore } from "@/features/editor/store";
@@ -36,6 +38,7 @@ export const SHORTCUTS = {
   search: "mod+shift+f",
   today: "mod+shift+d",
   rename: "f2",
+  shortcuts: "mod+/",
 } as const;
 
 function activeTab(): string | null {
@@ -159,6 +162,21 @@ const TAB_COMMANDS: Command[] = [
   },
 ];
 
+/**
+ * Every block the `/` menu offers is also a palette command, so one search field reaches
+ * all of them. They carry no default shortcut: inside the editor those keys are Tiptap's
+ * (see the Keyboard Shortcuts dialog), and two owners for one key would fight.
+ */
+export const BLOCK_COMMANDS: Command[] = BLOCK_ITEMS.map((item) => ({
+  id: `format.${item.id}`,
+  title: item.title,
+  group: "Format",
+  run: () => {
+    const editor = getActiveEditor();
+    if (editor) item.run(editor);
+  },
+}));
+
 export const SHELL_COMMANDS: Command[] = [
   {
     id: "folio.open",
@@ -196,6 +214,8 @@ export const SHELL_COMMANDS: Command[] = [
     title: "Insert Footnote",
     group: "Insert",
     shortcut: "mod+alt+f",
+    // Acts on the editor, so it has to work while the caret is in it.
+    global: true,
     run: () => {
       const e = getActiveEditor();
       if (e) insertFootnote(e);
@@ -358,6 +378,14 @@ export const SHELL_COMMANDS: Command[] = [
     run: () => useSpellStore.getState().toggle(),
   },
   {
+    id: "shortcuts.open",
+    title: "Keyboard Shortcuts…",
+    group: "View",
+    shortcut: SHORTCUTS.shortcuts,
+    global: true,
+    run: () => useKeymapStore.getState().setOpen(true),
+  },
+  {
     id: "appearance.cycle",
     title: "Appearance: Auto / Paper / Ink",
     group: "View",
@@ -371,7 +399,12 @@ let registered: (() => void) | null = null;
 
 /** Idempotent — safe under React StrictMode double-invocation and HMR. */
 export function registerShellCommands(): () => void {
-  if (!registered) registered = commandRegistry.register(...SHELL_COMMANDS);
+  if (!registered) registered = commandRegistry.register(...SHELL_COMMANDS, ...BLOCK_COMMANDS);
+  if (import.meta.env.DEV) {
+    // Exposed for e2e only: the suite reads the keymap to press every shortcut in it.
+    (window as unknown as { __amlCommands?: typeof commandRegistry }).__amlCommands =
+      commandRegistry;
+  }
   return () => {
     registered?.();
     registered = null;
