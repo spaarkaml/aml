@@ -156,14 +156,14 @@ Roughly 80–95 AI sessions. Stages 2 and 3 can overlap; 6 and 7 can overlap.
 
 | WP | Title |
 |---|---|
-| 5.1 | Project manifest (ADR-004): create Project, Binder order/tree, include-in-compile, per-item metadata synced with front matter |
-| 5.2 | Binder panel (replaces Browser inside a Project): drag reorder/nest, parts/chapters, split-at-cursor; **Project tabs** appear in the top bar |
-| 5.3 | Corkboard: card grid, synopsis in place, colour by label/status, reorder |
+| 5.1 | Project manifest (ADR-004): create Project, Binder order/tree, include-in-compile, per-item metadata synced with front matter — *done 2026-09-12* |
+| 5.2 | Binder panel (replaces Browser inside a Project): drag reorder/nest, parts/chapters, split-at-cursor; **Project tabs** appear in the top bar — *done 2026-09-12* |
+| 5.3 | Corkboard: card grid, synopsis in place, colour by label/status, reorder — *done 2026-09-12* |
 | 5.4 | Outliner: configurable columns, inline edit, sort/filter, totals |
 | 5.5 | Stitch: multiple notes as one continuous editor; writes back per file; separators |
 | 5.6 | Research panel: `research/` browser; PDF viewer with page-referenced quote copy (Q20); images; web clip |
 | 5.7 | Split view and Layouts: pin any panel, save/switch named Layouts, per device |
-| 5.8 | Project dashboard |
+| 5.8 | Project dashboard — *done 2026-09-12* |
 
 ### Quality Gate 5
 - [ ] Recreate a real manuscript as a Project; reorder in Corkboard → Binder/file order agree; Outliner totals match

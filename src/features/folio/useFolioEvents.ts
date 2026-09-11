@@ -3,6 +3,7 @@ import { useBoundingsStore } from "@/features/boundings/store";
 import { useDailyStore } from "@/features/daily/store";
 import { useEditorStore } from "@/features/editor/store";
 import { useLinkStore } from "@/features/links/store";
+import { useProjectStore } from "@/features/project/store";
 import { useQuickOpenStore } from "@/features/quickopen/store";
 import { useTagsStore } from "@/features/tags/store";
 import { useTypesStore } from "@/features/types/store";
@@ -26,6 +27,7 @@ export function useFolioEvents(): void {
         void useDailyStore.getState().refresh();
         void useBoundingsStore.getState().refresh();
         void useTypesStore.getState().refresh();
+        void useProjectStore.getState().refresh();
         for (const p of e.payload.paths) useEditorStore.getState().noteChangedOnDisk(p);
       })
       .then((off) => {

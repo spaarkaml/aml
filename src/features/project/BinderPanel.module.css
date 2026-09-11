@@ -1,0 +1,222 @@
+.binder {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  gap: var(--aml-space-1);
+  padding: var(--aml-space-1) var(--aml-space-2) var(--aml-space-2);
+  overflow: auto;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--aml-space-1);
+  min-width: 0;
+}
+
+.back,
+.title {
+  display: flex;
+  align-items: center;
+  gap: var(--aml-space-1);
+  height: var(--aml-row-sm);
+  font: inherit;
+  font-size: var(--aml-size-sm);
+  padding: 0 var(--aml-space-15);
+  border: 0;
+  border-radius: var(--aml-radius);
+  background: transparent;
+  color: var(--aml-text-2);
+  cursor: default;
+}
+
+.title {
+  min-width: 0;
+  font-weight: var(--aml-weight-semi);
+  color: var(--aml-text);
+}
+
+.titleText {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.back:hover,
+.title:hover {
+  background: var(--aml-highlight);
+}
+
+.toolbar {
+  display: flex;
+  gap: var(--aml-space-1);
+}
+
+.toolbar button {
+  flex: 1 1 auto;
+  height: var(--aml-row-sm);
+  font: inherit;
+  font-size: var(--aml-size-xs);
+  border: 0;
+  border-radius: var(--aml-radius);
+  background: var(--aml-highlight);
+  color: var(--aml-text-2);
+  cursor: default;
+}
+
+.toolbar button:hover {
+  color: var(--aml-text);
+}
+
+.empty {
+  margin: var(--aml-space-4) var(--aml-space-2);
+  font-size: var(--aml-size-sm);
+  color: var(--aml-text-3);
+}
+
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  margin: 0;
+}
+
+.part,
+.document {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: var(--aml-row-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--aml-space-15);
+  font: inherit;
+  font-size: var(--aml-size-md);
+  text-align: left;
+  padding-right: var(--aml-space-1);
+  border: 0;
+  border-radius: var(--aml-radius);
+  background: transparent;
+  color: var(--aml-text);
+  cursor: default;
+  white-space: nowrap;
+  overflow: hidden;
+  /* WebKit will not start a drag from a <button> on `draggable` alone (WP-2.1's lesson). */
+  -webkit-user-drag: element;
+}
+
+.part {
+  font-weight: var(--aml-weight-semi);
+}
+
+.part:hover,
+.document:hover {
+  background: var(--aml-highlight);
+}
+
+.part[aria-current],
+.document[aria-current] {
+  background: var(--aml-highlight);
+  color: var(--aml-primary);
+}
+
+.kind {
+  flex: none;
+  color: var(--aml-text-3);
+}
+
+.part .kind {
+  color: var(--aml-primary);
+}
+
+.name {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Left out of the compile: still yours, still editable, simply not in the book. */
+.part[data-out],
+.document[data-out] {
+  color: var(--aml-text-3);
+}
+
+.part[data-out] .name,
+.document[data-out] .name {
+  text-decoration: line-through;
+  text-decoration-color: var(--aml-text-3);
+}
+
+/* The insertion line, drawn on the row the drop would land against. */
+.part[data-band="before"],
+.document[data-band="before"] {
+  box-shadow: inset 0 2px 0 0 var(--aml-primary);
+}
+
+.part[data-band="after"],
+.document[data-band="after"] {
+  box-shadow: inset 0 -2px 0 0 var(--aml-primary);
+}
+
+.part[data-band="into"] {
+  background: var(--aml-highlight);
+  box-shadow: inset 0 0 0 2px var(--aml-primary);
+}
+
+.status {
+  flex: none;
+  font-size: var(--aml-size-xs);
+  color: var(--aml-text-3);
+  text-transform: lowercase;
+}
+
+.words {
+  flex: none;
+  min-width: 34px;
+  text-align: right;
+  font-size: var(--aml-size-xs);
+  color: var(--aml-text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The compile tick: quiet when it is on, because being in the book is the ordinary state. */
+.include {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  margin-left: var(--aml-space-05);
+  border: 0;
+  border-radius: var(--aml-radius-sm);
+  background: transparent;
+  color: var(--aml-text-3);
+  cursor: default;
+}
+
+.include[aria-pressed="false"] {
+  color: transparent;
+  box-shadow: inset 0 0 0 1px var(--aml-muted);
+}
+
+.include:hover {
+  background: var(--aml-highlight);
+  color: var(--aml-text-2);
+}
+
+.rename {
+  width: 100%;
+  height: var(--aml-row-sm);
+  font: inherit;
+  font-size: var(--aml-size-md);
+  padding: 0 var(--aml-space-15);
+  border: 1px solid var(--aml-primary);
+  border-radius: var(--aml-radius);
+  background: var(--aml-surface);
+  color: var(--aml-text);
+}

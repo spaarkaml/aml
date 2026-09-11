@@ -5,6 +5,7 @@ import { useDailyStore } from "@/features/daily/store";
 import { useEditorStore } from "@/features/editor/store";
 import { useBrowserStore } from "@/features/folio/browserStore";
 import { useFolioStore } from "@/features/folio/store";
+import { useProjectStore } from "@/features/project/store";
 import { useQuickOpenStore } from "@/features/quickopen/store";
 import { useSettingsStore } from "@/features/settings/store";
 import { useTagsStore } from "@/features/tags/store";
@@ -27,6 +28,7 @@ export function useTabsSync(): void {
   useEffect(() => {
     useTabsStore.getState().setFolio(root);
     useBrowserStore.getState().setRoot(root);
+    useProjectStore.getState().setRoot(root);
     if (root) {
       void useQuickOpenStore.getState().refresh();
       void useTagsStore.getState().refresh();
@@ -43,6 +45,7 @@ export function useTabsSync(): void {
       useDailyStore.getState().clear();
       useTemplatesStore.getState().clear();
       useBoundingsStore.getState().clear();
+      useProjectStore.getState().clear();
       useAppearanceStore.getState().clear();
       useSettingsStore.getState().clear();
     }

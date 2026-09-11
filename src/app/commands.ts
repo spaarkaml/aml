@@ -13,6 +13,8 @@ import { activeDir, useFolioStore } from "@/features/folio/store";
 import { useIndexStore } from "@/features/index/store";
 import { useLayoutStore } from "@/features/layout/store";
 import { useOutlineStore } from "@/features/outline/store";
+import { splitAtCursor } from "@/features/project/split";
+import { useProjectStore } from "@/features/project/store";
 import { useQuickOpenStore } from "@/features/quickopen/store";
 import { useSearchStore } from "@/features/search/store";
 import { useSettingsStore } from "@/features/settings/store";
@@ -46,6 +48,7 @@ export const SHORTCUTS = {
   typewriter: "mod+alt+t",
   zen: "mod+alt+z",
   settings: "mod+,",
+  split: "mod+shift+k",
   appearance: "mod+alt+,",
   overview: "mod+shift+h",
 } as const;
@@ -417,6 +420,38 @@ export const SHELL_COMMANDS: Command[] = [
     shortcut: SHORTCUTS.zen,
     global: true,
     run: () => useWritingStore.getState().toggleZen(),
+  },
+  {
+    id: "project.dashboard",
+    title: "Project: Dashboard",
+    group: "Project",
+    run: () => {
+      const project = useProjectStore.getState();
+      if (project.current) project.show("dashboard");
+    },
+  },
+  {
+    id: "project.corkboard",
+    title: "Project: Corkboard",
+    group: "Project",
+    run: () => {
+      const project = useProjectStore.getState();
+      if (project.current) project.show("corkboard");
+    },
+  },
+  {
+    id: "project.leave",
+    title: "Project: Back to the whole Folio",
+    group: "Project",
+    run: () => useProjectStore.getState().leave(),
+  },
+  {
+    id: "project.split",
+    title: "Split at Cursor",
+    group: "Project",
+    shortcut: SHORTCUTS.split,
+    global: true,
+    run: () => void splitAtCursor(),
   },
   {
     id: "stats.open",

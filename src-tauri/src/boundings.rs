@@ -38,22 +38,13 @@ pub struct Bounding {
     pub notes: Vec<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
-#[serde(rename_all = "camelCase")]
-pub struct ProjectInfo {
-    pub path: String,
-    pub name: String,
-    /// Notes anywhere under the Project folder.
-    pub notes: u32,
-}
-
 /* ---------------- the file ---------------- */
 
-fn quote(s: &str) -> String {
+pub(crate) fn quote(s: &str) -> String {
     format!("\"{}\"", s.replace('\\', "\\\\").replace('"', "\\\""))
 }
 
-fn unquote(s: &str) -> String {
+pub(crate) fn unquote(s: &str) -> String {
     let t = s.trim();
     if t.len() >= 2 && t.starts_with('"') && t.ends_with('"') {
         let mut out = String::with_capacity(t.len());
@@ -194,70 +185,6 @@ impl Folio {
         self.write_boundings(&list)?;
         Ok(list)
     }
-
-    /// Every folder holding a `project.aml.yaml`, with the notes under it (WP-5.1 fills these
-    /// in; the Overview lists whatever is there today).
-    pub fn projects(&self) -> Result<Vec<ProjectInfo>> {
-        let mut out = Vec::new();
-        collect_projects(self.root(), self.root(), 0, &mut out);
-        out.sort_by_key(|p| p.name.to_lowercase());
-        Ok(out)
-    }
-}
-
-fn collect_projects(
-    root: &std::path::Path,
-    dir: &std::path::Path,
-    depth: usize,
-    out: &mut Vec<ProjectInfo>,
-) {
-    if depth > 4 {
-        return;
-    }
-    let Ok(entries) = fs::read_dir(dir) else {
-        return;
-    };
-    for entry in entries.flatten() {
-        let path = entry.path();
-        if !path.is_dir() {
-            continue;
-        }
-        let name = entry.file_name().to_string_lossy().to_string();
-        if crate::folio::is_ignored_name(&name) {
-            continue;
-        }
-        if path.join("project.aml.yaml").is_file() {
-            out.push(ProjectInfo {
-                path: path
-                    .strip_prefix(root)
-                    .map(|p| p.to_string_lossy().replace('\\', "/"))
-                    .unwrap_or_default(),
-                name,
-                notes: count_notes(&path),
-            });
-        } else {
-            collect_projects(root, &path, depth + 1, out);
-        }
-    }
-}
-
-fn count_notes(dir: &std::path::Path) -> u32 {
-    let Ok(entries) = fs::read_dir(dir) else {
-        return 0;
-    };
-    let mut n = 0;
-    for entry in entries.flatten() {
-        let path = entry.path();
-        if path.is_dir() {
-            n += count_notes(&path);
-        } else if path
-            .extension()
-            .is_some_and(|e| e.eq_ignore_ascii_case("md"))
-        {
-            n += 1;
-        }
-    }
-    n
 }
 
 /// note path -> the names of the Boundings holding it, for `bounding:` searches.
@@ -372,7 +299,7 @@ mod tests {
     }
 
     #[test]
-    fn writes_reads_and_lists_projects_in_a_folio() {
+    fn writes_and_reads_boundings_in_a_folio() {
         let dir = tempfile::tempdir().unwrap();
         let folio = Folio::create(dir.path(), Some("Writing")).unwrap();
         assert!(folio.boundings().unwrap().is_empty());
@@ -385,22 +312,5 @@ mod tests {
             map["Thesis/chapters/03 Influence networks.md"],
             ["Academic"]
         );
-
-        let root = folio.root();
-        fs::create_dir_all(root.join("The Salt Road/part one")).unwrap();
-        fs::write(
-            root.join("The Salt Road/project.aml.yaml"),
-            "title: The Salt Road\n",
-        )
-        .unwrap();
-        fs::write(root.join("The Salt Road/one.md"), "#").unwrap();
-        fs::write(root.join("The Salt Road/part one/two.md"), "#").unwrap();
-        fs::create_dir_all(root.join("Thesis")).unwrap();
-        fs::write(root.join("Thesis/loose.md"), "#").unwrap();
-
-        let projects = folio.projects().unwrap();
-        assert_eq!(projects.len(), 1);
-        assert_eq!(projects[0].path, "The Salt Road");
-        assert_eq!(projects[0].notes, 2);
     }
 }

@@ -46,8 +46,9 @@ test("words match at word starts and field terms narrow the results", async ({ p
   await expect(results(page)).toContainText("04 Methods");
 
   await search(page, "status:drafting");
-  await expect(page.getByTestId("search-summary")).toHaveText("1 note");
+  await expect(page.getByTestId("search-summary")).toHaveText("3 notes");
   await expect(results(page)).toContainText("03 Influence networks");
+  await expect(results(page)).toContainText("01 Arrival");
 
   await search(page, '"needs a table"');
   await expect(results(page).locator("mark")).toHaveText("needs a table");

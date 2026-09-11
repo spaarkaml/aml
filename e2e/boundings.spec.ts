@@ -15,7 +15,8 @@ test("the Overview is the home screen: Boundings, the week and recents", async (
   await expect(overview).toContainText("Writing");
   await expect(page.getByTestId("overview-bounding-academic")).toContainText("Academic");
   await expect(page.getByTestId("overview-bounding-academic")).toContainText("2 notes");
-  await expect(overview).toContainText("Stage 5"); // no Projects yet
+  // Projects cluster beside the Boundings (WP-5.1): the mock Folio holds one book.
+  await expect(page.getByTestId("overview-project-The Salt Road")).toContainText("The Salt Road");
 
   // The week bar reaches the same Daily notes as the Daily panel.
   const iso = await page.evaluate(() => {

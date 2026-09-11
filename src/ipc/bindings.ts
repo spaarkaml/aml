@@ -66,6 +66,36 @@ export const commands = {
 	boundingRemove: (id: string, paths: string[]) => typedError<Bounding[], FolioError>(__TAURI_INVOKE("bounding_remove", { id, paths })),
 	/**  Every folder in the Folio holding a `project.aml.yaml`. */
 	projectsList: () => typedError<ProjectInfo[], FolioError>(__TAURI_INVOKE("projects_list")),
+	projectRead: (path: string) => typedError<Project, FolioError>(__TAURI_INVOKE("project_read", { path })),
+	/**
+	 *  Turns a folder into a Project, creating the folder if it is not there yet. Whatever is
+	 *  already in it becomes the Binder, in the Browser's order.
+	 */
+	projectCreate: (path: string, title: string) => typedError<Project, FolioError>(__TAURI_INVOKE("project_create", { path, title })),
+	/**
+	 *  Saves the Project's title and its goal. A field left out is unchanged; an empty target or
+	 *  deadline clears it.
+	 */
+	projectWrite: (path: string, title: string | null, target: number | null, deadline: string | null) => typedError<Project, FolioError>(__TAURI_INVOKE("project_write", { path, title, target, deadline })),
+	/**
+	 *  Sets the Binder order: `order` is the whole Binder, project-relative, in the order it is
+	 *  to be read. Paths the folder does not hold are kept — a note that has not synced yet
+	 *  still has its place waiting.
+	 */
+	projectOrder: (path: string, order: string[]) => typedError<Project, FolioError>(__TAURI_INVOKE("project_order", { path, order })),
+	/**
+	 *  Includes or excludes one Binder item from a compile. Excluding a part excludes what is
+	 *  under it, so only the part itself is written down.
+	 */
+	projectInclude: (path: string, item: string, include: boolean) => typedError<Project, FolioError>(__TAURI_INVOKE("project_include", { path, item, include })),
+	/**
+	 *  Writes a card's synopsis, label or status onto the note's own front matter (ADR-004:
+	 *  what belongs to the document lives in the document). A field left out is unchanged; an
+	 *  empty one is removed from the note.
+	 */
+	projectCardWrite: (path: string, note: string, synopsis: string | null, label: string | null, status: string | null) => typedError<Project, FolioError>(__TAURI_INVOKE("project_card_write", { path, note, synopsis, label, status })),
+	/**  The Project folder a note belongs to, or null — the innermost one when they nest. */
+	projectOfNote: (path: string) => typedError<string | null, FolioError>(__TAURI_INVOKE("project_of_note", { path })),
 	/**  The Folio's appearance settings, or all-absent when it has none of its own. */
 	appearanceRead: () => typedError<Appearance, FolioError>(__TAURI_INVOKE("appearance_read")),
 	/**  Saves appearance to `.aml/config.yaml`, leaving every other setting in the file alone. */
@@ -192,6 +222,23 @@ export type Backlink = {
 	/**  Nearest heading above the link, for jumping to the right section. */
 	section: string | null,
 	kind: string,
+};
+
+/**  One row of the Binder: a folder (a part) or a note (a document). */
+export type BinderItem = {
+	/**  Folio-relative, for opening it. */
+	path: string,
+	/**  Project-relative, as the manifest names it. */
+	rel: string,
+	name: string,
+	kind: EntryKind,
+	depth: number,
+	/**  False when this item, or a part above it, is excluded from a compile. */
+	include: boolean,
+	words: number,
+	synopsis: string,
+	label: string,
+	status: string,
 };
 
 export type Bounding = {
@@ -346,6 +393,19 @@ export type Preferences = {
 	dailyGoal: number | null,
 };
 
+export type Project = {
+	/**  Folio-relative path of the Project folder. */
+	path: string,
+	/**  The folder's name. */
+	name: string,
+	/**  The manifest's title, which defaults to the folder's name. */
+	title: string,
+	target: number | null,
+	deadline: string | null,
+	binder: BinderItem[],
+};
+
+/**  A Project folder as the Overview lists it, without reading its manifest. */
 export type ProjectInfo = {
 	path: string,
 	name: string,

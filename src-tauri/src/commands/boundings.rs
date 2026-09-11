@@ -2,7 +2,7 @@
 
 use tauri::State;
 
-use crate::boundings::{find, slug, Bounding, ProjectInfo, PALETTE};
+use crate::boundings::{find, slug, Bounding, PALETTE};
 use crate::folio::{Folio, FolioError, Result};
 use crate::state::AppState;
 
@@ -132,11 +132,4 @@ pub fn bounding_remove(
             Ok(())
         })
     })
-}
-
-/// Every folder in the Folio holding a `project.aml.yaml`.
-#[tauri::command]
-#[specta::specta]
-pub fn projects_list(state: State<AppState>) -> Result<Vec<ProjectInfo>> {
-    with_folio(&state, |folio| folio.projects())
 }

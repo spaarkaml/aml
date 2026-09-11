@@ -4,6 +4,35 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### WP-5.8 — Project dashboard (2026-09-12)
+- **The Project's own goal, at last.** WP-3.4 attached goals to a *note* because ADR-011 puts a book's goal in `project.aml.yaml` and nothing wrote that file yet. It does now: `target` and `deadline` are manifest keys, so a book's goal follows the book between machines, and the arithmetic is the same tested arithmetic — progress, days left, words a day.
+- Progress counts **the words a compile would take**, not every word in the folder: a chapter you have decided to leave out is not progress towards the book.
+- Words, compiled words, documents, parts and — only when there are any — how many documents are left out. **Where the words are** is by part with a bar against the longest, the same shape as Statistics' per-heading table one level up; **by status** is the other axis, with the documents that have no status listed last rather than hidden, because untouched is a state too.
+- Title, target and deadline are edited here, and are the only things on the screen that write to the manifest.
+
+### WP-5.3 — Corkboard (2026-09-12)
+- **One card per document**, grouped by part, in Binder order: what the book is about, at a glance.
+- **The board holds nothing of its own.** A card's synopsis, label and status are the note's own front matter (ADR-004), so what you type is legible in the file, in the Properties panel and to anything else that reads markdown. There is no board file and nothing to reconcile — and writing one changes exactly one line of the note, leaving key order, comments and quoting style as they were.
+- **Moving a card moves the document.** There is one order and the Binder is it, so a card drag runs the same plan a Binder drag runs.
+- **Colour by status, by label, or off.** The values are free text, so nobody chose the colours: they are a stable hash over the ADR-010 palette, which means the same word is the same colour in every Project, on every machine, for ever — with a key beside the control saying which is which. The colour is a band at the head of the card and never the whole card: a tinted card makes its own text harder to read, and the text is the point.
+
+### WP-5.2 — Binder panel (2026-09-12)
+- **Inside a Project the Browser becomes the book**: parts and documents in reading order, which is the order a compile will use. The Folio tab becomes the Binder rather than a fourth tab joining the three WP-3.10 settled on, and the panel's header is the way back out.
+- **A Project chip in the top bar** names the book and opens its dashboard. Which Project you are in is per device and per Folio (ADR-004) and is remembered between launches.
+- **Dragging: order is the manifest, nesting is the disk.** A row's outer thirds are an insertion line and nothing on disk moves; a part's middle third nests, which *moves the file*, because the Binder's structure is the folder's and there is no second truth to keep in step. The move happens first — a rename that failed must not leave an order pointing at somewhere the note never went — and it goes through the same rename that offers to rewrite links into the moved note.
+- **Include in the compile**: the tick at the end of each row, quiet when it is on because being in the book is the ordinary state. Excluding a part excludes everything under it, so only the part is written down.
+- **Split at cursor (⌘⇧K).** Everything after the caret becomes a new document beside this one, named after its first heading, placed straight after it in the Binder, and opened. A caret at the top of a block splits *above* it, so the half left behind keeps no empty heading. The tail is written to its own file **before** a character is removed from the note it came from, so a failure anywhere leaves the text in two places rather than none — which is what makes it safe without the snapshot engine ADR-006 wants and WP-4.1 will build.
+
+### WP-5.1 — Project manifest (2026-09-12)
+- **A folder with a `project.aml.yaml` is a Project**: an ordered Binder, what a compile leaves out, and the book's own goal.
+- **The folder is the structure; the manifest is the order.** A part is a folder, a document is a note, nesting is nesting. Two trees would need reconciling on every sync, every rename and every file dropped in by hand, and one of them would always be wrong.
+- **Nothing in the manifest is load-bearing.** The Binder is reconciled against the folder on every read: a note that arrived over Syncthing appears whether or not it is listed; a line naming a note that has gone is ignored on screen but kept in the file, because the likeliest reason a note is missing is that it has not synced yet. Reading a Project never writes to disk. Delete the manifest and you have a folder of markdown in alphabetical order, which is what you had before.
+- **One item per line**, paths relative to the Project folder, and leaving a scene out of the compile is *adding a line* to `exclude:` rather than editing one — the same merge argument that shapes everything under `.aml/`.
+- **Keys this version does not understand are kept.** Stage 6's compile presets will live in this file, and ADR-004's rule is that an older AML must never silently drop a newer one's settings; a test writes a `presets:` block through a full read-modify-write cycle and asserts it survives.
+- **Per-item metadata is front matter.** `synopsis`, `label` and `status` are keys in the document, not rows in the manifest — legible everywhere, and nothing to keep in step. `front_matter.rs` changes one line and leaves the rest of someone's YAML exactly as they wrote it.
+- Word counts and card properties come from the index in one query per Project, the way `types_by_note` does; a Folio still indexing shows zeroes rather than failing.
+- A new `book` icon, "Make this a Project" in the Browser's folder menu, and "New Project…" on the Overview, which now lists real Projects instead of a promise about Stage 5.
+
 ### WP-3.9 — Callouts as nodes (2026-09-12)
 - **`> [!warning] Read this` is what it looks like now** — a tinted panel with a coloured bar and a real, editable title — instead of a monospace Raw chip. Not a byte of what is written to disk changes: the corpus file moved from *expect: raw* to *expect: lossless*, which is Quality Gate 3's "callout Raw count is 0".
 - **Read from the blockquote's own source, not from the parse tree.** mdast joins the title line and the first body line into one paragraph with a soft break; separating them again inside the tree means splitting text nodes around a newline. Reading the lines that are already there is both simpler and exact — and because both halves are then parsed as markdown in their own right, emphasis in a title survives, a `[[wiki link]]` in the body is still a wiki link, and a callout nested inside another becomes a nested callout for free.

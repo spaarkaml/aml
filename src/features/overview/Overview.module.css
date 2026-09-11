@@ -255,3 +255,35 @@
   white-space: nowrap;
   max-width: 45%;
 }
+
+/* "New Project…" — a quiet link under the cluster, because making one is rare and the
+   clusters are what the screen is for. */
+.newProject {
+  align-self: flex-start;
+  font: inherit;
+  font-size: var(--aml-size-sm);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--aml-primary);
+  cursor: default;
+  text-decoration: underline;
+}
+
+.newProjectField {
+  align-self: flex-start;
+  width: 240px;
+  height: var(--aml-row);
+  font: inherit;
+  font-size: var(--aml-size-md);
+  padding: 0 var(--aml-space-2);
+  border: 0;
+  border-radius: var(--aml-radius-sm);
+  background: var(--aml-surface);
+  color: var(--aml-text);
+  box-shadow: var(--aml-shadow-1);
+}
+
+.newProjectField:focus {
+  outline: 2px solid var(--aml-primary);
+}

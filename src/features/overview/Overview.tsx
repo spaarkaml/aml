@@ -1,9 +1,10 @@
+import { useState } from "react";
 import { useBoundingsStore } from "@/features/boundings/store";
 import { dayOfMonth, longDate, todayIso, weekdayShort, weekOf } from "@/features/daily/dates";
 import { useDailyStore } from "@/features/daily/store";
-import { useBrowserStore } from "@/features/folio/browserStore";
 import { useFolioStore } from "@/features/folio/store";
 import { useLayoutStore } from "@/features/layout/store";
+import { useProjectStore } from "@/features/project/store";
 import { openNoteAt } from "@/features/quickopen/store";
 import { useTabsStore } from "@/features/tabs/store";
 import { baseName, parentDir } from "@/lib/paths";
@@ -18,13 +19,12 @@ const RECENTS = 8;
 export function Overview() {
   const folio = useFolioStore((s) => s.folio);
   const boundings = useBoundingsStore((s) => s.list);
-  const projects = useBoundingsStore((s) => s.projects);
+  const projects = useProjectStore((s) => s.list);
+  const enterProject = useProjectStore((s) => s.enter);
   const showBounding = useBoundingsStore((s) => s.show);
   const dates = useDailyStore((s) => s.dates);
   const openDaily = useDailyStore((s) => s.open);
   const recent = useTabsStore((s) => s.current().recents ?? []);
-  const reveal = useBrowserStore((s) => s.reveal);
-  const setLeftView = useLayoutStore((s) => s.setLeftView);
   const openPanel = useLayoutStore((s) => s.openPanel);
   const today = todayIso();
   const week = weekOf(today);
@@ -99,8 +99,8 @@ export function Overview() {
         <h2 className={styles.title}>Projects</h2>
         {projects.length === 0 ? (
           <p className={styles.empty}>
-            A Project is a folder with a manifest; the Binder and Compile arrive with them in Stage
-            5.
+            A Project is a folder with a manifest — a book, a thesis — with its own Binder,
+            Corkboard and goal. <NewProject />
           </p>
         ) : (
           <ul className={styles.tiles} data-testid="overview-projects">
@@ -110,8 +110,7 @@ export function Overview() {
                   type="button"
                   className={styles.tile}
                   onClick={() => {
-                    reveal(p.path);
-                    setLeftView("folio");
+                    void enterProject(p.path);
                     openPanel("left");
                   }}
                   data-testid={`overview-project-${p.path}`}
@@ -125,6 +124,7 @@ export function Overview() {
             ))}
           </ul>
         )}
+        {projects.length > 0 ? <NewProject /> : null}
       </section>
 
       {recent.length > 0 ? (
@@ -147,5 +147,54 @@ export function Overview() {
         </section>
       ) : null}
     </div>
+  );
+}
+
+/**
+ * Turning a folder into a Project is the whole of "New Project": the manifest joins the
+ * files that are already there, and nothing moves (ADR-004).
+ */
+function NewProject() {
+  const create = useProjectStore((s) => s.create);
+  const folio = useFolioStore((s) => s.folio);
+  const [naming, setNaming] = useState(false);
+  const [name, setName] = useState("");
+  if (!folio) return null;
+  if (!naming)
+    return (
+      <button
+        type="button"
+        className={styles.newProject}
+        onClick={() => setNaming(true)}
+        data-testid="new-project"
+      >
+        New Project…
+      </button>
+    );
+  const commit = () => {
+    const clean = name.trim().replace(/[/\\]/g, "-");
+    setNaming(false);
+    setName("");
+    if (clean) void create(clean);
+  };
+  return (
+    <input
+      // biome-ignore lint/a11y/noAutofocus: the field appears because the user asked for it
+      autoFocus
+      className={styles.newProjectField}
+      value={name}
+      placeholder="Name of the Project"
+      aria-label="Name of the Project"
+      data-testid="new-project-name"
+      onChange={(e) => setName(e.target.value)}
+      onBlur={commit}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") commit();
+        if (e.key === "Escape") {
+          setName("");
+          setNaming(false);
+        }
+      }}
+    />
   );
 }

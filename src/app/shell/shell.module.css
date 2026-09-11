@@ -37,6 +37,37 @@
   white-space: nowrap;
 }
 
+/* The Project chip (WP-5.2): which book you are in, always in the same place, and the way
+   back to its dashboard. It sits before the note tabs because it contains them. */
+.projectTab {
+  display: flex;
+  align-items: center;
+  gap: var(--aml-space-1);
+  flex: none;
+  max-width: 180px;
+  height: var(--aml-row-sm);
+  padding: 0 var(--aml-space-2);
+  margin-left: var(--aml-space-1);
+  font: inherit;
+  font-size: var(--aml-size-sm);
+  font-weight: var(--aml-weight-medium);
+  border: 0;
+  border-radius: var(--aml-radius-pill);
+  background: var(--aml-highlight);
+  color: var(--aml-text-2);
+  cursor: default;
+}
+
+.projectTab:hover {
+  color: var(--aml-text);
+}
+
+.projectName {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
 .tabs {
   display: flex;
   align-items: center;

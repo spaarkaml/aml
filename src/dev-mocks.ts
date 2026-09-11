@@ -34,6 +34,27 @@ const notes = new Map<string, { text: string; mtime: number }>([
   ],
   ["Inbox.md", { text: "Quick thoughts.\n", mtime: 1_700_000_000_000 }],
   [
+    "The Salt Road/part one/01 Arrival.md",
+    {
+      text: "---\nsynopsis: She reaches the salt flats at dusk.\nstatus: drafting\nlabel: Scene\n---\n\n# Arrival\n\nThe flats went on past where the light gave out, and she walked into them anyway.\n",
+      mtime: 1_700_000_000_000,
+    },
+  ],
+  [
+    "The Salt Road/part one/02 The road.md",
+    {
+      text: "---\nstatus: drafting\n---\n\n# The road\n\nThree days east, and the water ran out on the second.\n",
+      mtime: 1_700_000_000_000,
+    },
+  ],
+  [
+    "The Salt Road/part two/03 Salt.md",
+    {
+      text: "---\nstatus: revised\nlabel: Scene\n---\n\n# Salt\n\nWhat the lake left behind was worth more than the crossing cost.\n",
+      mtime: 1_700_000_000_000,
+    },
+  ],
+  [
     "journal/2026-09-09.md",
     {
       text: "# Tuesday\n\nReworked the interviews section of 04 Methods; the methodology needs a table. #thesis #journal\n",
@@ -620,6 +641,127 @@ function readAppearance(): MockAppearance {
   }
 }
 
+/* ---- Projects (WP-5.1–5.3, 5.8): the shape of src-tauri/src/project.rs ---- */
+
+interface MockManifest {
+  title: string;
+  target: number | null;
+  deadline: string | null;
+  binder: string[];
+  exclude: string[];
+}
+
+const manifests = new Map<string, MockManifest>([
+  [
+    "The Salt Road",
+    {
+      title: "The Salt Road",
+      target: 90_000,
+      deadline: null,
+      binder: [],
+      exclude: [],
+    },
+  ],
+]);
+
+/** Words outside the front matter — the same rule the index uses. */
+function mockWords(text: string): number {
+  const body = /^---\n[\s\S]*?\n---\n?/.test(text)
+    ? text.replace(/^---\n[\s\S]*?\n---\n?/, "")
+    : text;
+  return body.split(/\s+/).filter(Boolean).length;
+}
+
+function mockFm(text: string, key: string): string {
+  const front = /^---\n([\s\S]*?)\n---/.exec(text)?.[1];
+  if (!front) return "";
+  const line = front.split("\n").find((l) => !/^\s/.test(l) && l.split(":")[0]?.trim() === key);
+  const raw = line?.slice(line.indexOf(":") + 1).trim() ?? "";
+  return raw.startsWith('"') && raw.endsWith('"') && raw.length >= 2
+    ? raw.slice(1, -1).replace(/\\"/g, '"')
+    : raw;
+}
+
+/** Mirrors front_matter::set_keys: one line changes, everything else is left alone. */
+function mockSetFm(text: string, pairs: Array<[string, string]>): string {
+  const has = /^---\n([\s\S]*?)\n---\n?/.exec(text);
+  const lines = has?.[1] ? (has[1] as string).split("\n") : [];
+  const body = has ? text.slice(has[0].length) : text;
+  for (const [key, raw] of pairs) {
+    const value = raw.trim();
+    const at = lines.findIndex((l) => !/^\s/.test(l) && l.split(":")[0]?.trim() === key);
+    const quoted = /[:#]|^["'[{\-*&!|>%@`]|^(true|false|null|yes|no|on|off)$/i.test(value)
+      ? `"${value.replace(/"/g, '\\"')}"`
+      : value;
+    if (at === -1 && value) lines.push(`${key}: ${quoted}`);
+    else if (at !== -1 && value) lines[at] = `${key}: ${quoted}`;
+    else if (at !== -1) lines.splice(at, 1);
+  }
+  return lines.length === 0 ? body : `---\n${lines.join("\n")}\n---\n${body}`;
+}
+
+function mockBinder(project: string) {
+  const m = manifests.get(project);
+  if (!m) throw { kind: "notFound", detail: project };
+  const order = new Map(m.binder.map((rel, i) => [rel, i]));
+  const relOf = (p: string) => p.slice(project.length + 1);
+  const out: Array<Record<string, unknown>> = [];
+  const walk = (children: TreeNode[], depth: number, excluded: boolean) => {
+    const kept = [...children].filter((c) => c.kind !== "file");
+    kept.sort((a, b) => {
+      const ia = order.get(relOf(a.path)) ?? Number.MAX_SAFE_INTEGER;
+      const ib = order.get(relOf(b.path)) ?? Number.MAX_SAFE_INTEGER;
+      if (ia !== ib) return ia - ib;
+      if ((a.kind === "folder") !== (b.kind === "folder")) return a.kind === "folder" ? -1 : 1;
+      return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+    });
+    for (const c of kept) {
+      const rel = relOf(c.path);
+      const include = !excluded && !m.exclude.includes(rel);
+      const text = notes.get(c.path)?.text ?? "";
+      out.push({
+        path: c.path,
+        rel,
+        name: c.kind === "note" ? c.name.replace(/\.md$/i, "") : c.name,
+        kind: c.kind,
+        depth,
+        include,
+        words: c.kind === "note" ? mockWords(text) : 0,
+        synopsis: mockFm(text, "synopsis"),
+        label: mockFm(text, "label"),
+        status: mockFm(text, "status"),
+      });
+      if (c.kind === "folder") walk(c.children, depth + 1, !include);
+    }
+  };
+  walk(findNode(state.tree, project)?.children ?? [], 0, false);
+  return out;
+}
+
+function mockProject(path: string) {
+  const m = manifests.get(path);
+  if (!m) throw { kind: "notFound", detail: path };
+  return {
+    path,
+    name: path.split("/").pop() ?? path,
+    title: m.title,
+    target: m.target,
+    deadline: m.deadline,
+    binder: mockBinder(path),
+  };
+}
+
+function mockProjectsList() {
+  return [...manifests.keys()]
+    .filter((path) => findNode(state.tree, path))
+    .map((path) => {
+      let notesUnder = 0;
+      for (const p of notes.keys()) if (p.startsWith(`${path}/`)) notesUnder += 1;
+      return { path, name: path.split("/").pop() ?? path, notes: notesUnder };
+    })
+    .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+}
+
 const index = { building: false, done: 0, total: 0, lastBuilt: 0, lastDurationMs: 0 };
 function indexStatus() {
   return { notes: notes.size, ...index };
@@ -658,6 +800,13 @@ const state: { folio: FolioInfo | null; tree: TreeNode[]; recent: RecentFolio[] 
       ]),
     ]),
     node("The Salt Road", "The Salt Road", "folder", [
+      node("part one", "The Salt Road/part one", "folder", [
+        node("01 Arrival.md", "The Salt Road/part one/01 Arrival.md", "note"),
+        node("02 The road.md", "The Salt Road/part one/02 The road.md", "note"),
+      ]),
+      node("part two", "The Salt Road/part two", "folder", [
+        node("03 Salt.md", "The Salt Road/part two/03 Salt.md", "note"),
+      ]),
       node("Three.md", "The Salt Road/Three.md", "note"),
     ]),
     node("journal", "journal", "folder", [node("2026-09-09.md", "journal/2026-09-09.md", "note")]),
@@ -1092,10 +1241,72 @@ export function installDevMocks(): void {
         b.notes = b.notes.filter((n) => !(a.paths as string[]).includes(n));
         return boundingsCopy();
       }
-      case "projects_list": {
+      case "projects_list":
         if (!state.folio) throw { kind: "noFolioOpen" };
-        // No note in the mock Folio carries a project.aml.yaml yet (Projects are Stage 5).
-        return [];
+        return mockProjectsList();
+      case "project_read":
+        if (!state.folio) throw { kind: "noFolioOpen" };
+        return mockProject(String(a.path));
+      case "project_create": {
+        if (!state.folio) throw { kind: "noFolioOpen" };
+        const path = String(a.path);
+        if (manifests.has(path)) throw { kind: "alreadyExists", detail: path };
+        if (!findNode(state.tree, path)) {
+          insertNode(node(path.split("/").pop() ?? path, path, "folder"));
+        }
+        manifests.set(path, {
+          title: String(a.title || "").trim() || (path.split("/").pop() ?? path),
+          target: null,
+          deadline: null,
+          binder: [],
+          exclude: [],
+        });
+        return mockProject(path);
+      }
+      case "project_write": {
+        const path = String(a.path);
+        const m = manifests.get(path);
+        if (!m) throw { kind: "notFound", detail: path };
+        if (typeof a.title === "string" && a.title.trim()) m.title = a.title.trim();
+        if (typeof a.target === "number") m.target = a.target > 0 ? a.target : null;
+        if (typeof a.deadline === "string") m.deadline = a.deadline.trim() || null;
+        return mockProject(path);
+      }
+      case "project_order": {
+        const path = String(a.path);
+        const m = manifests.get(path);
+        if (!m) throw { kind: "notFound", detail: path };
+        const next: string[] = [];
+        for (const item of [...(a.order as string[]), ...m.binder]) {
+          if (item && !next.includes(item)) next.push(item);
+        }
+        m.binder = next;
+        return mockProject(path);
+      }
+      case "project_include": {
+        const path = String(a.path);
+        const m = manifests.get(path);
+        if (!m) throw { kind: "notFound", detail: path };
+        const item = String(a.item);
+        if (a.include) m.exclude = m.exclude.filter((p) => p !== item);
+        else if (!m.exclude.includes(item)) m.exclude.push(item);
+        return mockProject(path);
+      }
+      case "project_card_write": {
+        const notePath = String(a.note);
+        const current = notes.get(notePath);
+        if (!current) throw { kind: "notFound", detail: notePath };
+        const pairs: Array<[string, string]> = [];
+        for (const key of ["synopsis", "label", "status"] as const) {
+          if (typeof a[key] === "string") pairs.push([key, String(a[key])]);
+        }
+        notes.set(notePath, { text: mockSetFm(current.text, pairs), mtime: Date.now() });
+        return mockProject(String(a.path));
+      }
+      case "project_of_note": {
+        const path = String(a.path);
+        const owners = [...manifests.keys()].filter((p) => path.startsWith(`${p}/`));
+        return owners.sort((x, y) => y.length - x.length)[0] ?? null;
       }
       case "appearance_read":
         if (!state.folio) throw { kind: "noFolioOpen" };

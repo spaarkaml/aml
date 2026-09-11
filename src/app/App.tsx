@@ -7,6 +7,8 @@ import { useFolioEvents } from "@/features/folio/useFolioEvents";
 import { Welcome } from "@/features/folio/Welcome";
 import { RenameLinksDialog } from "@/features/links/RenameLinksDialog";
 import { Overview } from "@/features/overview/Overview";
+import { ProjectScreen } from "@/features/project/ProjectScreen";
+import { useProjectStore } from "@/features/project/store";
 import { useTabsSync } from "@/features/tabs/useTabsSync";
 import { type AppInfo, commands } from "@/ipc";
 import { registerShellCommands } from "./commands";
@@ -22,6 +24,7 @@ export function App() {
   const booted = useFolioStore((s) => s.booted);
   const bootstrap = useFolioStore((s) => s.bootstrap);
   const notePath = useEditorStore((s) => s.path);
+  const projectScreen = useProjectStore((s) => (s.project ? s.screen : null));
   useFolioEvents();
   useTabsSync();
 
@@ -37,7 +40,17 @@ export function App() {
 
   return (
     <Shell info={info} left={<LeftPanel />} right={<ContextPanel />}>
-      {!booted ? null : folio ? notePath ? <NoteEditor /> : <Overview /> : <Welcome />}
+      {!booted ? null : folio ? (
+        projectScreen ? (
+          <ProjectScreen />
+        ) : notePath ? (
+          <NoteEditor />
+        ) : (
+          <Overview />
+        )
+      ) : (
+        <Welcome />
+      )}
       <RenameLinksDialog />
       <ShortcutsDialog />
     </Shell>

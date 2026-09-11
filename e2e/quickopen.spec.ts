@@ -69,9 +69,10 @@ test("Escape and backdrop close it; it does nothing without a Folio", async ({ p
   await page.keyboard.press("Escape");
   await expect(page.getByTestId("quickopen-input")).toHaveCount(0);
   await quickOpen(page);
+  // Near the edge, not the middle: a long result list reaches the centre of the viewport.
   await page
     .getByTestId("quickopen-backdrop")
     .getByRole("button", { name: "Close Quick Open" })
-    .click();
+    .click({ position: { x: 8, y: 8 } });
   await expect(page.getByTestId("quickopen-input")).toHaveCount(0);
 });

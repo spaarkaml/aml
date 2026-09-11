@@ -1,0 +1,222 @@
+.board {
+  display: flex;
+  flex-direction: column;
+  gap: var(--aml-space-6);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--aml-space-2);
+  flex-wrap: wrap;
+}
+
+.toolbarLabel {
+  font-size: var(--aml-size-xs);
+  color: var(--aml-text-3);
+}
+
+.segmented {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: var(--aml-radius);
+  background: var(--aml-highlight);
+}
+
+.segment,
+.segmentActive {
+  height: var(--aml-row-sm);
+  padding: 0 var(--aml-space-2);
+  font: inherit;
+  font-size: var(--aml-size-xs);
+  border: 0;
+  border-radius: var(--aml-radius-sm);
+  background: transparent;
+  color: var(--aml-text-2);
+  cursor: default;
+}
+
+.segmentActive {
+  background: var(--aml-surface);
+  color: var(--aml-text);
+  box-shadow: var(--aml-shadow-1);
+}
+
+.key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--aml-space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: var(--aml-size-xs);
+  color: var(--aml-text-2);
+}
+
+.key li {
+  display: flex;
+  align-items: center;
+  gap: var(--aml-space-1);
+}
+
+.keyDot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--aml-radius-pill);
+  background: var(--aml-muted);
+}
+
+.empty {
+  font-size: var(--aml-size-md);
+  color: var(--aml-text-3);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--aml-space-3);
+}
+
+.partName {
+  display: flex;
+  align-items: baseline;
+  gap: var(--aml-space-2);
+  margin: 0;
+  font-size: var(--aml-size-md);
+  font-weight: var(--aml-weight-semi);
+  color: var(--aml-text-2);
+}
+
+.partWords {
+  font-size: var(--aml-size-xs);
+  font-weight: var(--aml-weight-normal);
+  color: var(--aml-text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--aml-space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* An index card: a title, what happens, and the two words you file it under. */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--aml-space-15);
+  min-height: 148px;
+  padding: var(--aml-space-3);
+  border-radius: var(--aml-radius-lg);
+  background: var(--aml-surface);
+  box-shadow: var(--aml-shadow-1);
+  transition: box-shadow var(--aml-dur-1) var(--aml-ease);
+}
+
+.card:hover {
+  box-shadow: var(--aml-shadow-2);
+}
+
+/* The colour is a band at the head of the card, never the whole card: a tinted card makes
+   its own text harder to read, and the text is the point. */
+.card[data-tinted]::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  border-radius: var(--aml-radius-lg) var(--aml-radius-lg) 0 0;
+  background: var(--card-tint, var(--aml-muted));
+}
+
+.card[data-out] {
+  opacity: 0.55;
+}
+
+.card[data-over="before"] {
+  box-shadow:
+    inset 3px 0 0 0 var(--aml-primary),
+    var(--aml-shadow-2);
+}
+
+.card[data-over="after"] {
+  box-shadow:
+    inset -3px 0 0 0 var(--aml-primary),
+    var(--aml-shadow-2);
+}
+
+.cardTitle {
+  font: inherit;
+  font-size: var(--aml-size-md);
+  font-weight: var(--aml-weight-semi);
+  text-align: left;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--aml-text);
+  cursor: default;
+}
+
+.cardTitle:hover {
+  color: var(--aml-primary);
+}
+
+.synopsis {
+  flex: 1 1 auto;
+  min-height: 56px;
+  resize: none;
+  font: inherit;
+  font-size: var(--aml-size-sm);
+  line-height: 1.45;
+  padding: var(--aml-space-1);
+  margin: 0 calc(var(--aml-space-1) * -1);
+  border: 0;
+  border-radius: var(--aml-radius-sm);
+  background: transparent;
+  color: var(--aml-text-2);
+}
+
+.synopsis:hover {
+  background: var(--aml-highlight);
+}
+
+.synopsis:focus {
+  outline: 2px solid var(--aml-primary);
+  outline-offset: 0;
+  background: var(--aml-bg);
+  color: var(--aml-text);
+}
+
+.foot {
+  display: flex;
+  align-items: center;
+  gap: var(--aml-space-1);
+}
+
+.chip {
+  min-width: 0;
+  height: 20px;
+  font: inherit;
+  font-size: var(--aml-size-xs);
+  padding: 0 var(--aml-space-15);
+  border: 0;
+  border-radius: var(--aml-radius-pill);
+  background: var(--aml-highlight);
+  color: var(--aml-text-2);
+}
+
+.chip:focus {
+  outline: 2px solid var(--aml-primary);
+  background: var(--aml-surface);
+  color: var(--aml-text);
+}
+
+.words {
+  margin-left: auto;
+  font-size: var(--aml-size-xs);
+  color: var(--aml-text-3);
+  font-variant-numeric: tabular-nums;
+}

@@ -5,8 +5,10 @@ mod boundings;
 mod commands;
 mod config;
 mod folio;
+mod front_matter;
 mod index;
 mod note_types;
+mod project;
 mod sidecar;
 mod spell;
 mod state;
@@ -54,7 +56,14 @@ fn specta_builder() -> Builder<tauri::Wry> {
             commands::boundings::bounding_delete,
             commands::boundings::bounding_add,
             commands::boundings::bounding_remove,
-            commands::boundings::projects_list,
+            commands::project::projects_list,
+            commands::project::project_read,
+            commands::project::project_create,
+            commands::project::project_write,
+            commands::project::project_order,
+            commands::project::project_include,
+            commands::project::project_card_write,
+            commands::project::project_of_note,
             commands::config::appearance_read,
             commands::config::appearance_write,
             commands::config::preferences_read,

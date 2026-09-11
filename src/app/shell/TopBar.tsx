@@ -2,6 +2,7 @@ import { current, type ModeSetting, useAppearanceStore } from "@/features/appear
 import { usePaletteStore } from "@/features/commands/paletteStore";
 import { commandRegistry, formatShortcut } from "@/features/commands/registry";
 import { useLayoutStore } from "@/features/layout/store";
+import { useProjectStore } from "@/features/project/store";
 import { useSettingsStore } from "@/features/settings/store";
 import { Breadcrumb } from "@/features/tabs/Breadcrumb";
 import { TabStrip } from "@/features/tabs/TabStrip";
@@ -21,6 +22,8 @@ export function TopBar() {
   const cycleMode = useAppearanceStore((s) => s.cycle);
   const openPalette = usePaletteStore((s) => s.setOpen);
   const openSettings = useSettingsStore((s) => s.setOpen);
+  const project = useProjectStore((s) => s.project);
+  const showProject = useProjectStore((s) => s.show);
 
   return (
     <header className={styles.topbar}>
@@ -38,6 +41,18 @@ export function TopBar() {
       <nav className={styles.crumbs} aria-label="Breadcrumb" data-testid="breadcrumb">
         <Breadcrumb />
       </nav>
+      {project ? (
+        <button
+          type="button"
+          className={styles.projectTab}
+          onClick={() => showProject("dashboard")}
+          title={`${project.title} — Project dashboard`}
+          data-testid="project-tab"
+        >
+          <Icon name="book" size={13} />
+          <span className={styles.projectName}>{project.title}</span>
+        </button>
+      ) : null}
       <TabStrip />
       <div className={styles.actions}>
         <button

@@ -27,6 +27,7 @@ export type IconName =
   | "check"
   | "trash"
   | "home"
+  | "book"
   | "settings";
 
 /** Path data on a 16×16 grid. Stroked, never filled — see `Icon` below. */
@@ -48,6 +49,9 @@ const PATHS: Record<IconName, string> = {
   file: "M3.6 3.1a1 1 0 0 1 1-1h3.9l3.5 3.6v7.2a1 1 0 0 1-1 1H4.6a1 1 0 0 1-1-1zM8.4 2.2v3.6h3.6",
   check: "m3.4 8.4 3 3 6.2-6.6",
   home: "M2.4 7.1 8 2.4l5.6 4.7M4.1 6.2v6.3a1 1 0 0 0 1 1h5.8a1 1 0 0 0 1-1V6.2",
+  // A Project: an open book, which reads as a thing with an inside — a stack of pages does
+  // not. Drawn inside the same 16 grid as the rest, with room for the 1.3px stroke.
+  book: "M8 4.2C6.8 3.2 5.2 2.8 3.2 3v9c2-.2 3.6.2 4.8 1.2 1.2-1 2.8-1.4 4.8-1.2V3c-2-.2-3.6.2-4.8 1.2zM8 4.2v9",
   // Sliders rather than a cog: at 16px a cog's teeth turn to mush, and macOS itself
   // uses sliders for "the settings of this thing".
   settings:

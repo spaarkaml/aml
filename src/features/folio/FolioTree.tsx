@@ -8,6 +8,7 @@ import {
 } from "react";
 import { Icon } from "@/app/icons";
 import { useEditorStore } from "@/features/editor/store";
+import { useProjectStore } from "@/features/project/store";
 import { useTabsStore } from "@/features/tabs/store";
 import { useTypesStore } from "@/features/types/store";
 import { TypeBadge } from "@/features/types/TypeBadge";
@@ -120,7 +121,11 @@ function Node({ node, depth, openMenu }: NodeProps) {
   const createNote = useFolioStore((s) => s.createNote);
   const createFolder = useFolioStore((s) => s.createFolder);
   const trash = useFolioStore((s) => s.trash);
+  const projects = useProjectStore((s) => s.list);
+  const enterProject = useProjectStore((s) => s.enter);
+  const createProject = useProjectStore((s) => s.create);
   const [dropTarget, setDropTarget] = useState(false);
+  const isProject = isFolder && projects.some((p) => p.path === node.path);
 
   const label = isFolder ? node.name : node.kind === "note" ? noteTitle(node.path) : node.name;
   // A typed note wears its type's mark instead of the generic page icon; an untyped one is
@@ -132,6 +137,9 @@ function Node({ node, depth, openMenu }: NodeProps) {
       ? [
           { label: "New Note", run: () => void createNote(node.path) },
           { label: "New Folder", run: () => void createFolder(node.path) },
+          isProject
+            ? { label: "Open as Project", run: () => void enterProject(node.path) }
+            : { label: "Make this a Project", run: () => void createProject(node.path) },
         ]
       : []),
     { label: "Rename", run: () => startRename(node.path) },
@@ -204,7 +212,11 @@ function Node({ node, depth, openMenu }: NodeProps) {
           {type ? (
             <TypeBadge type={type} className={styles.kind} />
           ) : (
-            <Icon name={isFolder ? "folder" : "file"} size={14} className={styles.kind} />
+            <Icon
+              name={isProject ? "book" : isFolder ? "folder" : "file"}
+              size={14}
+              className={styles.kind}
+            />
           )}
           <span className={styles.name}>{label}</span>
           {dirty ? <span className={styles.dot} role="img" aria-label="Unsaved changes" /> : null}
