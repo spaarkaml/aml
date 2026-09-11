@@ -13,8 +13,14 @@
  * lines that are already there.
  */
 
-/** `[!kind]`, an optional fold marker, and the rest of the line as the title. */
-const HEAD = /^\[!([A-Za-z][\w-]*)\]([+-])?[ \t]*(.*)$/;
+/**
+ * `[!kind]`, an optional fold marker, and the rest of the line as the title.
+ *
+ * The kind takes everything up to the `]`, Obsidian's `|` layout hints included, because the
+ * alternative is worse: an unrecognised head makes the block an ordinary quotation, and the
+ * serialiser then escapes its `[` and quietly rewrites the file on the first save.
+ */
+const HEAD = /^\[!([A-Za-z][\w-]*(?:\|[^\]]*)?)\]([+-])?[ \t]*(.*)$/;
 
 export type Fold = "+" | "-" | null;
 

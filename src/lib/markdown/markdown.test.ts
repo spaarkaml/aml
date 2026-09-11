@@ -82,9 +82,53 @@ describe("markdown bridge specifics", () => {
   });
 
   it("unknown content is held as Raw and emitted verbatim", () => {
-    const src = '> [!warning] Title\n> body\n\n<div align="center">x</div>\n\nTerm\n: Definition\n';
+    const src = '<div align="center">x</div>\n\nTerm\n: Definition\n';
     const doc = markdownToDoc(src);
-    expect(doc.content.map((n) => n.type)).toEqual(["rawBlock", "rawBlock", "paragraph"]);
+    expect(doc.content.map((n) => n.type)).toEqual(["rawBlock", "paragraph"]);
+    expect(docToMarkdown(doc)).toBe(src);
+  });
+
+  it("a callout is a node with a real title, and comes back byte-identical (WP-3.9)", () => {
+    const src = "> [!warning]- **Read** this\n> Body with a [[link]].\n>\n> Second paragraph.\n";
+    const doc = markdownToDoc(src);
+    const callout = doc.content[0];
+    expect(callout?.type).toBe("callout");
+    expect(callout?.attrs).toEqual({ kind: "warning", fold: "-" });
+    // Title first, then the body blocks; the title is inline content, so its emphasis lives.
+    expect(callout?.content?.map((n) => n.type)).toEqual([
+      "calloutTitle",
+      "paragraph",
+      "paragraph",
+    ]);
+    expect(callout?.content?.[0]?.content?.[0]?.marks?.[0]?.type).toBe("bold");
+    // The body is markdown in its own right: a wiki link inside one is still a wiki link.
+    expect(callout?.content?.[1]?.content?.some((n) => n.type === "wikiLink")).toBe(true);
+    expect(docToMarkdown(doc)).toBe(src);
+  });
+
+  it("a callout with no title, and one nested inside another, both survive", () => {
+    const plain = markdownToDoc("> [!note]\n> Just a body.\n");
+    expect(plain.content[0]?.content?.[0]).toEqual({ type: "calloutTitle", content: [] });
+    expect(docToMarkdown(plain)).toBe("> [!note]\n> Just a body.\n");
+
+    const src = "> [!note] Outer\n> > [!tip] Inner\n> > Nested body.\n";
+    const nested = markdownToDoc(src);
+    expect(nested.content[0]?.content?.[1]?.type).toBe("callout");
+    expect(docToMarkdown(nested)).toBe(src);
+  });
+
+  it("an Obsidian layout hint survives instead of having its brackets escaped", () => {
+    const src = "> [!note|left] Title\n> Body.\n";
+    const doc = markdownToDoc(src);
+    expect(doc.content[0]?.type).toBe("callout");
+    expect(doc.content[0]?.attrs?.kind).toBe("note|left");
+    expect(docToMarkdown(doc)).toBe(src);
+  });
+
+  it("an unknown callout kind is kept rather than rewritten to one AML knows", () => {
+    const src = "> [!bryces-own]+ Title\n> Body.\n";
+    const doc = markdownToDoc(src);
+    expect(doc.content[0]?.attrs).toEqual({ kind: "bryces-own", fold: "+" });
     expect(docToMarkdown(doc)).toBe(src);
   });
 

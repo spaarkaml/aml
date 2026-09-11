@@ -73,6 +73,130 @@ export const RawBlock = Node.create({
   },
 });
 
+/**
+ * Obsidian callouts (WP-3.9), a real node rather than a Raw block: `> [!warning] Title`.
+ *
+ * The title is its own child node with inline content, so it is editable text and emphasis in
+ * a title survives the round trip. `kind` is whatever the file says — an unknown kind is kept
+ * and styled with the default colour rather than rewritten to one AML knows.
+ */
+const KIND_LABELS: Record<string, string> = {
+  note: "Note",
+  info: "Info",
+  tip: "Tip",
+  hint: "Tip",
+  important: "Important",
+  abstract: "Abstract",
+  summary: "Summary",
+  tldr: "TL;DR",
+  todo: "To do",
+  quote: "Quote",
+  cite: "Quote",
+  example: "Example",
+  success: "Success",
+  check: "Done",
+  done: "Done",
+  question: "Question",
+  help: "Help",
+  faq: "FAQ",
+  warning: "Warning",
+  caution: "Caution",
+  attention: "Attention",
+  danger: "Danger",
+  error: "Error",
+  failure: "Failure",
+  fail: "Failure",
+  missing: "Missing",
+  bug: "Bug",
+};
+
+/** Kinds that share a colour, so a Folio full of invented kinds still reads sensibly. */
+const KIND_TONES: Record<string, string> = {
+  success: "done",
+  check: "done",
+  done: "done",
+  question: "warn",
+  help: "warn",
+  faq: "warn",
+  warning: "warn",
+  caution: "warn",
+  attention: "warn",
+  danger: "danger",
+  error: "danger",
+  failure: "danger",
+  fail: "danger",
+  missing: "danger",
+  bug: "danger",
+};
+
+/** Obsidian allows `[!note|left]`; the part before the pipe is the kind, the rest is layout. */
+function bareKind(kind: string): string {
+  return (kind.split("|")[0] ?? kind).trim().toLowerCase();
+}
+
+export function calloutLabel(kind: string): string {
+  const bare = bareKind(kind);
+  return KIND_LABELS[bare] ?? bare.replace(/[-_]+/g, " ").replace(/^./, (c) => c.toUpperCase());
+}
+
+export function calloutTone(kind: string): string {
+  return KIND_TONES[bareKind(kind)] ?? "info";
+}
+
+export const Callout = Node.create({
+  name: "callout",
+  group: "block",
+  content: "calloutTitle block+",
+  defining: true,
+  addAttributes() {
+    // Rendered as data attributes below rather than as themselves: `kind="note"` on a div is
+    // not an attribute HTML has, and it is what the class and the tone are already carrying.
+    return {
+      kind: {
+        default: "note",
+        parseHTML: (el: HTMLElement) => el.getAttribute("data-callout") || "note",
+        renderHTML: () => ({}),
+      },
+      fold: {
+        default: null,
+        parseHTML: (el: HTMLElement) => el.getAttribute("data-fold") || null,
+        renderHTML: (attrs: Record<string, unknown>) =>
+          attrs.fold ? { "data-fold": String(attrs.fold) } : {},
+      },
+    };
+  },
+  parseHTML() {
+    return [{ tag: "div[data-callout]" }];
+  },
+  renderHTML({ node, HTMLAttributes }) {
+    const kind = String(node.attrs.kind ?? "note");
+    return [
+      "div",
+      mergeAttributes(HTMLAttributes, {
+        "data-callout": kind,
+        "data-tone": calloutTone(kind),
+        class: "aml-callout",
+        // The label a callout with no title of its own shows, as a string a ::before can use.
+        style: `--aml-callout-label: "${calloutLabel(kind).replace(/"/g, "")}"`,
+      }),
+      0,
+    ];
+  },
+});
+
+export const CalloutTitle = Node.create({
+  name: "calloutTitle",
+  content: "inline*",
+  defining: true,
+  selectable: false,
+  parseHTML() {
+    return [{ tag: "div[data-callout-title]" }];
+  },
+  renderHTML() {
+    return ["div", { "data-callout-title": "", class: "aml-callout-title" }, 0];
+  },
+});
+
 export const RawInline = Node.create({
   name: "rawInline",
   group: "inline",

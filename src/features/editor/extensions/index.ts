@@ -4,6 +4,8 @@ import { BulletList, OrderedList, TaskItem, TaskList } from "@tiptap/extension-l
 import { Table, TableCell, TableHeader, TableRow } from "@tiptap/extension-table";
 import StarterKit from "@tiptap/starter-kit";
 import {
+  Callout,
+  CalloutTitle,
   Cite,
   FootnoteDef,
   FootnoteRef,
@@ -71,6 +73,8 @@ export function amlExtensions(): Extensions {
     TableCell,
     AmlImage,
     FrontMatter,
+    Callout,
+    CalloutTitle,
     RawBlock,
     RawInline,
     WikiLink,

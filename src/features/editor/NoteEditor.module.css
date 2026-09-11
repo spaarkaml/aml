@@ -272,3 +272,53 @@
 .typewriter .content {
   padding-bottom: 55vh;
 }
+
+/* ---- Callouts (WP-3.9) ----
+   A tinted panel with a bar in the tone's colour, and a title that is real editable text.
+   The tone is four buckets rather than one colour per kind, so a Folio full of invented
+   kinds still reads sensibly; an unknown kind falls through to info. */
+.prose :global(.aml-callout) {
+  --tone: var(--aml-primary);
+  margin: var(--aml-space-4) 0;
+  padding: var(--aml-space-2) var(--aml-space-3);
+  border-radius: var(--aml-radius);
+  border-left: 3px solid var(--tone);
+  background: color-mix(in srgb, var(--tone) 7%, transparent);
+}
+
+.prose :global(.aml-callout[data-tone="done"]) {
+  --tone: var(--aml-callout-done);
+}
+
+.prose :global(.aml-callout[data-tone="warn"]) {
+  --tone: var(--aml-callout-warn);
+}
+
+.prose :global(.aml-callout[data-tone="danger"]) {
+  --tone: var(--aml-callout-danger);
+}
+
+.prose :global(.aml-callout-title) {
+  font-weight: var(--aml-weight-bold);
+  color: var(--tone);
+  margin-bottom: var(--aml-space-1);
+}
+
+/* A callout with no title of its own says what kind it is, so the bar is never unexplained.
+   The label comes from the node as a string, which is why it is a custom property.
+   ProseMirror puts a trailing <br> in every empty textblock, so `:empty` never matches inside
+   the editor — the `:has` selector is the one that does the work; `:empty` covers the node
+   rendered as static HTML. */
+.prose :global(.aml-callout-title:empty)::before,
+.prose :global(.aml-callout-title:has(> br:only-child))::before {
+  content: var(--aml-callout-label, "Note");
+  opacity: 0.75;
+}
+
+.prose :global(.aml-callout) > :global(*:last-child) {
+  margin-bottom: 0;
+}
+
+.prose :global(.aml-callout) > :global(p:first-of-type) {
+  margin-top: 0;
+}

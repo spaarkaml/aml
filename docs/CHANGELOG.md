@@ -4,6 +4,16 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### WP-3.9 — Callouts as nodes (2026-09-12)
+- **`> [!warning] Read this` is what it looks like now** — a tinted panel with a coloured bar and a real, editable title — instead of a monospace Raw chip. Not a byte of what is written to disk changes: the corpus file moved from *expect: raw* to *expect: lossless*, which is Quality Gate 3's "callout Raw count is 0".
+- **Read from the blockquote's own source, not from the parse tree.** mdast joins the title line and the first body line into one paragraph with a soft break; separating them again inside the tree means splitting text nodes around a newline. Reading the lines that are already there is both simpler and exact — and because both halves are then parsed as markdown in their own right, emphasis in a title survives, a `[[wiki link]]` in the body is still a wiki link, and a callout nested inside another becomes a nested callout for free.
+- **Written back by hand, on purpose.** The body has to sit on the lines straight after the head; a stringifier would put a blank `>` between them, and parsing that back gives a different document from the one written — the round trip would drift on every save.
+- The title is a child node with inline content rather than a string, so ADR-003's second rule still holds: nothing about a title is lost, and it is ordinary editable text.
+- An invented kind is kept, not rewritten to one AML knows. Four tones (info, done, warn, danger) rather than one colour per kind, so a Folio full of invented kinds still reads sensibly; a callout with no title of its own shows the kind's name, so a coloured bar is never unexplained.
+- `/callout` in the slash menu (and *Format › Callout* in the palette) inserts one.
+- **Fixed a file-rewriting bug found on the way:** `> [!note|left]` — Obsidian's layout hint — did not match the old callout pattern, so the block became an ordinary quotation and the serialiser escaped its `[`, rewriting the file on the first save. It round-trips byte-identically now.
+- Three new colour tokens (`--aml-callout-done/-warn/-danger`), each clearing 4.5:1 against the page because a callout's title is text — which is why danger has a darker relative of its own rather than borrowing `--aml-accent`, which ADR-010 says is never text in light mode.
+
 ### WP-3.7 — Statistics (2026-09-12)
 - **Click the word count** in the status bar (or *Statistics…* in the palette) for the note's figures: words, characters with and without spaces, sentences, paragraphs and reading time.
 - **Every figure counts the same text the status bar counts** — Q19's rules, from one place: front matter, code blocks and HTML comments are not prose; headings, lists, tables and quotes are. Two counters with different opinions would be worse than either being wrong, so the e2e asserts the panel's figure against the status bar's.

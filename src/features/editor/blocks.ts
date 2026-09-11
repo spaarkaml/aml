@@ -57,6 +57,23 @@ export const BLOCK_ITEMS: BlockItem[] = [
     run: (e) => e.chain().focus().toggleBlockquote().run(),
   },
   {
+    id: "callout",
+    title: "Callout",
+    hint: "> [!note]",
+    // Inserted rather than wrapped: a callout needs a title node of its own, and "wrap this
+    // paragraph" would have to guess whether the paragraph was meant to be the title.
+    run: (e) =>
+      e
+        .chain()
+        .focus()
+        .insertContent({
+          type: "callout",
+          attrs: { kind: "note", fold: null },
+          content: [{ type: "calloutTitle" }, { type: "paragraph" }],
+        })
+        .run(),
+  },
+  {
     id: "code",
     title: "Code block",
     hint: "```",

@@ -65,6 +65,14 @@
   --aml-radius-xl: 16px; /* sheets and dialogs */
   --aml-radius-pill: 999px;
 
+  /* ---- callout tones (WP-3.9) ----
+     A callout's title is text, so each of these clears 4.5:1 against the page. The accent
+     above deliberately does not (ADR-010: "never text in light mode"), which is why danger
+     has a darker relative of its own rather than borrowing it. Info reuses --aml-primary. */
+  --aml-callout-done: #3d7a4b;
+  --aml-callout-warn: #8a6212;
+  --aml-callout-danger: #b04a46;
+
   /* ---- elevation: a ½px ring plus a shadow, instead of a 1px wall ---- */
   --aml-shadow-1: 0 0 0 0.5px rgb(0 0 0 / 6%), 0 1px 2px rgb(0 0 0 / 5%);
   --aml-shadow-2:
@@ -96,6 +104,10 @@
   --aml-muted: #2f4a52;
   --aml-highlight: #3a2e31;
   --aml-accent: #e37c78;
+
+  --aml-callout-done: #7fb389;
+  --aml-callout-warn: #d7a955;
+  --aml-callout-danger: #e79b98;
 
   --aml-shadow-1: 0 0 0 0.5px rgb(255 255 255 / 8%), 0 1px 2px rgb(0 0 0 / 40%);
   --aml-shadow-2:

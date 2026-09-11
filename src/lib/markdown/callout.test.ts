@@ -24,6 +24,12 @@ describe("reading a callout", () => {
     expect(parseCalloutSource("> [!bryces-own] Title")?.kind).toBe("bryces-own");
   });
 
+  it("keeps an Obsidian layout hint in the kind rather than letting the block escape", () => {
+    // Unrecognised, this was an ordinary quotation whose `[` the serialiser escaped — which
+    // rewrote the user's file on the first save.
+    expect(parseCalloutSource("> [!note|left] Title\n> Body.")?.kind).toBe("note|left");
+  });
+
   it("is not fooled by an ordinary quote", () => {
     expect(parseCalloutSource("> Just a quotation.")).toBeNull();
     expect(parseCalloutSource("> [not a callout] really")).toBeNull();
@@ -37,9 +43,9 @@ describe("reading a callout", () => {
 
 describe("writing a callout", () => {
   it("puts the body on the lines straight after the head", () => {
-    expect(
-      calloutToSource({ kind: "note", fold: null, title: "Title", body: "Body." }),
-    ).toBe("> [!note] Title\n> Body.");
+    expect(calloutToSource({ kind: "note", fold: null, title: "Title", body: "Body." })).toBe(
+      "> [!note] Title\n> Body.",
+    );
   });
 
   it("quotes a blank line as a bare marker, so two paragraphs stay two", () => {

@@ -10,7 +10,14 @@ import type {
   Table,
   TableRow,
 } from "mdast";
-import { isCallout, nodeToMarkdown } from "./mdast";
+import { calloutToSource, parseCalloutSource } from "./callout";
+import {
+  isCallout,
+  nodeToMarkdown,
+  normaliseSource,
+  parseMarkdown,
+  serialiseMarkdown,
+} from "./mdast";
 import type { AmlInline, PmDoc, PmMark, PmNode } from "./types";
 
 /**
@@ -67,9 +74,14 @@ function blockToPm(node: RootContent, ctx: Ctx): PmNode {
       };
     case "thematicBreak":
       return { type: "horizontalRule" };
-    case "blockquote":
-      if (isCallout(node)) return raw(verbatim(node, ctx));
+    case "blockquote": {
+      // A callout is read from its own source text, not from its mdast children: mdast puts
+      // the title line and the first body line in one paragraph joined by a soft break, and
+      // separating them again is both harder and less exact than reading the lines (WP-3.9).
+      const callout = isCallout(node) ? parseCalloutSource(verbatim(node, ctx)) : null;
+      if (callout) return calloutToPm(callout);
       return { type: "blockquote", content: blocksToPm(node.children, ctx) };
+    }
     case "list":
       return listToPm(node, ctx);
     case "code":
@@ -93,6 +105,28 @@ function blockToPm(node: RootContent, ctx: Ctx): PmNode {
     default:
       return raw(verbatim(node, ctx));
   }
+}
+
+/**
+ * A callout as a node with a real title and real block content. The title and body are
+ * markdown in their own right, so both are parsed as such — which is what makes an emphasised
+ * title survive, and a nested callout inside the body become a nested callout node.
+ */
+function calloutToPm(callout: ReturnType<typeof parseCalloutSource> & object): PmNode {
+  const titleTree = callout.title ? parseMarkdown(callout.title) : null;
+  const firstBlock = titleTree?.children[0];
+  const titleInlines =
+    firstBlock?.type === "paragraph"
+      ? inlinesToPm(firstBlock.children as Inline[], { source: callout.title })
+      : [];
+  const body = callout.body.trim()
+    ? mdastToPm(parseMarkdown(callout.body), normaliseSource(callout.body)).content
+    : [{ type: "paragraph" }];
+  return {
+    type: "callout",
+    attrs: { kind: callout.kind, fold: callout.fold },
+    content: [{ type: "calloutTitle", content: titleInlines }, ...body],
+  };
 }
 
 function blocksToPm(children: (Block | RootContent)[], ctx: Ctx): PmNode[] {
@@ -275,6 +309,23 @@ function pmBlockToMdast(n: PmNode): RootContent[] {
     }
     case "rawBlock":
       return rawToMdast(str(a.markdown));
+    case "callout": {
+      // Emitted as Raw so the exact line shape is ours: the body has to sit on the lines
+      // straight after the head, and a stringifier would put a blank `>` line between them.
+      const [title, ...body] = n.content ?? [];
+      const titleMd = title?.type === "calloutTitle" ? inlineRunToMarkdown(title) : "";
+      const blocks = pmBlocksToMdast(title?.type === "calloutTitle" ? body : (n.content ?? []));
+      const bodyMd = serialiseMarkdown({ type: "root", children: blocks }).replace(/\n+$/, "");
+      const fold = a.fold === "+" || a.fold === "-" ? a.fold : null;
+      return rawToMdast(
+        calloutToSource({
+          kind: str(a.kind, "note") || "note",
+          fold,
+          title: titleMd,
+          body: bodyMd,
+        }),
+      );
+    }
     case "table":
       return [pmTableToMdast(n)];
     case "footnoteDef":
@@ -302,6 +353,15 @@ function clampDepth(v: unknown): 1 | 2 | 3 | 4 | 5 | 6 {
 function collectText(n: PmNode): string {
   if (n.text) return n.text;
   return (n.content ?? []).map(collectText).join("");
+}
+
+/** A run of inline nodes as one line of markdown — the callout's title. */
+function inlineRunToMarkdown(node: PmNode): string {
+  const children = pmInlinesToMdast(node.content ?? []);
+  if (children.length === 0) return "";
+  return serialiseMarkdown({ type: "root", children: [{ type: "paragraph", children }] })
+    .replace(/\n+$/, "")
+    .replace(/\n/g, " ");
 }
 
 function pmBlocksToMdast(nodes: PmNode[]): RootContent[] {

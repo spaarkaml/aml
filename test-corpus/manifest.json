@@ -153,8 +153,8 @@
     },
     "meta/obsidian-callouts.md": {
       "category": "meta",
-      "expect": "raw",
-      "note": "Obsidian callouts: Raw until WP-3.9 models them"
+      "expect": "lossless",
+      "note": "Obsidian callouts are modelled nodes since WP-3.9, and come back byte-identical"
     },
     "meta/obsidian-extras.md": {
       "category": "meta",

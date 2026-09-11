@@ -31,7 +31,9 @@ test("opens a note WYSIWYG with AML atoms rendered and a word count", async ({ p
   await expect(editor.locator(".aml-wiki-link")).toHaveText("04 Methods");
   await expect(editor.locator(".aml-cite")).toHaveText("[@rid2020, p. 41]");
   await expect(editor.locator(".aml-tag")).toHaveText("#thesis/ch3");
-  await expect(editor.locator(".aml-raw-block")).toContainText("[!note]");
+  // The callout is a node of its own since WP-3.9, so there is no Raw chip left in this note.
+  await expect(editor.locator(".aml-raw-block")).toHaveCount(0);
+  await expect(editor.locator(".aml-callout-title")).toHaveText("Callout");
   await expect(editor.locator('input[type="checkbox"]')).toHaveCount(2);
   await expect(page.getByTestId("word-count")).toContainText("words");
   await expect(page.getByTestId("save-state")).toHaveText("Saved");

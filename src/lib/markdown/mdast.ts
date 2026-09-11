@@ -35,7 +35,8 @@ export function isCallout(node: Blockquote): boolean {
   const first = node.children[0];
   if (first?.type !== "paragraph") return false;
   const t = first.children[0];
-  return t?.type === "text" && /^\[![\w-]+\][+-]?/.test(t.value);
+  // Kept in step with callout.ts's own head pattern, layout hints (`[!note|left]`) included.
+  return t?.type === "text" && /^\[![A-Za-z][\w-]*(?:\|[^\]]*)?\][+-]?/.test(t.value);
 }
 
 /** Resolves reference-style links/images to inline ones and removes the definitions. */
