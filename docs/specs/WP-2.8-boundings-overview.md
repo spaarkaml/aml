@@ -27,6 +27,7 @@ Boundings — virtual, many-to-many groups of notes that travel with the Folio �
 ## Lessons recorded
 - Adding a fifth left-panel view exposed two commands that assumed the Browser was showing: **Rename Note** and **Reveal Note in Browser** opened the panel but not the Folio view, so F2 did nothing visible. Anything that reveals a note must set the view as well as open the panel.
 - Selecting a Bounding toggles, and a newly created one is already selected — worth knowing when writing tests against it.
+- CI (not the local run) caught two keystroke faults this WP. One was the WP-2.6 focus lesson again, in `openNoteAt`: Tiptap's `focus()` left DOM focus on Quick Open's field, so typing after a heading jump went nowhere — `editor.view.focus()` is the fix, and that path is shared by every panel that opens a note. The other was `shell.spec` pressing a shortcut as its first action after a reload, before the global key listener existed; a test that presses keys must first wait for the shell.
 
 ## Not in this work package
 - Automatic clusters from tags or links (Q10: Stage 7).

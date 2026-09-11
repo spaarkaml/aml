@@ -6,6 +6,9 @@ test.beforeEach(async ({ page }) => {
   await page.goto("/");
   await page.evaluate(() => localStorage.clear());
   await page.reload();
+  // These tests press shortcuts as their first action, so wait for the shell to have
+  // mounted: the global key listener does not exist until it has.
+  await expect(page.getByTestId("layout-toggle")).toBeVisible();
 });
 
 test("boots with wordmark, status info and pinned Browser (Desk layout)", async ({ page }) => {

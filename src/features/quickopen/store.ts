@@ -39,7 +39,12 @@ export function openNoteAt(path: string, heading: string | null): void {
       if (node.type.name === "heading" && node.textContent.trim() === heading) pos = p + 1;
       return pos === -1;
     });
-    if (pos !== -1) editor.chain().focus().setTextSelection(pos).scrollIntoView().run();
+    if (pos !== -1) {
+      editor.chain().setTextSelection(pos).scrollIntoView().run();
+      // Tiptap's focus() command does not reliably move DOM focus off whatever opened the
+      // note (Quick Open's own field, a panel button), and then typing goes nowhere.
+      editor.view.focus();
+    }
     return true;
   };
   if (tryJump()) return;

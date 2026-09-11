@@ -11,6 +11,7 @@ All notable changes. Format: one entry per work package.
 - `bounding:Academic` searches now match (the field was reserved in WP-2.5).
 - **Overview** replaces the placeholder home screen: the Folio and its size, this week's Dailies, Bounding and Project tiles, and recent notes.
 - Command `boundings_list` / `bounding_create` / `bounding_update` / `bounding_delete` / `bounding_add` / `bounding_remove` / `projects_list`.
+- Jumping to a heading (Quick Open, backlinks, search, a Bounding) now focuses the editor itself, so typing lands where the caret went.
 - Which list the left panel shows is now layout state (it had been living in the tags store); **Rename Note** and **Reveal Note in Browser** now switch to the Browser view, not just open the panel.
 
 ### WP-2.7 — Templates and Daily notes (2026-09-10)
