@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { Icon } from "@/app/icons";
 import { fuzzyFilter } from "@/lib/fuzzy";
 import { conflictOf, shortcutFromEvent } from "./keymap";
 import { useKeymapStore } from "./keymapStore";
@@ -135,7 +136,7 @@ export function ShortcutsDialog() {
                   aria-label={`Reset ${c.title}`}
                   data-testid={`shortcut-reset-${c.id}`}
                 >
-                  ↺
+                  <Icon name="revert" size={13} />
                 </button>
               </li>
             );

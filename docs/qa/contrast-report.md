@@ -6,14 +6,14 @@ Thresholds: text ≥ 4.5:1 · large ≥ 3:1 · decorative = informational.
 
 | Foreground | Background | Ratio | Role | Result |
 |---|---|---|---|---|
-| `--aml-text` #1f2a2e | `--aml-bg` #faefed | 13.04 : 1 | text | ✅ |
-| `--aml-text` #1f2a2e | `--aml-surface` #ffffff | 14.70 : 1 | text | ✅ |
-| `--aml-primary` #006078 | `--aml-bg` #faefed | 6.33 : 1 | text | ✅ |
+| `--aml-text` #1d1d1f | `--aml-bg` #f5f5f7 | 15.46 : 1 | text | ✅ |
+| `--aml-text` #1d1d1f | `--aml-surface` #ffffff | 16.83 : 1 | text | ✅ |
+| `--aml-primary` #006078 | `--aml-bg` #f5f5f7 | 6.55 : 1 | text | ✅ |
 | `--aml-primary` #006078 | `--aml-surface` #ffffff | 7.13 : 1 | text | ✅ |
-| `--aml-text` #1f2a2e | `--aml-highlight` #ffd4d1 | 10.91 : 1 | text | ✅ |
-| `--aml-accent` #e37c78 | `--aml-bg` #faefed | 2.51 : 1 | decorative | ℹ️ |
-| `--aml-muted` #82bac4 | `--aml-bg` #faefed | 1.91 : 1 | decorative | ℹ️ |
-| `--aml-bg` #faefed | `--aml-primary` #006078 | 6.33 : 1 | text | ✅ |
+| `--aml-text` #1d1d1f | `--aml-highlight` #e8e8ed | 13.78 : 1 | text | ✅ |
+| `--aml-accent` #e37c78 | `--aml-bg` #f5f5f7 | 2.60 : 1 | decorative | ℹ️ |
+| `--aml-muted` #d8d8dd | `--aml-bg` #f5f5f7 | 1.30 : 1 | decorative | ℹ️ |
+| `--aml-bg` #f5f5f7 | `--aml-primary` #006078 | 6.55 : 1 | text | ✅ |
 
 ## Ink
 

@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--aml-space-2);
-  font-size: 12px;
+  font-size: var(--aml-size-sm);
 }
 
 .head {
@@ -13,28 +13,31 @@
 }
 
 .label {
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--aml-size-xs);
+  font-weight: var(--aml-weight-semi);
   letter-spacing: 0.03em;
-  opacity: 0.8;
+  color: var(--aml-text-2);
 }
 
 .arrow {
-  font: inherit;
-  font-size: 14px;
-  line-height: 1;
-  padding: 0 6px;
+  width: var(--aml-row-sm);
+  height: var(--aml-row-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 0;
-  border-radius: 3px;
+  border-radius: var(--aml-radius-sm);
   background: transparent;
-  color: var(--aml-primary);
+  color: var(--aml-text-2);
   cursor: default;
+  transition:
+    background var(--aml-dur-1) var(--aml-ease),
+    color var(--aml-dur-1) var(--aml-ease);
 }
 
-.arrow:hover,
-.arrow:focus-visible {
+.arrow:hover {
   background: var(--aml-highlight);
-  outline: none;
+  color: var(--aml-text);
 }
 
 .week {
@@ -56,7 +59,7 @@
   font: inherit;
   padding: 4px 0 6px;
   border: 1px solid transparent;
-  border-radius: 3px;
+  border-radius: var(--aml-radius-sm);
   background: transparent;
   color: inherit;
   cursor: default;
@@ -73,35 +76,42 @@
 .dayToday {
   border-color: var(--aml-primary);
   color: var(--aml-primary);
-  font-weight: 600;
+  font-weight: var(--aml-weight-semi);
 }
 
 .weekday {
-  font-size: 10px;
-  opacity: 0.6;
+  font-size: var(--aml-size-xs);
+  color: var(--aml-text-3);
 }
 
 .number {
   font-variant-numeric: tabular-nums;
 }
 
-/* A day that already has a note carries a dot under its number. */
-.day[data-has]::after,
-.dayToday[data-has]::after {
+/* A day that already has a note carries a dot under its number; the slot is always there so
+   the strip does not change height as notes appear. */
+.day::after,
+.dayToday::after {
   content: "";
   width: 4px;
   height: 4px;
   border-radius: 50%;
+  background: transparent;
+}
+
+.day[data-has]::after,
+.dayToday[data-has]::after {
   background: var(--aml-accent);
 }
 
 .today {
   font: inherit;
-  font-size: 11px;
+  font-size: var(--aml-size-xs);
   padding: 3px 8px;
-  border: 1px solid var(--aml-muted);
-  border-radius: 3px;
-  background: transparent;
+  border: 0;
+  box-shadow: var(--aml-shadow-1);
+  border-radius: var(--aml-radius-sm);
+  background: var(--aml-surface);
   color: var(--aml-primary);
   cursor: default;
 }
@@ -114,11 +124,11 @@
 
 .title {
   margin: var(--aml-space-1) 0 0;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--aml-size-xs);
+  font-weight: var(--aml-weight-semi);
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  opacity: 0.75;
+  color: var(--aml-text-3);
 }
 
 .list {
@@ -136,7 +146,7 @@
   text-align: left;
   padding: 3px 6px;
   border: 0;
-  border-radius: 3px;
+  border-radius: var(--aml-radius-sm);
   background: transparent;
   color: inherit;
   cursor: default;
@@ -151,10 +161,10 @@
 .entry[aria-current] {
   background: var(--aml-highlight);
   color: var(--aml-primary);
-  font-weight: 600;
+  font-weight: var(--aml-weight-semi);
 }
 
 .empty {
   margin: 0;
-  opacity: 0.6;
+  color: var(--aml-text-3);
 }

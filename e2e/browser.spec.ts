@@ -27,7 +27,7 @@ test("+ Note creates an untitled note, opens it and renames it inline", async ({
   await field.press("Enter");
   await expect(page.getByTestId("folio-tree").getByText("Ideas", { exact: true })).toBeVisible();
   await expect(page.getByRole("tab", { selected: true })).toContainText("Ideas");
-  await expect(page.getByTestId("breadcrumb")).toHaveText("Writing›Ideas");
+  await expect(page.getByTestId("breadcrumb")).toHaveText(/^Writing\s*Ideas$/);
   expect(await mockNotePaths(page)).toContain("Ideas.md");
   expect(await mockNotePaths(page)).not.toContain("Untitled.md");
 });
@@ -78,7 +78,7 @@ test("dragging a note onto a folder moves it and its tab follows", async ({ page
   await expect(page.getByRole("tab", { selected: true })).toContainText("Inbox");
   await tree.getByText("Inbox", { exact: true }).dragTo(tree.getByText("journal", { exact: true }));
   await expect(tree.locator('[data-path="journal/Inbox.md"]')).toBeVisible();
-  await expect(page.getByTestId("breadcrumb")).toHaveText("Writing›journal›Inbox");
+  await expect(page.getByTestId("breadcrumb")).toHaveText(/^Writing\s*journal\s*Inbox$/);
   expect(await mockNotePaths(page)).toContain("journal/Inbox.md");
 });
 

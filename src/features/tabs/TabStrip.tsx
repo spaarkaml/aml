@@ -1,3 +1,4 @@
+import { Icon } from "@/app/icons";
 import { useEditorStore } from "@/features/editor/store";
 import { baseName, noteTitle, parentDir } from "@/lib/paths";
 import { useTabsStore } from "./store";
@@ -48,9 +49,7 @@ export function TabStrip() {
               ) : null}
             </span>
             {dirty && editorPath === path ? (
-              <span className={styles.dot} role="img" aria-label="Unsaved changes">
-                ●
-              </span>
+              <span className={styles.dot} role="img" aria-label="Unsaved changes" />
             ) : null}
             <button
               type="button"
@@ -61,7 +60,7 @@ export function TabStrip() {
                 close(path);
               }}
             >
-              ×
+              <Icon name="close" size={13} />
             </button>
           </div>
         );

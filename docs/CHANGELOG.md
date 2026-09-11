@@ -4,6 +4,14 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### WP-3.0 — Visual refresh, Apple-light (2026-09-11)
+- **The whole shell was rebuilt on one decided foundation** (ADR-013, chosen from a canvas of three directions): the system interface face instead of Arial, a 11→34px type ramp instead of one flat 11–12px, an 8-point spacing rhythm, four corner radii instead of 4px everywhere, elevation instead of 1px walls, and 120/180/240 ms motion with a single `prefers-reduced-motion` rule that zeroes it.
+- **Paper is neutral now** — `#f5f5f7` chrome on a white page. AML's teal and coral keep their jobs; the warm rose ground does not. Ink is unchanged and still awaiting its Gate 0 approval.
+- **Icons are drawn** (`src/app/icons.tsx`): a 16px, 1.3px-stroke, `currentColor` set replacing the typed ◧ ◨ ↺ ✎ ▸ ▾ ‹ › × and the 8px ● dirty marker. Keyboard glyphs (⌘ ⌥ ⇧ ⌃) stay as characters.
+- Secondary and tertiary text are tokens derived from `--aml-text`, so `opacity` no longer stands in for a text colour — which is why hover and focus used to look broken on muted rows.
+- Three unit tests keep it that way: no stylesheet may name a colour, a raw radius or a raw font size of its own, and the Appearance defaults must equal `tokens.css` so *Reset to AML* restores what the app really falls back to.
+- Screenshots refreshed by `node scripts/screens.mjs` (Paper and Ink, 2×).
+
 ### WP-3.2 — Appearance settings (2026-09-11)
 - **Appearance** (`⌘,`, palette): Paper / Ink / follow-the-OS, every ADR-010 colour token with a picker, a hex field and live preview, per-token and per-mode reset, and a live WCAG contrast score on the text colours.
 - Type: editor and interface face, measure, leading and paragraph spacing.

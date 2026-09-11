@@ -1,11 +1,11 @@
 .overview {
   height: 100%;
   overflow-y: auto;
-  padding: var(--aml-space-8) var(--aml-space-6);
+  padding: var(--aml-space-12) var(--aml-space-8) var(--aml-space-12);
   display: flex;
   flex-direction: column;
-  gap: var(--aml-space-6);
-  max-width: 900px;
+  gap: var(--aml-space-8);
+  max-width: 940px;
   margin: 0 auto;
   width: 100%;
 }
@@ -18,16 +18,16 @@
 
 .name {
   margin: 0;
-  font-family: var(--aml-font-editor);
-  font-size: 28px;
-  font-weight: 600;
-  color: var(--aml-primary);
+  font-size: var(--aml-size-2xl);
+  font-weight: var(--aml-weight-bold);
+  letter-spacing: -0.015em;
+  color: var(--aml-text);
 }
 
 .count {
   margin: 0;
-  font-size: 12px;
-  opacity: 0.6;
+  font-size: var(--aml-size-sm);
+  color: var(--aml-text-3);
   font-variant-numeric: tabular-nums;
 }
 
@@ -39,27 +39,25 @@
 
 .title {
   margin: 0;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  opacity: 0.7;
+  font-size: var(--aml-size-xs);
+  font-weight: var(--aml-weight-semi);
+  color: var(--aml-text-3);
 }
 
 .empty {
   margin: 0;
-  font-size: 12px;
-  opacity: 0.6;
-  line-height: 1.6;
-  max-width: 60ch;
+  font-size: var(--aml-size-md);
+  color: var(--aml-text-3);
+  line-height: 1.55;
+  max-width: 62ch;
 }
 
 /* ---- week bar ---- */
 
 .week {
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 88px));
-  gap: var(--aml-space-2);
+  grid-template-columns: repeat(7, minmax(0, 96px));
+  gap: var(--aml-space-15);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -71,50 +69,74 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 1px;
   font: inherit;
-  font-size: 12px;
-  padding: var(--aml-space-2) 0;
-  border: 1px solid var(--aml-muted);
-  border-radius: var(--aml-radius);
+  padding: var(--aml-space-15) 0 var(--aml-space-2);
+  border: 0;
+  border-radius: var(--aml-radius-lg);
   background: var(--aml-surface);
-  color: inherit;
+  box-shadow: var(--aml-shadow-1);
+  color: var(--aml-text);
   cursor: default;
+  transition:
+    background var(--aml-dur-1) var(--aml-ease),
+    transform var(--aml-dur-1) var(--aml-ease);
 }
 
 .day:hover,
-.dayToday:hover,
-.day:focus-visible,
-.dayToday:focus-visible {
+.dayToday:hover {
   background: var(--aml-highlight);
-  outline: none;
+}
+
+.day:active,
+.dayToday:active {
+  transform: scale(0.98);
 }
 
 .dayToday {
-  border-color: var(--aml-primary);
-  color: var(--aml-primary);
-  font-weight: 600;
+  background: var(--aml-primary);
+  color: var(--aml-surface);
+}
+
+.dayToday:hover {
+  background: color-mix(in srgb, var(--aml-primary) 88%, black);
 }
 
 .weekday {
-  font-size: 10px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  opacity: 0.6;
+  font-size: var(--aml-size-xs);
+  font-weight: var(--aml-weight-medium);
+  color: var(--aml-text-3);
+}
+
+.dayToday .weekday {
+  color: color-mix(in srgb, var(--aml-surface) 78%, transparent);
 }
 
 .number {
-  font-size: 16px;
+  font-size: var(--aml-size-lg);
+  font-weight: var(--aml-weight-medium);
   font-variant-numeric: tabular-nums;
+}
+
+/* A day that already has a note carries a dot. The slot is always there, so a week with one
+   note in it is not a row of different heights. */
+.day::after,
+.dayToday::after {
+  content: "";
+  width: 5px;
+  height: 5px;
+  margin-top: 2px;
+  border-radius: 50%;
+  background: transparent;
 }
 
 .day[data-has]::after,
 .dayToday[data-has]::after {
-  content: "";
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
   background: var(--aml-accent);
+}
+
+.dayToday[data-has]::after {
+  background: var(--aml-surface);
 }
 
 /* ---- clusters ---- */
@@ -133,33 +155,36 @@
   align-items: center;
   gap: var(--aml-space-2);
   font: inherit;
-  font-size: 13px;
+  font-size: var(--aml-size-md);
   text-align: left;
   padding: var(--aml-space-2) var(--aml-space-3);
-  border: 1px solid var(--aml-muted);
-  border-left-width: 4px;
-  border-radius: var(--aml-radius);
+  border: 0;
+  border-left: 3px solid var(--aml-muted);
+  border-radius: var(--aml-radius-lg);
   background: var(--aml-surface);
-  color: inherit;
+  box-shadow: var(--aml-shadow-1);
+  color: var(--aml-text);
   cursor: default;
-  min-width: 180px;
+  min-width: 200px;
+  transition:
+    background var(--aml-dur-1) var(--aml-ease),
+    box-shadow var(--aml-dur-1) var(--aml-ease);
 }
 
-.tile:hover,
-.tile:focus-visible {
+.tile:hover {
   background: var(--aml-highlight);
-  outline: none;
+  box-shadow: var(--aml-shadow-2);
 }
 
 .tileIcon {
   flex: none;
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 3px;
-  font-size: 13px;
+  border-radius: var(--aml-radius-sm);
+  font-size: var(--aml-size-md);
 }
 
 .tileName {
@@ -168,13 +193,13 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-weight: 600;
+  font-weight: var(--aml-weight-medium);
 }
 
 .tileCount {
   flex: none;
-  font-size: 11px;
-  opacity: 0.6;
+  font-size: var(--aml-size-xs);
+  color: var(--aml-text-3);
   font-variant-numeric: tabular-nums;
 }
 
@@ -187,7 +212,7 @@
   display: flex;
   flex-direction: column;
   gap: 1px;
-  max-width: 60ch;
+  max-width: 62ch;
 }
 
 .note {
@@ -197,20 +222,20 @@
   justify-content: space-between;
   gap: var(--aml-space-3);
   font: inherit;
-  font-size: 13px;
+  font-size: var(--aml-size-md);
   text-align: left;
-  padding: 4px 6px;
+  height: var(--aml-row);
+  padding: 0 var(--aml-space-2);
   border: 0;
-  border-radius: 3px;
+  border-radius: var(--aml-radius);
   background: transparent;
-  color: inherit;
+  color: var(--aml-text);
   cursor: default;
+  transition: background var(--aml-dur-1) var(--aml-ease);
 }
 
-.note:hover,
-.note:focus-visible {
+.note:hover {
   background: var(--aml-highlight);
-  outline: none;
 }
 
 .noteName {
@@ -218,13 +243,13 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: var(--aml-primary);
+  font-weight: var(--aml-weight-medium);
 }
 
 .noteFolder {
   flex: none;
-  font-size: 11px;
-  opacity: 0.55;
+  font-size: var(--aml-size-xs);
+  color: var(--aml-text-3);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

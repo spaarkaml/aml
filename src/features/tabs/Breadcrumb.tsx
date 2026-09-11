@@ -25,7 +25,7 @@ export function Breadcrumb() {
         const path = folders.slice(0, i + 1).join("/");
         return (
           <span key={path} className={styles.crumb}>
-            <span aria-hidden="true">›</span>
+            <span className={styles.sep} aria-hidden="true" />
             <button
               type="button"
               className={styles.crumbButton}
@@ -42,7 +42,7 @@ export function Breadcrumb() {
       })}
       {leaf ? (
         <span className={styles.crumb}>
-          <span aria-hidden="true">›</span>
+          <span className={styles.sep} aria-hidden="true" />
           <span>{noteTitle(leaf)}</span>
         </span>
       ) : null}

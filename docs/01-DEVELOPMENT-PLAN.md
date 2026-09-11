@@ -111,6 +111,7 @@ Roughly 80–95 AI sessions. Stages 2 and 3 can overlap; 6 and 7 can overlap.
 
 | WP | Title |
 |---|---|
+| 3.0 | **Visual refresh (ADR-013)**: the Apple-light foundation — system face, type ramp, spacing rhythm, radii, elevation, a drawn icon set, motion — across the whole shell. Added after 3.1 and 3.2, at Bryce's call, from a design canvas of three directions |
 | 3.1 | Focus Mode (paragraph/sentence dimming), Typewriter Mode, Zen (hide all panels) — per-device |
 | 3.2 | Appearance settings (ADR-010): light/dark/OS switch, per-token colour editor with live preview and reset, font picker (bundled + system), measure/leading/spacing; saved to `.aml/config.yaml` with per-device override |
 | 3.3 | Note Types (Q9): registry from `_templates/`, colour + icon, "New <Type>" commands, type-specific properties |

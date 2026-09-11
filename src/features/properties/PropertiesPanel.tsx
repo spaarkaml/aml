@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Icon } from "@/app/icons";
 import { getActiveEditor } from "@/features/editor/editorRef";
 import { ALLOW_FRONT_MATTER_REMOVAL } from "@/features/editor/extensions/aml-nodes";
 import { useEditorStore } from "@/features/editor/store";
@@ -92,7 +93,7 @@ export function PropertiesPanel() {
                   aria-label={`Remove ${f.key}`}
                   onClick={() => update(removeField(fields, f.key))}
                 >
-                  ×
+                  <Icon name="close" size={12} />
                 </button>
               </dd>
             </div>

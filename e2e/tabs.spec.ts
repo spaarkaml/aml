@@ -28,12 +28,12 @@ test("opening notes adds tabs; clicking a tab switches the editor and breadcrumb
   const tabs = page.getByRole("tab");
   await expect(tabs).toHaveCount(2);
   await expect(page.getByTestId("breadcrumb")).toHaveText(
-    "Writing›Thesis›chapters›03 Influence networks",
+    /^Writing\s*Thesis\s*chapters\s*03 Influence networks$/,
   );
   await expect(page.getByTestId("note-editor").locator("h1")).toHaveText("Influence networks");
   await tabs.filter({ hasText: "Inbox" }).click();
   await expect(page.getByRole("tab", { selected: true })).toContainText("Inbox");
-  await expect(page.getByTestId("breadcrumb")).toHaveText("Writing›Inbox");
+  await expect(page.getByTestId("breadcrumb")).toHaveText(/^Writing\s*Inbox$/);
   await expect(page.getByTestId("note-editor")).toContainText("Quick thoughts.");
 });
 

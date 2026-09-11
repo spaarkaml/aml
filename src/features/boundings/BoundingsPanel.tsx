@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Icon } from "@/app/icons";
 import { useEditorStore } from "@/features/editor/store";
 import { openNoteAt } from "@/features/quickopen/store";
 import type { Bounding } from "@/ipc";
@@ -194,7 +195,7 @@ export function BoundingsPanel() {
                   data-testid={`bounding-edit-${b.id}`}
                   onClick={() => edit(editing === b.id ? null : b.id)}
                 >
-                  ✎
+                  <Icon name="pencil" size={13} />
                 </button>
               </div>
               {editing === b.id ? (

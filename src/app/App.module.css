@@ -9,19 +9,22 @@
 
 .wordmark {
   font-family: var(--aml-font-ui);
-  font-size: 2rem;
-  letter-spacing: 0.3em;
+  font-size: var(--aml-size-3xl);
+  font-weight: var(--aml-weight-bold);
+  letter-spacing: 0.22em;
+  text-indent: 0.22em;
   color: var(--aml-primary);
   margin: 0;
 }
 
 .tagline {
   font-family: var(--aml-font-editor);
-  font-size: 1.25rem;
+  font-size: var(--aml-size-xl);
+  color: var(--aml-text-2);
   margin: 0;
 }
 
 .placeholder {
-  opacity: 0.6;
+  color: var(--aml-text-3);
   margin: 0;
 }

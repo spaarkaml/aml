@@ -7,11 +7,10 @@
   padding: 4px;
   background: var(--aml-surface);
   color: var(--aml-text);
-  border: 1px solid var(--aml-muted);
-  border-radius: var(--aml-radius);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+  border-radius: var(--aml-radius-lg);
+  box-shadow: var(--aml-shadow-2);
   font-family: var(--aml-font-ui);
-  font-size: 12px;
+  font-size: var(--aml-size-sm);
 }
 
 .item,
@@ -21,7 +20,7 @@
   align-items: center;
   gap: var(--aml-space-3);
   padding: 4px 8px;
-  border-radius: 3px;
+  border-radius: var(--aml-radius-sm);
   cursor: default;
 }
 
@@ -31,7 +30,7 @@
 }
 
 .hint {
-  opacity: 0.55;
+  color: var(--aml-text-3);
   font-family: var(--aml-font-mono, monospace);
-  font-size: 11px;
+  font-size: var(--aml-size-xs);
 }

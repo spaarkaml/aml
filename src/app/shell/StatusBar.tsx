@@ -7,6 +7,7 @@ import { describeSync, startSyncPolling, useSyncStore } from "@/features/sync/st
 import { FOCUS_LABEL, useWritingStore } from "@/features/writing/store";
 import type { AppInfo } from "@/ipc";
 import { readingMinutes } from "@/lib/wordcount";
+import { Icon } from "../icons";
 import styles from "./shell.module.css";
 
 export function StatusBar({ info }: { info: AppInfo | null }) {
@@ -53,11 +54,16 @@ export function StatusBar({ info }: { info: AppInfo | null }) {
         }
         data-testid="spell-toggle"
       >
-        {spell ? "en-AU ✓" : "en-AU off"}
+        {spell ? <Icon name="check" size={12} /> : null}
+        en-AU{spell ? "" : " off"}
       </button>
       {path ? (
-        <span data-testid="save-state" title={path}>
-          {saving ? "Saving…" : dirty ? "● Unsaved" : "Saved"}
+        <span
+          data-testid="save-state"
+          title={path}
+          className={dirty && !saving ? styles.dirtyDot : undefined}
+        >
+          {saving ? "Saving…" : dirty ? "Unsaved" : "Saved"}
         </span>
       ) : null}
       {focus !== "off" ? (

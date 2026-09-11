@@ -2,11 +2,11 @@
   display: flex;
   flex-direction: column;
   gap: var(--aml-space-2);
-  font-size: 12px;
+  font-size: var(--aml-size-md);
 }
 
 .empty {
-  opacity: 0.6;
+  color: var(--aml-text-3);
   margin: 0;
 }
 
@@ -16,11 +16,9 @@
   justify-content: space-between;
   gap: var(--aml-space-2);
   margin: var(--aml-space-2) 0 0;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  opacity: 0.75;
+  font-size: var(--aml-size-xs);
+  font-weight: var(--aml-weight-semi);
+  color: var(--aml-text-3);
 }
 
 .list {
@@ -29,53 +27,54 @@
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
 .row {
   display: flex;
   flex-direction: column;
   gap: 1px;
-  padding: 4px 6px;
-  border-radius: 3px;
-  cursor: pointer;
+  padding: var(--aml-space-15) var(--aml-space-2);
+  border-radius: var(--aml-radius);
+  cursor: default;
   text-align: left;
   font: inherit;
   color: inherit;
   background: transparent;
   border: none;
   width: 100%;
+  transition: background var(--aml-dur-1) var(--aml-ease);
 }
 
-.row:hover,
-.row:focus-visible {
+.row:hover {
   background: var(--aml-highlight);
-  outline: none;
 }
 
 .source {
-  color: var(--aml-primary);
-  font-weight: 600;
+  color: var(--aml-text);
+  font-weight: var(--aml-weight-medium);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .section {
-  font-weight: 400;
-  opacity: 0.7;
+  font-weight: var(--aml-weight-normal);
+  color: var(--aml-text-3);
 }
 
 .context {
-  opacity: 0.85;
+  color: var(--aml-text-2);
+  font-size: var(--aml-size-sm);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .context mark {
-  background: var(--aml-highlight);
+  background: color-mix(in srgb, var(--aml-primary) 18%, transparent);
   color: inherit;
+  border-radius: var(--aml-radius-xs);
 }
 
 .mention {
@@ -91,17 +90,22 @@
 
 .small {
   font: inherit;
-  font-size: 11px;
-  padding: 2px 8px;
-  border: 1px solid var(--aml-muted);
-  border-radius: 3px;
+  font-size: var(--aml-size-xs);
+  font-weight: var(--aml-weight-medium);
+  padding: var(--aml-space-05) var(--aml-space-2);
+  border: 0;
+  border-radius: var(--aml-radius-sm);
   background: var(--aml-surface);
-  color: var(--aml-text);
-  cursor: pointer;
+  box-shadow: var(--aml-shadow-1);
+  color: var(--aml-text-2);
+  cursor: default;
   white-space: nowrap;
+  transition:
+    background var(--aml-dur-1) var(--aml-ease),
+    color var(--aml-dur-1) var(--aml-ease);
 }
 
 .small:hover {
-  border-color: var(--aml-primary);
-  color: var(--aml-primary);
+  background: var(--aml-highlight);
+  color: var(--aml-text);
 }

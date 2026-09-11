@@ -1,32 +1,93 @@
-/* AML design tokens (ADR-010). Paper is the default; Ink overrides under [data-mode="ink"].
-   Every colour is user-editable at runtime by setting the same custom property on :root. */
+/* AML design tokens.
+   Colours: ADR-010 (seven per mode, all user-editable at runtime by setting the same custom
+   property on :root). Paper's values and everything below the colours — the type ramp, the
+   spacing rhythm, the radii, elevation and motion — are ADR-013.
+   Paper is the default; Ink overrides under [data-mode="ink"]. */
 :root {
-  --aml-bg: #faefed;
+  /* ---- colour (ADR-010 tokens, ADR-013 Paper values) ---- */
+  --aml-bg: #f5f5f7;
   --aml-surface: #ffffff;
-  --aml-text: #1f2a2e;
+  --aml-text: #1d1d1f;
   --aml-primary: #006078;
-  --aml-muted: #82bac4;
-  --aml-highlight: #ffd4d1;
+  --aml-muted: #d8d8dd;
+  --aml-highlight: #e8e8ed;
   --aml-accent: #e37c78;
 
-  --aml-font-ui: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  /* Text hierarchy, derived so a user's edited --aml-text stays consistent with itself.
+     62% = 4.6:1 on Paper (passes AA); 50% = 3.2:1, for metadata only. Never `opacity` on a
+     text element — that dims its background and its focus ring with it. */
+  --aml-text-2: color-mix(in srgb, var(--aml-text) 62%, transparent);
+  --aml-text-3: color-mix(in srgb, var(--aml-text) 50%, transparent);
+
+  /* ---- type (ADR-013) ---- */
+  --aml-font-ui:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable Text", "Segoe UI",
+    system-ui, sans-serif;
   --aml-font-editor: "Source Serif 4", "Times New Roman", Times, serif;
   --aml-font-mono: "IBM Plex Mono", Menlo, Consolas, monospace;
 
+  --aml-size-xs: 11px; /* metadata: counts, timestamps, paths */
+  --aml-size-sm: 12px; /* dense rows, secondary controls */
+  --aml-size-md: 13px; /* the default interface size */
+  --aml-size-lg: 15px; /* dialog titles, palette input */
+  --aml-size-xl: 19px; /* screen headings */
+  --aml-size-2xl: 26px; /* the one big title on a screen */
+  --aml-size-3xl: 34px; /* the wordmark, and nothing else */
+
+  /* The reading size of the editor page. Not chrome: WP-3.2's Appearance settings own the
+     measure, the leading and the face, and this is the size they are set against. */
+  --aml-reading-size: 17px;
+
+  --aml-weight-normal: 400;
+  --aml-weight-medium: 510;
+  --aml-weight-semi: 590;
+  --aml-weight-bold: 680;
+
+  /* ---- spacing: --aml-space-N is N × 4px ---- */
+  --aml-space-05: 2px;
   --aml-space-1: 4px;
+  --aml-space-15: 6px;
   --aml-space-2: 8px;
   --aml-space-3: 12px;
   --aml-space-4: 16px;
   --aml-space-6: 24px;
   --aml-space-8: 32px;
-  --aml-radius: 4px;
+  --aml-space-12: 48px;
 
-  /* Set by Appearance (WP-3.2) when the Folio or this device asks for something else;
-     the editor falls back to its own values when they are absent. */
+  --aml-row: 28px; /* a list row, a toolbar button */
+  --aml-row-sm: 24px; /* a dense tree row */
+
+  /* ---- radii ---- */
+  --aml-radius-xs: 3px; /* an inline mark behind a word */
+  --aml-radius-sm: 6px; /* inputs, chips, swatches */
+  --aml-radius: 8px; /* buttons, rows, menu items */
+  --aml-radius-lg: 12px; /* cards, panels, popovers */
+  --aml-radius-xl: 16px; /* sheets and dialogs */
+  --aml-radius-pill: 999px;
+
+  /* ---- elevation: a ½px ring plus a shadow, instead of a 1px wall ---- */
+  --aml-shadow-1: 0 0 0 0.5px rgb(0 0 0 / 6%), 0 1px 2px rgb(0 0 0 / 5%);
+  --aml-shadow-2:
+    0 0 0 0.5px rgb(0 0 0 / 6%), 0 2px 6px rgb(0 0 0 / 6%), 0 10px 28px rgb(0 0 0 / 7%);
+  --aml-shadow-3:
+    0 0 0 0.5px rgb(0 0 0 / 8%), 0 4px 12px rgb(0 0 0 / 8%), 0 24px 64px rgb(0 0 0 / 12%);
+  --aml-scrim: rgb(0 0 0 / 18%);
+
+  /* The disclosure chevron, as a mask so it takes `currentcolor` wherever it is used.
+     Drawn here rather than in a component because it belongs to ::before pseudo-elements. */
+  --aml-chevron: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="m3.6 6.2 4.4 4 4.4-4" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+
+  /* ---- motion (zeroed under prefers-reduced-motion in global.css) ---- */
+  --aml-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --aml-dur-1: 120ms;
+  --aml-dur-2: 180ms;
+  --aml-dur-3: 240ms;
 
   color-scheme: light;
 }
 
+/* Ink keeps ADR-010's palette; ADR-013 gives it the same foundation. Only the values that
+   cannot be derived from the colours above — the shadows and the scrim — are restated. */
 :root[data-mode="ink"] {
   --aml-bg: #17262b;
   --aml-surface: #1f3238;
@@ -35,5 +96,13 @@
   --aml-muted: #2f4a52;
   --aml-highlight: #3a2e31;
   --aml-accent: #e37c78;
+
+  --aml-shadow-1: 0 0 0 0.5px rgb(255 255 255 / 8%), 0 1px 2px rgb(0 0 0 / 40%);
+  --aml-shadow-2:
+    0 0 0 0.5px rgb(255 255 255 / 8%), 0 2px 6px rgb(0 0 0 / 40%), 0 10px 28px rgb(0 0 0 / 45%);
+  --aml-shadow-3:
+    0 0 0 0.5px rgb(255 255 255 / 10%), 0 4px 12px rgb(0 0 0 / 45%), 0 24px 64px rgb(0 0 0 / 55%);
+  --aml-scrim: rgb(0 0 0 / 45%);
+
   color-scheme: dark;
 }

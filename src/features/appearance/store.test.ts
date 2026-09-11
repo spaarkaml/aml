@@ -56,10 +56,11 @@ describe("contrast", () => {
     expect(paper).toBeGreaterThan(12);
     expect(contrastVerdict(paper).ok).toBe(true);
 
-    // The same number docs/qa/contrast-report.md reports for this pair (ADR-010 rounds it to 2.0).
+    // The same number docs/qa/contrast-report.md reports for this pair, so the Appearance
+    // screen and the generated report can never disagree about AML's own colours.
     const muted = contrastRatio(DEFAULTS.paper.muted as string, DEFAULTS.paper.bg as string);
-    expect(muted).toBeCloseTo(1.91, 2);
-    expect(contrastVerdict(muted)).toEqual({ label: "1.9:1 too low", ok: false });
+    expect(muted).toBeCloseTo(1.3, 2);
+    expect(contrastVerdict(muted)).toEqual({ label: "1.3:1 too low", ok: false });
     expect(contrastVerdict(contrastRatio("#767676", "#ffffff")).label).toContain("AA");
   });
 

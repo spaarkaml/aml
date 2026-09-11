@@ -5,7 +5,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.35);
+  background: var(--aml-scrim);
 }
 
 .dialog {
@@ -17,29 +17,29 @@
   padding: var(--aml-space-4);
   background: var(--aml-surface);
   color: var(--aml-text);
-  border: 1px solid var(--aml-muted);
-  border-radius: var(--aml-radius);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  border-radius: var(--aml-radius-xl);
+  box-shadow: var(--aml-shadow-3);
   font-family: var(--aml-font-ui);
 }
 
 .title {
   margin: 0;
-  font-size: 15px;
-  font-weight: 600;
+  font-size: var(--aml-size-lg);
+  font-weight: var(--aml-weight-semi);
 }
 
 .lead {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--aml-size-md);
 }
 
 .list {
   overflow: auto;
-  border: 1px solid var(--aml-muted);
+  border: 0;
   border-radius: var(--aml-radius);
   padding: var(--aml-space-2);
-  font-size: 12px;
+  font-size: var(--aml-size-sm);
+  background: color-mix(in srgb, var(--aml-text) 6%, transparent);
 }
 
 .note + .note {
@@ -48,8 +48,8 @@
 
 .notePath {
   margin: 0 0 4px;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--aml-size-sm);
+  font-weight: var(--aml-weight-semi);
   color: var(--aml-primary);
 }
 
@@ -62,7 +62,7 @@
 .line {
   min-width: 2.5em;
   text-align: right;
-  opacity: 0.55;
+  color: var(--aml-text-3);
   font-variant-numeric: tabular-nums;
 }
 
@@ -76,7 +76,7 @@
 }
 
 .diff del {
-  opacity: 0.6;
+  color: var(--aml-text-3);
 }
 
 .diff ins {

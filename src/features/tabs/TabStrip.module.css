@@ -1,7 +1,7 @@
 .strip {
   display: flex;
-  align-items: stretch;
-  gap: 2px;
+  align-items: center;
+  gap: var(--aml-space-05);
   flex-grow: 1;
   min-width: 0;
   height: 100%;
@@ -13,35 +13,37 @@
   display: none;
 }
 
+/* Tabs sit in the toolbar as pills, not as folder tabs welded to a border. */
 .tab,
 .tabActive {
   display: flex;
   align-items: center;
-  gap: 4px;
-  flex: 0 1 180px;
-  min-width: 72px;
-  padding: 0 4px 0 10px;
-  margin: 6px 0 0;
-  border: 1px solid transparent;
-  border-bottom: 0;
-  border-radius: var(--aml-radius) var(--aml-radius) 0 0;
-  color: var(--aml-text);
-  opacity: 0.7;
-  font-size: 12px;
+  gap: var(--aml-space-1);
+  flex: 0 1 172px;
+  min-width: 76px;
+  height: var(--aml-row);
+  padding: 0 var(--aml-space-1) 0 var(--aml-space-2);
+  border: 0;
+  border-radius: var(--aml-radius);
+  color: var(--aml-text-2);
+  font-size: var(--aml-size-sm);
   cursor: default;
   user-select: none;
+  transition:
+    background var(--aml-dur-1) var(--aml-ease),
+    color var(--aml-dur-1) var(--aml-ease);
 }
 
 .tab:hover {
   background: var(--aml-highlight);
-  opacity: 1;
+  color: var(--aml-text);
 }
 
 .tabActive {
   background: var(--aml-surface);
-  border-color: var(--aml-muted);
-  color: var(--aml-primary);
-  opacity: 1;
+  color: var(--aml-text);
+  font-weight: var(--aml-weight-medium);
+  box-shadow: var(--aml-shadow-1);
 }
 
 .label {
@@ -53,43 +55,54 @@
 }
 
 .hint {
-  opacity: 0.6;
+  color: var(--aml-text-3);
 }
 
 .dot {
-  font-size: 8px;
-  color: var(--aml-accent);
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--aml-accent);
 }
 
 .close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 0;
   background: transparent;
-  color: inherit;
+  color: var(--aml-text-3);
   font: inherit;
-  font-size: 14px;
-  line-height: 1;
-  width: 18px;
-  height: 18px;
-  border-radius: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--aml-radius-sm);
   opacity: 0;
   cursor: default;
-}
-
-.tab:hover .close,
-.tabActive .close,
-.close:focus-visible {
-  opacity: 0.7;
+  transition:
+    opacity var(--aml-dur-1) var(--aml-ease),
+    background var(--aml-dur-1) var(--aml-ease);
 }
 
 .close:hover {
-  background: var(--aml-highlight);
+  background: color-mix(in srgb, var(--aml-text) 10%, transparent);
+  color: var(--aml-text);
+}
+
+.close:focus-visible {
+  opacity: 1;
+}
+
+/* The close control is only there once you are on the tab. */
+.tabActive .close,
+.tab:hover .close {
   opacity: 1;
 }
 
 .crumb {
   display: inline-flex;
   align-items: center;
-  gap: var(--aml-space-2);
+  gap: var(--aml-space-05);
 }
 
 .crumbButton {
@@ -97,11 +110,23 @@
   background: transparent;
   color: inherit;
   font: inherit;
-  padding: 0 2px;
-  border-radius: 3px;
+  padding: 2px var(--aml-space-1);
+  border-radius: var(--aml-radius-sm);
   cursor: default;
+  transition: background var(--aml-dur-1) var(--aml-ease);
 }
 
 .crumbButton:hover {
   background: var(--aml-highlight);
+  color: var(--aml-text);
+}
+
+/* The breadcrumb separator, drawn rather than typed. */
+.sep {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  background: var(--aml-text-3);
+  mask: var(--aml-chevron) center / contain no-repeat;
+  transform: rotate(-90deg);
 }

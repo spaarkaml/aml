@@ -16,7 +16,7 @@
   display: flex;
   align-items: center;
   gap: var(--aml-space-3);
-  font-size: 12px;
+  font-size: var(--aml-size-sm);
   padding: var(--aml-space-2) var(--aml-space-3);
   margin-bottom: var(--aml-space-4);
   border: 1px solid var(--aml-accent);
@@ -26,7 +26,7 @@
 
 .banner button {
   font: inherit;
-  font-size: 12px;
+  font-size: var(--aml-size-sm);
   color: var(--aml-primary);
   border: 1px solid var(--aml-primary);
   background: transparent;
@@ -39,7 +39,7 @@
   outline: none;
   user-select: text;
   font-family: var(--aml-font-editor);
-  font-size: 17px;
+  font-size: var(--aml-reading-size);
   line-height: var(--aml-leading, 1.65);
   color: var(--aml-text);
   min-height: 60vh;
@@ -56,7 +56,7 @@
 .prose :global(h5),
 .prose :global(h6) {
   color: var(--aml-primary);
-  font-weight: 700;
+  font-weight: var(--aml-weight-bold);
   line-height: 1.25;
   margin: 1.4em 0 0.5em;
 }
@@ -103,7 +103,7 @@
   font-family: var(--aml-font-mono);
   font-size: 0.9em;
   background: var(--aml-highlight);
-  border-radius: 3px;
+  border-radius: var(--aml-radius-sm);
   padding: 0 0.25em;
 }
 
@@ -177,7 +177,7 @@
 
 .prose :global(.aml-front-matter) {
   font-family: var(--aml-font-ui);
-  font-size: 11px;
+  font-size: var(--aml-size-xs);
   color: var(--aml-primary);
   border: 1px solid var(--aml-muted);
   border-radius: var(--aml-radius);
@@ -221,7 +221,7 @@
 .prose :global(.aml-tag) {
   color: var(--aml-primary);
   background: var(--aml-highlight);
-  border-radius: 10px;
+  border-radius: var(--aml-radius-pill);
   padding: 0 0.5em;
   font-size: 0.85em;
   font-family: var(--aml-font-ui);

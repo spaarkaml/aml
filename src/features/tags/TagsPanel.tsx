@@ -21,7 +21,7 @@ function Node({ node, depth }: { node: TagNode; depth: number }) {
             onClick={() => toggle(node.tag)}
             aria-label={expanded ? `Collapse ${node.tag}` : `Expand ${node.tag}`}
           >
-            {expanded ? "▾" : "▸"}
+            <span className={styles.chevron} data-expanded={expanded ? "" : undefined} />
           </button>
         ) : (
           <span className={styles.twisty} />

@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--aml-space-2);
-  font-size: 12px;
+  font-size: var(--aml-size-sm);
 }
 
 .head {
@@ -13,16 +13,16 @@
 }
 
 .title {
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--aml-size-xs);
+  font-weight: var(--aml-weight-semi);
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  opacity: 0.75;
+  color: var(--aml-text-3);
 }
 
 .empty {
   margin: 0;
-  opacity: 0.6;
+  color: var(--aml-text-3);
   line-height: 1.5;
 }
 
@@ -64,7 +64,7 @@
   text-align: left;
   padding: 3px 6px;
   border: 0;
-  border-radius: 3px;
+  border-radius: var(--aml-radius-sm);
   background: transparent;
   color: inherit;
   cursor: default;
@@ -80,14 +80,14 @@
 
 .boundingOn {
   background: var(--aml-highlight);
-  font-weight: 600;
+  font-weight: var(--aml-weight-semi);
 }
 
 .dot {
   flex: none;
   width: 8px;
   height: 8px;
-  border-radius: 2px;
+  border-radius: 50%;
 }
 
 .label {
@@ -105,8 +105,8 @@
 .count,
 .folder {
   flex: none;
-  opacity: 0.55;
-  font-size: 11px;
+  color: var(--aml-text-3);
+  font-size: var(--aml-size-xs);
   font-variant-numeric: tabular-nums;
 }
 
@@ -119,21 +119,24 @@
 
 .toggle {
   flex: none;
-  width: 20px;
-  font: inherit;
-  line-height: 1;
-  padding: 3px 0;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 0;
-  border-radius: 3px;
+  border-radius: var(--aml-radius-sm);
   background: transparent;
-  color: var(--aml-primary);
+  color: var(--aml-text-3);
   cursor: default;
+  transition:
+    background var(--aml-dur-1) var(--aml-ease),
+    color var(--aml-dur-1) var(--aml-ease);
 }
 
-.toggle:hover,
-.toggle:focus-visible {
+.toggle:hover {
   background: var(--aml-highlight);
-  outline: none;
+  color: var(--aml-text);
 }
 
 .notes {
@@ -151,7 +154,7 @@
   text-align: left;
   padding: 2px 6px;
   border: 0;
-  border-radius: 3px;
+  border-radius: var(--aml-radius-sm);
   background: transparent;
   color: inherit;
   cursor: default;
@@ -170,8 +173,10 @@
   flex-direction: column;
   gap: var(--aml-space-2);
   padding: var(--aml-space-2);
-  border: 1px solid var(--aml-muted);
-  border-radius: var(--aml-radius);
+  border: 0;
+  background: var(--aml-surface);
+  box-shadow: var(--aml-shadow-1);
+  border-radius: var(--aml-radius-lg);
 }
 
 .fields {
@@ -183,9 +188,9 @@
 .name {
   font: inherit;
   color: var(--aml-text);
-  background: var(--aml-surface);
-  border: 1px solid var(--aml-muted);
-  border-radius: 3px;
+  background: color-mix(in srgb, var(--aml-text) 6%, transparent);
+  border: 0;
+  border-radius: var(--aml-radius-sm);
   padding: 3px 6px;
 }
 
@@ -201,8 +206,9 @@
 
 .icon:focus,
 .name:focus {
-  border-color: var(--aml-primary);
   outline: none;
+  background: var(--aml-surface);
+  box-shadow: 0 0 0 2px var(--aml-primary);
 }
 
 .swatches {
@@ -214,7 +220,7 @@
 .swatchOn {
   width: 18px;
   height: 18px;
-  border-radius: 3px;
+  border-radius: var(--aml-radius-sm);
   border: 1px solid transparent;
   cursor: default;
 }
@@ -233,11 +239,12 @@
 .small,
 .danger {
   font: inherit;
-  font-size: 11px;
+  font-size: var(--aml-size-xs);
   padding: 2px 6px;
-  border: 1px solid var(--aml-muted);
-  border-radius: 3px;
-  background: transparent;
+  border: 0;
+  box-shadow: var(--aml-shadow-1);
+  border-radius: var(--aml-radius-sm);
+  background: var(--aml-surface);
   color: var(--aml-primary);
   cursor: default;
 }

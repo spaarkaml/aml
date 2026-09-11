@@ -12,29 +12,27 @@
 .note,
 .file {
   width: 100%;
+  height: var(--aml-row-sm);
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--aml-space-15);
   font: inherit;
-  font-size: 12px;
+  font-size: var(--aml-size-md);
   text-align: left;
-  padding: 3px 8px;
+  padding: 0 var(--aml-space-2);
   border: 0;
-  border-radius: 3px;
+  border-radius: var(--aml-radius);
   background: transparent;
   color: var(--aml-text);
   cursor: default;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.folder {
-  color: var(--aml-primary);
+  transition: background var(--aml-dur-1) var(--aml-ease);
 }
 
 .file {
-  opacity: 0.6;
+  color: var(--aml-text-3);
 }
 
 .folder:hover,
@@ -43,10 +41,34 @@
   background: var(--aml-highlight);
 }
 
-.glyph {
-  display: inline-block;
+/* The kind icon is quiet until the row is the current one. */
+.kind {
+  flex: none;
+  color: var(--aml-text-3);
+}
+
+.folder .kind {
+  color: var(--aml-primary);
+  opacity: 0.7;
+}
+
+/* Disclosure triangle: drawn from the shared chevron mask so it matches every other one. */
+.twisty,
+.twistyNone {
+  flex: none;
   width: 10px;
-  font-size: 10px;
+  height: 10px;
+}
+
+.twisty {
+  background: var(--aml-text-3);
+  mask: var(--aml-chevron) center / 9px no-repeat;
+  transform: rotate(-90deg);
+  transition: transform var(--aml-dur-1) var(--aml-ease);
+}
+
+.twisty[data-expanded] {
+  transform: none;
 }
 
 .name {
@@ -55,69 +77,89 @@
 }
 
 .empty {
-  opacity: 0.6;
+  color: var(--aml-text-3);
   margin: 0;
 }
 
 .note[aria-current="true"] {
-  background: var(--aml-highlight);
-  color: var(--aml-primary);
+  background: var(--aml-primary);
+  color: var(--aml-surface);
+}
+
+.note[aria-current="true"] .kind {
+  color: inherit;
+  opacity: 0.8;
 }
 
 .browser,
 .browserDrop {
   min-height: 100%;
-  padding-bottom: 40px;
+  padding-bottom: var(--aml-space-8);
 }
 
 .browserDrop {
-  outline: 1px dashed var(--aml-primary);
+  outline: 2px solid var(--aml-primary);
   outline-offset: -2px;
+  border-radius: var(--aml-radius);
 }
 
 .toolbar {
   display: flex;
-  gap: 4px;
-  padding: 0 4px 6px;
+  gap: var(--aml-space-1);
+  padding: 0 0 var(--aml-space-15);
 }
 
 .toolbar button {
-  border: 1px solid var(--aml-muted);
-  background: transparent;
-  color: var(--aml-primary);
+  height: var(--aml-row-sm);
+  border: 0;
+  background: var(--aml-surface);
+  box-shadow: var(--aml-shadow-1);
+  color: var(--aml-text-2);
   font: inherit;
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: var(--aml-radius);
+  font-size: var(--aml-size-xs);
+  font-weight: var(--aml-weight-medium);
+  padding: 0 var(--aml-space-2);
+  border-radius: var(--aml-radius-sm);
   cursor: default;
+  transition:
+    background var(--aml-dur-1) var(--aml-ease),
+    color var(--aml-dur-1) var(--aml-ease);
 }
 
 .toolbar button:hover {
   background: var(--aml-highlight);
+  color: var(--aml-text);
 }
 
 .folderDrop {
   composes: folder;
-  outline: 1px dashed var(--aml-primary);
-  outline-offset: -1px;
+  outline: 2px solid var(--aml-primary);
+  outline-offset: -2px;
   background: var(--aml-highlight);
 }
 
 .dot {
   margin-left: auto;
-  font-size: 8px;
-  color: var(--aml-accent);
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--aml-accent);
 }
 
 .rename {
   display: block;
-  width: calc(100% - 16px);
+  width: calc(100% - var(--aml-space-4));
   box-sizing: border-box;
   font: inherit;
-  font-size: 12px;
-  padding: 2px 6px;
-  border: 1px solid var(--aml-primary);
-  border-radius: 3px;
+  font-size: var(--aml-size-md);
+  padding: 2px var(--aml-space-15);
+  border: 0;
+  border-radius: var(--aml-radius-sm);
   background: var(--aml-surface);
   color: var(--aml-text);
+  box-shadow:
+    var(--aml-shadow-1),
+    0 0 0 2px var(--aml-primary);
+  outline: none;
 }

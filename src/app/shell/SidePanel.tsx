@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { type Side, useLayoutStore } from "@/features/layout/store";
+import { Icon } from "../icons";
 import styles from "./shell.module.css";
 
 interface Props {
@@ -64,7 +65,7 @@ export function SidePanel({ side, title, children }: Props) {
             title="Close"
             aria-label={`Close ${title}`}
           >
-            ×
+            <Icon name="close" />
           </button>
         </span>
       </div>

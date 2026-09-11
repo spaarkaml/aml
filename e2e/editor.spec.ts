@@ -52,7 +52,7 @@ test("typing marks the note unsaved, then autosaves canonical markdown with fron
   await clickEndOf(page, "h1");
   await page.keyboard.type(" revisited");
   await expect(h1).toHaveText("Influence networks revisited");
-  await expect(page.getByTestId("save-state")).toHaveText("● Unsaved");
+  await expect(page.getByTestId("save-state")).toHaveText("Unsaved");
   await expect(page.getByTestId("save-state")).toHaveText("Saved", { timeout: 4000 });
   const md = await writtenMarkdown(page, "Thesis/chapters/03 Influence networks.md");
   expect(

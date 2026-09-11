@@ -1,8 +1,9 @@
 import type { Mode } from "./store";
 
 /**
- * The colour tokens the Appearance screen edits (ADR-010). The defaults here must match
- * `src/app/tokens.css`, which is what the app falls back to when nothing is set: an edited
+ * The colour tokens the Appearance screen edits (ADR-010; Paper's values are ADR-013). The
+ * defaults here must match `src/app/tokens.css` — a unit test compares the two files, because
+ * a drift between them makes "Reset to AML" restore a colour the app never had. An edited
  * token is written as a custom property on `:root`, and clearing it lets the stylesheet win.
  */
 export interface TokenSpec {
@@ -15,23 +16,28 @@ export interface TokenSpec {
 }
 
 export const TOKENS: TokenSpec[] = [
-  { name: "bg", label: "Background", role: "The app and the page behind the text", text: false },
-  { name: "surface", label: "Surface", role: "Panels, cards, popovers", text: false },
+  {
+    name: "bg",
+    label: "Background",
+    role: "Window chrome: toolbar, sidebars, status bar",
+    text: false,
+  },
+  { name: "surface", label: "Surface", role: "The page, cards, popovers", text: false },
   { name: "text", label: "Text", role: "Body text", text: true },
   { name: "primary", label: "Primary", role: "Headings, links, active states", text: true },
-  { name: "muted", label: "Muted", role: "Borders and rules (decorative)", text: false },
-  { name: "highlight", label: "Highlight", role: "Selection, hover, current line", text: false },
+  { name: "muted", label: "Muted", role: "Hairlines and rules (decorative)", text: false },
+  { name: "highlight", label: "Highlight", role: "Hover and row selection fill", text: false },
   { name: "accent", label: "Accent", role: "Progress, warnings, the unsaved dot", text: false },
 ];
 
 export const DEFAULTS: Record<Mode, Record<string, string>> = {
   paper: {
-    bg: "#faefed",
+    bg: "#f5f5f7",
     surface: "#ffffff",
-    text: "#1f2a2e",
+    text: "#1d1d1f",
     primary: "#006078",
-    muted: "#82bac4",
-    highlight: "#ffd4d1",
+    muted: "#d8d8dd",
+    highlight: "#e8e8ed",
     accent: "#e37c78",
   },
   ink: {
@@ -47,6 +53,10 @@ export const DEFAULTS: Record<Mode, Record<string, string>> = {
 
 /** Type defaults, matching `NoteEditor.module.css`. */
 export const TYPE_DEFAULTS = { measure: 70, leading: 1.65, paragraphSpacing: 1 };
+
+/** ADR-013's interface face. Kept in one place so `tokens.css` and the picker cannot drift. */
+const UI_SYSTEM_STACK =
+  '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif';
 
 export interface FontSpec {
   name: string;
@@ -93,10 +103,16 @@ export const EDITOR_FONTS: FontSpec[] = [
 
 export const UI_FONTS: FontSpec[] = [
   {
+    name: "System",
+    stack: UI_SYSTEM_STACK,
+    bundled: false,
+    note: "AML's default — SF Pro on macOS, Segoe UI on Windows",
+  },
+  {
     name: "Arial",
     stack: 'Arial, "Helvetica Neue", Helvetica, sans-serif',
     bundled: false,
-    note: "AML's default",
+    note: "From your system",
   },
   {
     name: "Helvetica",
@@ -109,12 +125,6 @@ export const UI_FONTS: FontSpec[] = [
     stack: "Verdana, Geneva, sans-serif",
     bundled: false,
     note: "Wider, easier at small sizes",
-  },
-  {
-    name: "System",
-    stack: "system-ui, sans-serif",
-    bundled: false,
-    note: "Whatever this machine uses",
   },
 ];
 

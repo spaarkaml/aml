@@ -79,7 +79,7 @@ test("insert table from the palette, edit it with the table menu, save canonical
   await expect(editor.locator("th").first()).toHaveText("Head");
   await page.getByTestId("table-menu").getByRole("button", { name: "Row ↓" }).click();
   await expect(editor.locator("table tr")).toHaveCount(4);
-  await expect(page.getByTestId("save-state")).toHaveText("● Unsaved");
+  await expect(page.getByTestId("save-state")).toHaveText("Unsaved");
   await expect(page.getByTestId("save-state")).toHaveText("Saved", { timeout: 4000 });
   const md = await written(page);
   expect(md).toContain("| Head |");

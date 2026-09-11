@@ -2,11 +2,11 @@
   display: flex;
   flex-direction: column;
   gap: var(--aml-space-3);
-  font-size: 12px;
+  font-size: var(--aml-size-sm);
 }
 
 .empty {
-  opacity: 0.6;
+  color: var(--aml-text-3);
   margin: 0;
 }
 
@@ -27,16 +27,30 @@
 }
 
 .twisty {
-  width: 14px;
+  width: 16px;
+  height: 16px;
   flex: none;
-  font: inherit;
-  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: 0;
   background: transparent;
-  color: var(--aml-text);
-  opacity: 0.6;
   padding: 0;
   cursor: default;
+}
+
+/* The disclosure triangle, drawn from the shared chevron mask and turned. */
+.chevron {
+  width: 9px;
+  height: 9px;
+  background: var(--aml-text-3);
+  mask: var(--aml-chevron) center / contain no-repeat;
+  transform: rotate(-90deg);
+  transition: transform var(--aml-dur-1) var(--aml-ease);
+}
+
+.chevron[data-expanded] {
+  transform: none;
 }
 
 .tag,
@@ -52,7 +66,7 @@
   text-align: left;
   padding: 3px 8px;
   border: 0;
-  border-radius: 3px;
+  border-radius: var(--aml-radius-sm);
   background: transparent;
   color: var(--aml-primary);
   cursor: default;
@@ -76,8 +90,8 @@
 .count,
 .folder {
   flex: none;
-  opacity: 0.55;
-  font-size: 11px;
+  color: var(--aml-text-3);
+  font-size: var(--aml-size-xs);
   font-variant-numeric: tabular-nums;
 }
 
@@ -95,11 +109,11 @@
 
 .head {
   margin: 0 0 var(--aml-space-1);
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--aml-size-xs);
+  font-weight: var(--aml-weight-semi);
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  opacity: 0.75;
+  color: var(--aml-text-3);
 }
 
 .note {

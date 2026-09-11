@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Icon } from "@/app/icons";
 import { useFolioStore } from "@/features/folio/store";
 import styles from "./AppearanceScreen.module.css";
 import {
@@ -80,7 +81,7 @@ function Swatch({ mode, token }: { mode: Mode; token: (typeof TOKENS)[number] })
         aria-label={`Reset ${token.label}`}
         data-testid={`reset-${mode}-${token.name}`}
       >
-        ↺
+        <Icon name="revert" size={13} />
       </button>
     </li>
   );
@@ -222,7 +223,7 @@ export function AppearanceScreen() {
               onChange={(e) => patch({ uiFont: e.target.value || null })}
               data-testid="ui-font"
             >
-              <option value="">AML's own (Arial)</option>
+              <option value="">AML's own (the system face)</option>
               {UI_FONTS.map((f) => (
                 <option key={f.name} value={f.name}>
                   {f.name} — {f.note}

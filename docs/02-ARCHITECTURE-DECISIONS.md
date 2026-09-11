@@ -133,7 +133,7 @@ Decision log: 2026-09-09 — Bryce answered Q1–Q5; ADR-003, 005, 006, 011 rewr
 
 ---
 
-## ADR-010 — Appearance: light and dark modes, user-editable colours, approved fonts  `ACCEPTED`
+## ADR-010 — Appearance: light and dark modes, user-editable colours, approved fonts  `ACCEPTED` *(Paper colour table and UI font superseded by ADR-013)*
 
 **Decision (Q13, Q14):** two modes only — **Paper** (light) and **Ink** (dark) — following the OS or set manually. Every colour token is editable in **Settings → Appearance** (colour pickers per token, per mode, with "Reset to AML"). Edits are saved to the Folio's `.aml/config.yaml` under `appearance:` so they follow you between devices; a per-device override toggle exists for the one machine you want different. No user CSS files, no third theme.
 
@@ -184,3 +184,45 @@ The words "vault", "collection", "study", "library" and "workspace" are not used
 ## ADR-012 — No code signing; local-only updater  `ACCEPTED`
 
 **Decision (Q25):** personal tool, no Apple Developer or Authenticode certificates. Builds are unsigned. First-run instructions are shown on the release page and in `06-NAS-SETUP.md` §Install: macOS right-click → Open (or remove the quarantine attribute); Windows SmartScreen → More info → Run anyway. The in-app updater still works: Tauri's updater signs update bundles with its own free minisign key, unrelated to OS code signing. Revisit only if the app is ever shared.
+
+---
+
+## ADR-013 — Visual foundation: Apple-light ("Sonoma"), neutral Paper chrome  `ACCEPTED`
+*Supersedes the Paper colour table in ADR-010 and its UI-font choice. Everything else in ADR-010 — two modes, seven editable tokens per mode, `.aml/config.yaml`, the per-device override, the Ink table, the four bundled reading faces — stands unchanged.*
+
+**Context.** ADR-010 decided *colour* and *reading faces* and nothing else. It left the type ramp, spacing rhythm, corner radii, elevation, iconography, control density and motion undecided, so they were improvised per component: one 11–12px size everywhere, 4px radii on everything from a colour swatch to a modal, every panel walled off with a 1px border, icons typed as literal characters (◧ ◨ ↺ ✎ ▸), `opacity: 0.6` standing in for a secondary text colour, and no motion at all. The result was consistent but unfinished, and every stage after this one adds panels that would inherit it. Bryce reviewed three directions on a design canvas (2026-09-11) and chose **A — Sonoma**: native macOS light, neutral greys, AML's teal kept as the accent.
+
+**Decision.** AML's chrome follows the macOS light idiom. The foundation below is decided here and is not per-component.
+
+**Paper (light) tokens — the seven editable ones**
+
+| Token | Was (ADR-010) | Now | Role | Contrast |
+|---|---|---|---|---|
+| `--aml-bg` | #FAEFED | **#F5F5F7** | Window chrome: toolbar, sidebars, status bar | — |
+| `--aml-surface` | #FFFFFF | **#FFFFFF** *(unchanged)* | The page, cards, popovers | — |
+| `--aml-text` | #1F2A2E | **#1D1D1F** | Body text | 15.5 : 1 ✅ |
+| `--aml-primary` | #006078 | **#006078** *(unchanged)* | Headings, links, active states, selection fill | 6.6 : 1 ✅ |
+| `--aml-muted` | #82BAC4 | **#D8D8DD** | Hairlines, rules, inactive icons | 1.3 : 1 — decorative |
+| `--aml-highlight` | #FFD4D1 | **#E8E8ED** | Hover and row selection fill | text on it 13.8 : 1 ✅ |
+| `--aml-accent` | #E37C78 | **#E37C78** *(unchanged)* | Unsaved dot, warnings, destructive, goal progress | 2.6 : 1 — never text |
+
+AML's teal and coral survive; what goes is the warm rose *ground*. Teal now does what an accent colour does on macOS — it marks the selected row, the active control, the link — rather than competing with a tinted background for attention.
+
+**Foundation — decided here, not editable**
+
+- **Interface face:** the system UI face (`-apple-system` → SF Pro on macOS, Segoe UI Variable on Windows), replacing Arial. The four bundled *reading* faces of ADR-010 are untouched; this is the chrome, not the page.
+- **Type ramp:** 11 / 12 / 13 / 15 / 19 / 26 px with weights 400 / 510 / 590 / 680. 13px is the default interface size (macOS's own); 11px is reserved for metadata.
+- **Secondary and tertiary text** are tokens derived from `--aml-text` with `color-mix` — 62% (4.6 : 1, passes AA) and 50% (3.2 : 1, AA-large, metadata only). `opacity` on a text element is no longer how hierarchy is expressed, because it dims the element's background and focus ring too.
+- **Spacing:** 2 · 4 · 6 · 8 · 12 · 16 · 24 · 32 · 48, named `--aml-space-N` where N × 4 = the value. Rows are 28px, not 22px.
+- **Radii:** 6 (inputs, chips, swatches) · 8 (buttons, rows, menu items) · 12 (cards, panels, popovers) · 16 (sheets and dialogs) · 999 (pills). One 4px radius for everything is gone.
+- **Elevation instead of walls.** Panels, popovers and dialogs are separated by a ½px ring plus a shadow (`--aml-shadow-1/2/3`), not by 1px borders. Borders remain only where two *regions* meet (sidebar ↔ content, status bar ↔ body).
+- **Icons** are a drawn 16px stroke set in `src/app/icons.tsx` (1.3px stroke, round caps, `currentColor`), not typed characters. Keyboard glyphs (⌘ ⌥ ⇧ ⌃) stay as characters — those are correct Apple typography.
+- **Motion:** 120 / 180 / 240 ms on `--aml-ease`. Every transition is suppressed under `prefers-reduced-motion: reduce`, globally, in one rule.
+
+**Consequences**
+1. `docs/qa/contrast-report.md` is regenerated; the unit test that pins one pair to the report moves with it.
+2. The Appearance screen's "Reset to AML" now restores these values. Anyone who had edited the old Paper colours keeps their edits — they are in `.aml/config.yaml` and override the defaults exactly as before.
+3. **Ink is unchanged in colour** and gets the same foundation. Re-deriving Ink onto a neutral ground is deliberately *not* done here: the Ink palette approval has been outstanding since Gate 0, and doing both at once would put an unapproved palette on top of an unreviewed layout. That is a follow-up once Bryce signs off Ink on screen.
+4. ADR-002's "CSS custom properties + CSS Modules, no Tailwind" is what makes this a token change rather than a rewrite, and is reaffirmed.
+
+**Rejected:** *B — Warm Desk* (Apple structure over AML's cream page; kept ADR-010 intact but read as a warmer version of the same app rather than a modern one). *C — Studio* (Pages-like floating sheet, icon rail, note list with previews; best-looking of the three but a layout change costing roughly twice as much, and it would have pre-empted Stage 5's Binder). Both remain on the canvas if the decision is ever revisited.

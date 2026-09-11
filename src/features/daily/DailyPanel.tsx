@@ -1,3 +1,4 @@
+import { Icon } from "@/app/icons";
 import { useEditorStore } from "@/features/editor/store";
 import styles from "./DailyPanel.module.css";
 import { dayOfMonth, longDate, todayIso, weekdayShort, weekLabel, weekOf } from "./dates";
@@ -26,7 +27,7 @@ export function DailyPanel() {
           aria-label="Previous week"
           data-testid="daily-prev"
         >
-          ‹
+          <Icon name="chevronLeft" size={14} />
         </button>
         <span className={styles.label} data-testid="daily-label">
           {weekLabel(anchor, today)}
@@ -38,7 +39,7 @@ export function DailyPanel() {
           aria-label="Next week"
           data-testid="daily-next"
         >
-          ›
+          <Icon name="chevronRight" size={14} />
         </button>
       </div>
 

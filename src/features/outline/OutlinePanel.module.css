@@ -1,7 +1,7 @@
 .empty {
   margin: 0;
-  opacity: 0.6;
-  font-size: 12px;
+  color: var(--aml-text-3);
+  font-size: var(--aml-size-md);
 }
 
 .list {
@@ -11,7 +11,7 @@
   display: flex;
   flex-direction: column;
   gap: 1px;
-  font-size: 12px;
+  font-size: var(--aml-size-md);
 }
 
 .row,
@@ -20,29 +20,29 @@
   align-items: baseline;
   gap: var(--aml-space-2);
   width: 100%;
+  min-height: var(--aml-row-sm);
   font: inherit;
   text-align: left;
-  padding: 3px 6px;
+  padding: var(--aml-space-05) var(--aml-space-2);
   border: 0;
   border-top: 2px solid transparent;
-  border-radius: 3px;
+  border-radius: var(--aml-radius);
   background: transparent;
-  color: inherit;
+  color: var(--aml-text-2);
   cursor: default;
+  transition: background var(--aml-dur-1) var(--aml-ease);
 }
 
 .row:hover,
-.rowActive:hover,
-.row:focus-visible,
-.rowActive:focus-visible {
+.rowActive:hover {
   background: var(--aml-highlight);
-  outline: none;
+  color: var(--aml-text);
 }
 
 .rowActive {
   background: var(--aml-highlight);
   color: var(--aml-primary);
-  font-weight: 600;
+  font-weight: var(--aml-weight-semi);
 }
 
 /* Where the dragged section would land. */
@@ -53,8 +53,8 @@
 
 .level {
   flex: none;
-  opacity: 0.45;
-  font-size: 10px;
+  color: var(--aml-text-3);
+  font-size: var(--aml-size-xs);
   font-variant-numeric: tabular-nums;
 }
 
@@ -68,19 +68,18 @@
 .tail {
   width: 100%;
   font: inherit;
-  font-size: 11px;
+  font-size: var(--aml-size-xs);
   text-align: left;
-  padding: 3px 6px;
+  padding: var(--aml-space-1) var(--aml-space-2);
   border: 1px dashed var(--aml-muted);
-  border-radius: 3px;
+  border-radius: var(--aml-radius);
   background: transparent;
-  color: inherit;
-  opacity: 0.7;
+  color: var(--aml-text-3);
   cursor: default;
 }
 
 .tail[data-over] {
   border-style: solid;
   border-color: var(--aml-primary);
-  opacity: 1;
+  color: var(--aml-primary);
 }

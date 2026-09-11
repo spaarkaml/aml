@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { Icon } from "@/app/icons";
 import { useEditorStore } from "@/features/editor/store";
 import { useTabsStore } from "@/features/tabs/store";
 import type { TreeNode } from "@/ipc";
@@ -191,13 +192,13 @@ function Node({ node, depth, openMenu }: NodeProps) {
           aria-current={current ? "true" : undefined}
           aria-expanded={isFolder ? expanded : undefined}
         >
-          <span className={styles.glyph}>{isFolder ? (expanded ? "▾" : "▸") : ""}</span>
+          <span
+            className={isFolder ? styles.twisty : styles.twistyNone}
+            data-expanded={isFolder && expanded ? "" : undefined}
+          />
+          <Icon name={isFolder ? "folder" : "file"} size={14} className={styles.kind} />
           <span className={styles.name}>{label}</span>
-          {dirty ? (
-            <span className={styles.dot} role="img" aria-label="Unsaved changes">
-              ●
-            </span>
-          ) : null}
+          {dirty ? <span className={styles.dot} role="img" aria-label="Unsaved changes" /> : null}
         </button>
       )}
       {isFolder && expanded && node.children.length > 0 ? (

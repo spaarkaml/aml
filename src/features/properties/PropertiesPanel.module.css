@@ -2,11 +2,11 @@
   display: flex;
   flex-direction: column;
   gap: var(--aml-space-2);
-  font-size: 12px;
+  font-size: var(--aml-size-md);
 }
 
 .empty {
-  opacity: 0.6;
+  color: var(--aml-text-3);
   margin: 0;
 }
 
@@ -14,7 +14,7 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--aml-space-1);
+  gap: var(--aml-space-05);
 }
 
 .row {
@@ -25,7 +25,7 @@
 }
 
 .key {
-  color: var(--aml-primary);
+  color: var(--aml-text-3);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -35,47 +35,75 @@
   margin: 0;
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: var(--aml-space-05);
   min-width: 0;
 }
 
+/* A recessed field, the way macOS draws an editable value in an inspector. */
 .input {
   flex-grow: 1;
   min-width: 0;
   font: inherit;
   color: var(--aml-text);
-  background: var(--aml-surface);
-  border: 1px solid transparent;
-  border-radius: 3px;
-  padding: 2px 6px;
+  background: transparent;
+  border: 0;
+  border-radius: var(--aml-radius-sm);
+  padding: var(--aml-space-05) var(--aml-space-15);
+  transition: background var(--aml-dur-1) var(--aml-ease);
 }
 
-.input:hover,
+.input:hover {
+  background: color-mix(in srgb, var(--aml-text) 6%, transparent);
+}
+
 .input:focus {
-  border-color: var(--aml-muted);
+  background: var(--aml-surface);
+  box-shadow: 0 0 0 2px var(--aml-primary);
   outline: none;
 }
 
 .remove,
 .small {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font: inherit;
-  color: var(--aml-primary);
+  font-size: var(--aml-size-xs);
+  color: var(--aml-text-3);
   background: transparent;
-  border: 1px solid transparent;
-  border-radius: 3px;
-  padding: 1px 5px;
+  border: 0;
+  border-radius: var(--aml-radius-sm);
+  padding: var(--aml-space-05) var(--aml-space-15);
+  cursor: default;
+  transition:
+    opacity var(--aml-dur-1) var(--aml-ease),
+    background var(--aml-dur-1) var(--aml-ease);
 }
 
 .remove {
   opacity: 0;
 }
 
-.row:hover .remove {
-  opacity: 0.7;
+.row:hover .remove,
+.remove:focus-visible {
+  opacity: 1;
+}
+
+.remove:hover {
+  background: color-mix(in srgb, var(--aml-accent) 20%, transparent);
+  color: var(--aml-text);
 }
 
 .small {
-  border-color: var(--aml-muted);
+  background: var(--aml-surface);
+  box-shadow: var(--aml-shadow-1);
+  color: var(--aml-text-2);
+  font-weight: var(--aml-weight-medium);
+}
+
+.small:hover {
+  background: var(--aml-highlight);
+  color: var(--aml-text);
 }
 
 .add {
@@ -86,12 +114,19 @@
 
 .raw {
   font-family: var(--aml-font-mono);
-  font-size: 11px;
+  font-size: var(--aml-size-xs);
+  line-height: 1.5;
   min-height: 120px;
   color: var(--aml-text);
   background: var(--aml-surface);
-  border: 1px solid var(--aml-muted);
-  border-radius: 3px;
-  padding: 6px;
+  border: 0;
+  border-radius: var(--aml-radius-sm);
+  box-shadow: var(--aml-shadow-1);
+  padding: var(--aml-space-2);
   resize: vertical;
+}
+
+.raw:focus {
+  box-shadow: 0 0 0 2px var(--aml-primary);
+  outline: none;
 }

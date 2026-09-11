@@ -13,13 +13,90 @@ body,
 
 body {
   font-family: var(--aml-font-ui);
+  font-size: var(--aml-size-md);
+  line-height: 1.35;
   background: var(--aml-bg);
   color: var(--aml-text);
   -webkit-font-smoothing: antialiased;
   user-select: none;
 }
 
-/* Bundled faces (ADR-010), fetched by `pnpm fonts:fetch` and not committed. Each is
+/* One rule for the whole app (ADR-013). Honouring reduced motion in twenty stylesheets
+   means forgetting it in one of them; this also makes the e2e suite deterministic. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --aml-dur-1: 0ms;
+    --aml-dur-2: 0ms;
+    --aml-dur-3: 0ms;
+  }
+
+  /* biome-ignore-start lint/complexity/noImportantStyles: a motion override has to beat every
+     animation and transition already declared, including inline ones — this is the standard
+     reduced-motion reset and the only place !important is allowed. */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+  /* biome-ignore-end lint/complexity/noImportantStyles: see above */
+}
+
+/* Focus is a ring on the control it is on, and visible on both grounds. Deliberately listed
+   rather than applied to `:focus-visible` outright: a bare selector also rings the editor
+   surface, which ProseMirror gives a tabindex and which stays focused for as long as you are
+   writing in it — hence the contenteditable exclusion on the last line too. */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
+[role="button"]:focus-visible,
+[role="tab"]:focus-visible,
+[tabindex]:not([tabindex="-1"], [contenteditable]):focus-visible {
+  outline: 2px solid var(--aml-primary);
+  outline-offset: 1px;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--aml-primary) 22%, transparent);
+}
+
+/* macOS-style overlay scrollbars: no track, thumb only, and only while there is room. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--aml-text) 22%, transparent) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--aml-text) 20%, transparent);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  border-radius: var(--aml-radius-pill);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--aml-text) 32%, transparent);
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Bundled reading faces (ADR-010; the interface face is the system one, ADR-013), fetched by `pnpm fonts:fetch` and not committed. Each is
    licensed under the SIL OFL 1.1; the licence travels beside the file in public/fonts/.
    A missing file just falls through to the next family in the stack. */
 @font-face {

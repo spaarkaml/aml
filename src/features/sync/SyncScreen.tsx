@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Icon } from "@/app/icons";
 import { useFolioStore } from "@/features/folio/store";
 import styles from "./SyncScreen.module.css";
 import { startSyncPolling, syncedFolderFor, useSyncStore } from "./store";
@@ -96,7 +97,7 @@ export function SyncScreen() {
             onClick={() => setOpen(false)}
             aria-label="Close"
           >
-            ×
+            <Icon name="close" />
           </button>
         </header>
 
