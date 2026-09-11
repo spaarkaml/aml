@@ -4,6 +4,12 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### Release workflow (2026-09-11)
+- `.github/workflows/release.yml`: builds the DMG (Apple silicon) and the MSI + NSIS installer (Windows x64) and attaches them to a **draft** GitHub Release on a `v*` tag. `workflow_dispatch` builds the same installers as artifacts without making a release, which is the way to get an MSI without tagging.
+- The tag is checked against `tauri.conf.json`'s version before anything is built: a release page whose installers claim a different version is worse than no release.
+- Release notes carry the unsigned-build instructions for both OSes (ADR-012).
+- Part of WP-8.1, pulled forward because the MSI cannot be built on the Mac.
+
 ### Fix — the phantom "changed on disk" banner (2026-09-11)
 - **Removed** the *"This note changed on disk while you were editing"* warning. It was raised from a watcher event alone, and AML's own atomic save trips the watcher exactly as a foreign edit does — with the watcher's 300 ms debounce landing after the save finished and you still typing, it fired roughly every 1.3 seconds of normal writing. Its *Reload from disk* button silently discarded everything typed since the last save, so a false alarm offered a data-losing button.
 - The guard that actually protects you is unchanged: every save sends the mtime it read, and `Folio::write_note` refuses to write over a file that has moved. That refusal is what raises the conflict banner now — checked against the file, never guessed from an event.

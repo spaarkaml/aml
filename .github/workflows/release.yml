@@ -1,0 +1,129 @@
+# Builds the installers and attaches them to a GitHub Release.
+#
+# Tag a release:   git tag v0.1.0 && git push origin v0.1.0
+# Or build without tagging: Actions → Release → Run workflow (artifacts only, no Release).
+#
+# Builds are unsigned by ADR-012. The release notes say what that means on first launch.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # macos-latest is Apple silicon; an Intel build would need its own runner and its
+          # own Syncthing binary (scripts/fetch-syncthing.mjs takes a target triple).
+          - os: macos-latest
+            artifact: aml-macos-aarch64
+          - os: windows-latest
+            artifact: aml-windows-x64
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Neither the sidecar nor the fonts are committed; both are bundle inputs.
+      - name: Fetch Syncthing sidecar
+        run: pnpm sidecar:fetch
+
+      - name: Fetch bundled fonts
+        run: pnpm fonts:fetch
+
+      # A tag that disagrees with tauri.conf.json would ship an installer whose version does
+      # not match its own release page, and the updater reads the bundle, not the tag.
+      - name: Tag matches the app version
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        run: |
+          conf=$(node -p "require('./src-tauri/tauri.conf.json').version")
+          tag="${GITHUB_REF_NAME#v}"
+          if [ "$conf" != "$tag" ]; then
+            echo "tag $GITHUB_REF_NAME does not match tauri.conf.json version $conf" >&2
+            exit 1
+          fi
+          echo "version $conf"
+
+      - name: Build frontend
+        run: pnpm build
+
+      - name: Build installers (unsigned — ADR-012)
+        run: pnpm tauri build --ci
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ""
+
+      - name: Upload installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          if-no-files-found: error
+          path: |
+            src-tauri/target/release/bundle/dmg/*.dmg
+            src-tauri/target/release/bundle/msi/*.msi
+            src-tauri/target/release/bundle/nsis/*-setup.exe
+
+  release:
+    name: release
+    needs: build
+    runs-on: ubuntu-latest
+    # Only a tag makes a Release; a manual run just leaves the artifacts on the run.
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: installers
+          merge-multiple: true
+
+      - name: What was built
+        run: ls -lR installers
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" installers/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "AML $GITHUB_REF_NAME" \
+            --draft \
+            --notes "$(cat <<'NOTES'
+          Unsigned builds (ADR-012) — the OS will object the first time.
+
+          **macOS** (Apple silicon, `.dmg`): right-click AML → **Open** → Open. Or:
+          `xattr -dr com.apple.quarantine /Applications/AML.app`
+
+          **Windows** (`.msi`): SmartScreen → **More info** → **Run anyway**.
+
+          After installing, open a Folio and pair with the NAS from the sync screen;
+          `docs/06-NAS-SETUP.md` has the steps.
+          NOTES
+          )"

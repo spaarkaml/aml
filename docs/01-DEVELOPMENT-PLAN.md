@@ -217,7 +217,7 @@ Per-WP acceptance; gate is "nothing in 7 regressed Stages 1–6" (full e2e + rou
 
 | WP | Title |
 |---|---|
-| 8.1 | Unsigned release builds (ADR-012): `release.yml` producing `.dmg` and `.msi`; first-run instructions for Gatekeeper and SmartScreen on the release page |
+| 8.1 | Unsigned release builds (ADR-012): `release.yml` producing `.dmg` and `.msi`; first-run instructions for Gatekeeper and SmartScreen on the release page — **workflow written 2026-09-11** (pulled forward: the MSI cannot be built on the Mac); what remains here is the updater endpoint and the release checklist |
 | 8.2 | Auto-update from GitHub Releases (Tauri updater with its own minisign key — no OS certificate needed) |
 | 8.3 | Performance pass: 10k-note Folio |
 | 8.4 | Accessibility pass: keyboard-only, screen-reader labels, reduced motion, contrast |
