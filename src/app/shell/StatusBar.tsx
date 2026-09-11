@@ -4,6 +4,7 @@ import { useFolioStore } from "@/features/folio/store";
 import { describeIndex, listenIndexProgress, useIndexStore } from "@/features/index/store";
 import { useSpellStore } from "@/features/spell/store";
 import { describeSync, startSyncPolling, useSyncStore } from "@/features/sync/store";
+import { FOCUS_LABEL, useWritingStore } from "@/features/writing/store";
 import type { AppInfo } from "@/ipc";
 import { readingMinutes } from "@/lib/wordcount";
 import styles from "./shell.module.css";
@@ -18,6 +19,10 @@ export function StatusBar({ info }: { info: AppInfo | null }) {
   const folioRoot = useFolioStore((s) => s.folio?.root ?? null);
   const syncStatus = useSyncStore((s) => s.status);
   const openSync = useSyncStore((s) => s.setOpen);
+  const focus = useWritingStore((s) => s.focus);
+  const typewriter = useWritingStore((s) => s.typewriter);
+  const cycleFocus = useWritingStore((s) => s.cycleFocus);
+  const toggleTypewriter = useWritingStore((s) => s.toggleTypewriter);
   const indexStatus = useIndexStore((s) => s.status);
   useEffect(() => {
     if (!folioRoot) return;
@@ -54,6 +59,28 @@ export function StatusBar({ info }: { info: AppInfo | null }) {
         <span data-testid="save-state" title={path}>
           {saving ? "Saving…" : dirty ? "● Unsaved" : "Saved"}
         </span>
+      ) : null}
+      {focus !== "off" ? (
+        <button
+          type="button"
+          className={styles.chip}
+          onClick={cycleFocus}
+          title="Focus Mode — click to change"
+          data-testid="focus-chip"
+        >
+          Focus: {FOCUS_LABEL[focus]}
+        </button>
+      ) : null}
+      {typewriter ? (
+        <button
+          type="button"
+          className={styles.chip}
+          onClick={toggleTypewriter}
+          title="Typewriter Mode — click to turn off"
+          data-testid="typewriter-chip"
+        >
+          Typewriter
+        </button>
       ) : null}
       {indexLabel ? (
         <span data-testid="index-state" role="status">

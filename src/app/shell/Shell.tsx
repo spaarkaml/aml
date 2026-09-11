@@ -5,6 +5,7 @@ import { useGlobalShortcuts } from "@/features/commands/useGlobalShortcuts";
 import { useLayoutStore } from "@/features/layout/store";
 import { QuickOpen } from "@/features/quickopen/QuickOpen";
 import { SyncScreen } from "@/features/sync/SyncScreen";
+import { useWritingStore } from "@/features/writing/store";
 import type { AppInfo } from "@/ipc";
 import { SidePanel } from "./SidePanel";
 import { StatusBar } from "./StatusBar";
@@ -24,6 +25,8 @@ export function Shell({ info, left, right, children }: Props) {
   const leftPanel = useLayoutStore((s) => s.left);
   const rightPanel = useLayoutStore((s) => s.right);
   const closeOverlays = useLayoutStore((s) => s.closeOverlays);
+  const zen = useWritingStore((s) => s.zen);
+  const setZen = useWritingStore((s) => s.setZen);
   const overlayOpen =
     (leftPanel.open && !leftPanel.pinned) || (rightPanel.open && !rightPanel.pinned);
 
@@ -35,6 +38,29 @@ export function Shell({ info, left, right, children }: Props) {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [overlayOpen, closeOverlays]);
+
+  // Zen hides every way out, so Escape has to be one.
+  useEffect(() => {
+    if (!zen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setZen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [zen, setZen]);
+
+  if (zen) {
+    return (
+      <div className={styles.root} data-zen="true">
+        <main className={styles.center}>{children}</main>
+        <p className={styles.zenHint} data-testid="zen-hint">
+          Escape to leave Zen
+        </p>
+        <CommandPalette />
+        <QuickOpen />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.root}>

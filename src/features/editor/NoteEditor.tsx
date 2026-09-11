@@ -2,6 +2,7 @@ import { EditorContent, useEditor } from "@tiptap/react";
 import { useCallback, useEffect, useMemo } from "react";
 import { LinkMenu } from "@/features/links/LinkMenu";
 import { SpellMenu } from "@/features/spell/SpellMenu";
+import { useWritingStore } from "@/features/writing/store";
 import type { PmNode } from "@/lib/markdown";
 import { setActiveEditor } from "./editorRef";
 import { amlExtensions } from "./extensions";
@@ -22,6 +23,7 @@ export function NoteEditor() {
   const reload = useEditorStore((s) => s.reloadFromDisk);
   const overwrite = useEditorStore((s) => s.overwriteDisk);
   const error = useEditorStore((s) => s.error);
+  const typewriter = useWritingStore((s) => s.typewriter);
 
   // Stable options: Tiptap re-applies changed options on every render, so fresh objects here
   // (extensions, editorProps, callbacks) would churn the view while the user types.
@@ -76,7 +78,12 @@ export function NoteEditor() {
   if (!path) return null;
 
   return (
-    <div className={styles.page} data-testid="note-editor">
+    <div
+      className={typewriter ? `${styles.page} ${styles.typewriter}` : styles.page}
+      // The Typewriter scroller finds its container by this marker.
+      data-scroll="editor"
+      data-testid="note-editor"
+    >
       {conflict || externalChanged ? (
         <div className={styles.banner} role="alert">
           <span>

@@ -4,6 +4,12 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### WP-3.1 — Focus, Typewriter and Zen (2026-09-11)
+- **Focus Mode** (`⌘⌥D`, cycles off → paragraph → sentence): dims everything but the block — or the sentence — the caret is in. Sentence detection keeps decimals, file names, "e.g." and "p. 41" whole.
+- **Typewriter Mode** (`⌘⌥T`): holds the line you are typing at a fixed height on the page.
+- **Zen** (`⌘⌥Z`): the page and nothing else; Escape leaves, and the palette still works inside it.
+- All three are per device and remembered; status-bar chips show the active ones and turn them off.
+
 ### WP-2.9 — Command Palette complete and rebindable (2026-09-11)
 - Every `/` block is now a palette command too (group **Format**), from the same list the slash menu reads.
 - **Keyboard Shortcuts** dialog (`⌘/`, palette): every command with its key, click to record a new one, ↺ for the default, *Reset all*, and a filter. A key another command already holds is refused by name rather than quietly winning.

@@ -260,3 +260,54 @@
   margin: var(--aml-space-2) 0;
   font-size: 12px;
 }
+
+/* Zen (WP-3.1): the page and nothing else, with one reminder of the way out. */
+.zenHint {
+  position: fixed;
+  bottom: var(--aml-space-4);
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--aml-surface);
+  color: var(--aml-text);
+  border: 1px solid var(--aml-muted);
+  opacity: 0;
+  animation: zen-hint 4s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes zen-hint {
+  0% {
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.9;
+  }
+  70% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Status-bar chips for the writing modes: shown only while a mode is on, and they turn it off. */
+.chip {
+  font: inherit;
+  font-size: inherit;
+  color: var(--aml-primary);
+  background: transparent;
+  border: 1px solid var(--aml-muted);
+  border-radius: 999px;
+  padding: 0 8px;
+  cursor: default;
+}
+
+.chip:hover,
+.chip:focus-visible {
+  background: var(--aml-highlight);
+  outline: none;
+}

@@ -259,3 +259,16 @@
   text-decoration-skip-ink: none;
   text-underline-offset: 3px;
 }
+
+/* ---- Writing modes (WP-3.1) ---- */
+
+/* Focus Mode dims everything but the block — or the sentence — the caret is in. */
+.prose :global(.aml-dim) {
+  opacity: var(--aml-dim, 0.32);
+  transition: opacity 120ms ease-out;
+}
+
+/* Typewriter Mode needs room below the last line for it to reach the middle of the page. */
+.typewriter .content {
+  padding-bottom: 55vh;
+}

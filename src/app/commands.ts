@@ -19,6 +19,7 @@ import { useSpellStore } from "@/features/spell/store";
 import { useSyncStore } from "@/features/sync/store";
 import { useTabsStore } from "@/features/tabs/store";
 import { useTagsStore } from "@/features/tags/store";
+import { useWritingStore } from "@/features/writing/store";
 
 /** Single source of truth for shell shortcuts; the e2e suite presses each one. */
 export const SHORTCUTS = {
@@ -39,6 +40,9 @@ export const SHORTCUTS = {
   today: "mod+shift+d",
   rename: "f2",
   shortcuts: "mod+/",
+  focus: "mod+alt+d",
+  typewriter: "mod+alt+t",
+  zen: "mod+alt+z",
 } as const;
 
 function activeTab(): string | null {
@@ -384,6 +388,30 @@ export const SHELL_COMMANDS: Command[] = [
     shortcut: SHORTCUTS.shortcuts,
     global: true,
     run: () => useKeymapStore.getState().setOpen(true),
+  },
+  {
+    id: "writing.focus",
+    title: "Focus Mode (Off / Paragraph / Sentence)",
+    group: "View",
+    shortcut: SHORTCUTS.focus,
+    global: true,
+    run: () => useWritingStore.getState().cycleFocus(),
+  },
+  {
+    id: "writing.typewriter",
+    title: "Typewriter Mode",
+    group: "View",
+    shortcut: SHORTCUTS.typewriter,
+    global: true,
+    run: () => useWritingStore.getState().toggleTypewriter(),
+  },
+  {
+    id: "writing.zen",
+    title: "Zen Mode",
+    group: "View",
+    shortcut: SHORTCUTS.zen,
+    global: true,
+    run: () => useWritingStore.getState().toggleZen(),
   },
   {
     id: "appearance.cycle",

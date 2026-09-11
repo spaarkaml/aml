@@ -22,6 +22,7 @@ import { Outline } from "./outline";
 import { SlashMenu } from "./slash";
 import { SpellCheck } from "./spell";
 import { TagClicks } from "./tags";
+import { WritingModes } from "./writing";
 
 /**
  * The AML editor schema. Node names and attrs must match src/lib/markdown/pm.ts.
@@ -84,6 +85,7 @@ export function amlExtensions(): Extensions {
     NoteLinks,
     Outline,
     TagClicks,
+    WritingModes,
     SpellCheck,
   ];
 }
