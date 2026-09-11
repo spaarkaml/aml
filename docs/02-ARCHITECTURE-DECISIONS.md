@@ -183,7 +183,13 @@ The words "vault", "collection", "study", "library" and "workspace" are not used
 
 ## ADR-012 — No code signing; local-only updater  `ACCEPTED`
 
-**Decision (Q25):** personal tool, no Apple Developer or Authenticode certificates. Builds are unsigned. First-run instructions are shown on the release page and in `06-NAS-SETUP.md` §Install: macOS right-click → Open (or remove the quarantine attribute); Windows SmartScreen → More info → Run anyway. The in-app updater still works: Tauri's updater signs update bundles with its own free minisign key, unrelated to OS code signing. Revisit only if the app is ever shared.
+**Decision (Q25):** personal tool, no Apple Developer or Authenticode certificates. Builds are unsigned.
+
+**Proposed amendment, 2026-09-12 — ad-hoc signing on macOS (needs Bryce's yes).** "Unsigned" turned out to mean two different things on Apple Silicon, and the weaker one does not run. Tauri's bundler left the *executable* linker-signed and the **bundle itself unsigned**, so there was no `_CodeSignature/CodeResources`; `codesign --verify` failed with "code has no resources but signature indicates they must be present", and a quarantined copy is refused by Gatekeeper with **"AML is damaged and can't be opened"** — a hard block that right-click → Open cannot bypass. Every DMG built before today has this fault.
+
+The fix is `bundle.macOS.signingIdentity: "-"` in `tauri.conf.json`, which ad-hoc signs the whole bundle at build time. This is **not** what this ADR rejected: an ad-hoc signature uses no certificate, no Apple Developer account, no notarisation and costs nothing; it conveys no trust and Gatekeeper still calls the app unidentified. It is only what makes an arm64 bundle launchable at all. Nothing about the updater's own minisign key changes.
+
+If accepted, this ADR's decision line should read "no Apple Developer or Authenticode certificates; macOS builds are ad-hoc signed so that the first-run instructions below actually work." First-run instructions are shown on the release page and in `06-NAS-SETUP.md` §Install: macOS right-click → Open (or remove the quarantine attribute); Windows SmartScreen → More info → Run anyway. The in-app updater still works: Tauri's updater signs update bundles with its own free minisign key, unrelated to OS code signing. Revisit only if the app is ever shared.
 
 ---
 

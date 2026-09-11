@@ -4,6 +4,12 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### Fix — macOS builds were refused as "damaged" (2026-09-12)
+- Tauri's bundler left the executable linker-signed and **the bundle itself unsigned**: no `_CodeSignature/CodeResources`, so `codesign --verify` failed and Gatekeeper refused a downloaded copy with *"AML is damaged and can't be opened"* — a hard block that right-click → Open cannot get past. Every DMG built before today has this fault.
+- `bundle.macOS.signingIdentity: "-"` ad-hoc signs the whole bundle at build time. The app now verifies `--deep --strict`, carries its real identifier (`com.brycereeves.aml`, not the linker's `aml-903c6d268b7aae11`), and the bundled Syncthing validates inside it.
+- This needs no certificate, no Apple Developer account and no notarisation, and conveys no trust — Gatekeeper still calls AML unidentified, which right-click → Open bypasses. ADR-012 carries a proposed amendment saying so; it needs Bryce's yes.
+- An existing install refused this way is fixed with `xattr -dr com.apple.quarantine /Applications/AML.app`.
+
 ### WP-5.8 — Project dashboard (2026-09-12)
 - **The Project's own goal, at last.** WP-3.4 attached goals to a *note* because ADR-011 puts a book's goal in `project.aml.yaml` and nothing wrote that file yet. It does now: `target` and `deadline` are manifest keys, so a book's goal follows the book between machines, and the arithmetic is the same tested arithmetic — progress, days left, words a day.
 - Progress counts **the words a compile would take**, not every word in the folder: a chapter you have decided to leave out is not progress towards the book.

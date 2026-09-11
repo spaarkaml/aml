@@ -41,7 +41,8 @@ Sync and snapshots protect against mistakes, not against fire, theft, or a dead 
 - [ ] Optional: a small UPS so the NAS shuts down cleanly in a power cut.
 
 ## 7. Installing AML on Mac and Windows (unsigned builds, ADR-012)
-- **macOS:** open the `.dmg`, drag AML to Applications, then **right-click → Open** the first time and confirm. If macOS still refuses, run `xattr -d com.apple.quarantine /Applications/AML.app` in Terminal once.
+- **macOS:** open the `.dmg`, drag AML to Applications, then **right-click → Open** the first time and confirm. If macOS says AML **"is damaged and can't be opened"**, the build predates 2026-09-12 and its bundle was never signed (see ADR-012's amendment); `xattr -dr com.apple.quarantine /Applications/AML.app` in Terminal clears it, and any later build does not need it.
+- Before installing a new build, **eject any AML disk image still mounted** (`hdiutil detach /Volumes/AML`). A second image with the same volume name mounts as `AML 1`, and it is easy to drag the app out of the older window.
 - **Windows:** run the `.msi`; on the SmartScreen dialog click **More info → Run anyway**.
 - First launch: Create Folio → Synced → paste the NAS Device ID → accept the new device in the NAS's Syncthing UI → done.
 
