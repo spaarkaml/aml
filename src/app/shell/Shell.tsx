@@ -3,6 +3,7 @@ import { AppearanceScreen } from "@/features/appearance/AppearanceScreen";
 import { useAppearance } from "@/features/appearance/useAppearance";
 import { CommandPalette } from "@/features/commands/CommandPalette";
 import { useGlobalShortcuts } from "@/features/commands/useGlobalShortcuts";
+import { useGoals } from "@/features/goals/useGoals";
 import { useLayoutStore } from "@/features/layout/store";
 import { QuickOpen } from "@/features/quickopen/QuickOpen";
 import { SettingsScreen } from "@/features/settings/SettingsScreen";
@@ -24,6 +25,7 @@ interface Props {
 export function Shell({ info, left, right, children }: Props) {
   useAppearance();
   useGlobalShortcuts();
+  useGoals();
   const leftPanel = useLayoutStore((s) => s.left);
   const rightPanel = useLayoutStore((s) => s.right);
   const closeOverlays = useLayoutStore((s) => s.closeOverlays);

@@ -506,12 +506,19 @@ function mockCleanFolder(value: string | null): string | null {
   return cleaned;
 }
 
-function mockPreferences(): { dailyFolder: string | null } {
+interface MockPreferences {
+  dailyFolder: string | null;
+  dailyGoal: number | null;
+}
+
+const EMPTY_PREFS: MockPreferences = { dailyFolder: null, dailyGoal: null };
+
+function mockPreferences(): MockPreferences {
   try {
     const raw = localStorage.getItem(PREFS_KEY);
-    return raw ? { dailyFolder: null, ...JSON.parse(raw) } : { dailyFolder: null };
+    return raw ? { ...EMPTY_PREFS, ...JSON.parse(raw) } : { ...EMPTY_PREFS };
   } catch {
-    return { dailyFolder: null };
+    return { ...EMPTY_PREFS };
   }
 }
 
@@ -1125,10 +1132,14 @@ export function installDevMocks(): void {
         return mockPreferences();
       case "preferences_write": {
         if (!state.folio) throw { kind: "noFolioOpen" };
-        const asked = ((a.preferences as { dailyFolder: string | null }).dailyFolder ?? "").trim();
+        const asked = ((a.preferences as MockPreferences).dailyFolder ?? "").trim();
         const cleaned = mockCleanFolder(asked);
         if (asked && !cleaned) throw { kind: "invalidPath", detail: asked };
-        const prefs = { dailyFolder: cleaned };
+        const goal = (a.preferences as MockPreferences).dailyGoal ?? 0;
+        const prefs: MockPreferences = {
+          dailyFolder: cleaned,
+          dailyGoal: goal > 0 ? Math.round(goal) : null,
+        };
         localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
         return prefs;
       }

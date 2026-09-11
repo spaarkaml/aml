@@ -119,7 +119,8 @@ Text-based (**Mermaid**: flowcharts, mind maps, timelines — AI-friendly, diffs
 
 ### Q16. Linux build — Tauri gives it almost for free. Want it?
 ### Q17. Mobile — "any device in my network" is read as Mac/Windows only. Files remain readable by any mobile markdown app that can open an SMB share or a Syncthing folder. Confirm no iOS/Android app is expected.
-### Q18. Goals — per session, per day, per project deadline (words remaining ÷ days)? Streaks? **Assumption:** all three, opt-in.
+### Q18. Goals — per session, per day, per project deadline (words remaining ÷ days)? Streaks? **Assumption:** all three, opt-in.  ✅ built in WP-3.4, one part deferred
+**Built (WP-3.4):** per-note target and deadline (its own front matter), per-day goal (the Folio's `.aml/config.yaml`), what you wrote today (per device — a session is a fact about the keyboard, ADR-004), streaks, and the words-remaining-÷-days pace. All opt-in. A "session" separate from a day was deliberately not built: one that survives a restart is a day, and one that does not is a number nobody can check. **Per-Project goals wait for Stage 5**, because ADR-011 puts them in `project.aml.yaml` and nothing writes that file yet; the arithmetic is already written and tested.
 ### Q19. Word count rules — exclude front matter, comments, code blocks, headings? **Assumption:** exclude front matter, HTML comments and code blocks; include headings; configurable.
 ### Q20. Research pane PDFs — view only, or highlight/annotate? **Assumption:** view + copy-quote-with-page-ref in v1; annotation later.
 ### Q21. Grammar/style checking — LanguageTool can run on the NAS in Docker and gives AU English grammar. Interested?

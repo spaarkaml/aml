@@ -1,0 +1,27 @@
+.ring {
+  flex: none;
+  /* Zero is the top, clockwise — the way every progress ring has ever turned. */
+  transform: rotate(-90deg);
+  overflow: visible;
+}
+
+.track,
+.progress {
+  fill: none;
+  stroke-width: 2;
+}
+
+.track {
+  stroke: var(--aml-muted);
+}
+
+.progress {
+  stroke: var(--aml-accent);
+  stroke-linecap: round;
+  transition: stroke-dasharray var(--aml-dur-2) var(--aml-ease);
+}
+
+/* Met. The ring stops being a warning colour and becomes the app's own. */
+.ring[data-full] .progress {
+  stroke: var(--aml-primary);
+}

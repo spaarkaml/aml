@@ -43,6 +43,9 @@ pub struct Appearance {
 pub struct Preferences {
     /// Folder new Daily notes are written into. Absent means `journal`.
     pub daily_folder: Option<String>,
+    /// Words a day to aim for. Absent means no daily goal, which is the default: a goal you
+    /// did not set is not a goal you are failing (Q18 — all of these are opt-in).
+    pub daily_goal: Option<f64>,
 }
 
 /* ---------------- the file ---------------- */
@@ -159,6 +162,7 @@ pub fn appearance_of(settings: &BTreeMap<String, String>) -> Appearance {
 pub fn preferences_of(settings: &BTreeMap<String, String>) -> Preferences {
     Preferences {
         daily_folder: settings.get("daily.folder").cloned(),
+        daily_goal: number(settings, "goals.daily").filter(|n| *n > 0.0),
     }
 }
 
@@ -224,6 +228,14 @@ pub fn with_preferences(
         "daily.folder",
         preferences.daily_folder.clone(),
     );
+    put(
+        &mut settings,
+        "goals.daily",
+        preferences
+            .daily_goal
+            .filter(|n| *n > 0.0)
+            .map(|n| n.round().to_string()),
+    );
     settings
 }
 
@@ -286,22 +298,35 @@ mod tests {
             settings,
             &Preferences {
                 daily_folder: Some("Notes/Days".into()),
+                daily_goal: Some(500.0),
             },
         );
         let text = to_yaml(&settings);
         // Its own section, one setting per line, alongside appearance rather than inside it.
         assert!(text.contains("daily:\n  folder: \"Notes/Days\"\n"));
+        assert!(text.contains("goals:\n  daily: 500\n"));
         let read = parse(&text);
         assert_eq!(
             preferences_of(&read).daily_folder.as_deref(),
             Some("Notes/Days")
         );
+        assert_eq!(preferences_of(&read).daily_goal, Some(500.0));
         assert_eq!(appearance_of(&read), sample());
 
         // Clearing it removes the line rather than writing an empty one: absent means `journal`.
         let cleared = with_preferences(read, &Preferences::default());
         assert!(!to_yaml(&cleared).contains("daily:"));
+        assert!(!to_yaml(&cleared).contains("goals:"));
         assert_eq!(preferences_of(&cleared).daily_folder, None);
+        // A goal of zero is no goal, not a goal of nothing.
+        let zeroed = with_preferences(
+            BTreeMap::new(),
+            &Preferences {
+                daily_folder: None,
+                daily_goal: Some(0.0),
+            },
+        );
+        assert_eq!(preferences_of(&zeroed).daily_goal, None);
     }
 
     #[test]

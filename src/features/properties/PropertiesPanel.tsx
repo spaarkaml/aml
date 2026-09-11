@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { Icon } from "@/app/icons";
-import { getActiveEditor } from "@/features/editor/editorRef";
-import { ALLOW_FRONT_MATTER_REMOVAL } from "@/features/editor/extensions/aml-nodes";
 import { useEditorStore } from "@/features/editor/store";
 import { useTypesStore } from "@/features/types/store";
 import { TypeBadge } from "@/features/types/TypeBadge";
+import { applyYaml, currentYaml } from "./edit";
 import {
   coerce,
   display,
@@ -15,30 +14,6 @@ import {
   toYaml,
 } from "./frontmatter";
 import styles from "./PropertiesPanel.module.css";
-
-function currentYaml(): string {
-  const doc = useEditorStore.getState().doc;
-  const first = doc?.content[0];
-  return first?.type === "frontMatter" ? String(first.attrs?.yaml ?? "") : "";
-}
-
-/** Writes the YAML into the front-matter node (creating or removing it as needed). */
-function applyYaml(yaml: string): void {
-  const editor = getActiveEditor();
-  if (!editor) return;
-  const { state } = editor;
-  const first = state.doc.firstChild;
-  const tr = state.tr.setMeta(ALLOW_FRONT_MATTER_REMOVAL, true);
-  const type = state.schema.nodes.frontMatter;
-  if (!type) return;
-  if (first?.type.name === "frontMatter") {
-    if (yaml === "") tr.delete(0, first.nodeSize);
-    else tr.setNodeMarkup(0, type, { yaml });
-  } else if (yaml !== "") {
-    tr.insert(0, type.create({ yaml }));
-  }
-  editor.view.dispatch(tr);
-}
 
 /**
  * The note's type, and the fields that type expects (WP-3.3).

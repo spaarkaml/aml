@@ -20,6 +20,8 @@ export function SettingsScreen() {
   const setOpen = useSettingsStore((s) => s.setOpen);
   const dailyFolder = useSettingsStore((s) => s.dailyFolder);
   const setDailyFolder = useSettingsStore((s) => s.setDailyFolder);
+  const dailyGoal = useSettingsStore((s) => s.dailyGoal);
+  const setDailyGoal = useSettingsStore((s) => s.setDailyGoal);
   const save = useSettingsStore((s) => s.save);
   const error = useSettingsStore((s) => s.error);
   const saved = useSettingsStore((s) => s.saved);
@@ -108,6 +110,39 @@ export function SettingsScreen() {
               stay where they are.
             </p>
           )}
+        </section>
+
+        <section className={styles.section}>
+          <h3 className={styles.heading}>Goals</h3>
+          <form
+            className={styles.field}
+            onSubmit={(e) => {
+              e.preventDefault();
+              void save();
+            }}
+          >
+            <label className={styles.label} htmlFor="daily-goal">
+              Words a day
+            </label>
+            <input
+              id="daily-goal"
+              className={styles.input}
+              type="number"
+              min="0"
+              step="50"
+              value={dailyGoal}
+              disabled={!folio}
+              onChange={(e) => setDailyGoal(e.target.value)}
+              onBlur={() => void save()}
+              placeholder="none"
+              aria-label="Words a day to aim for"
+              data-testid="daily-goal"
+            />
+          </form>
+          <p className={styles.note}>
+            What you write today is counted on this machine, so the two do not add up to something
+            neither of them wrote. A note's own target is one of its properties.
+          </p>
         </section>
 
         <section className={styles.section}>

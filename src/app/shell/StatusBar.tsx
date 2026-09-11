@@ -1,7 +1,12 @@
 import { useEffect } from "react";
+import { todayIso } from "@/features/daily/dates";
 import { useEditorStore } from "@/features/editor/store";
 import { useFolioStore } from "@/features/folio/store";
+import { ProgressRing } from "@/features/goals/ProgressRing";
+import { useGoalsStore } from "@/features/goals/store";
 import { describeIndex, listenIndexProgress, useIndexStore } from "@/features/index/store";
+import { useLayoutStore } from "@/features/layout/store";
+import { useSettingsStore } from "@/features/settings/store";
 import { useSpellStore } from "@/features/spell/store";
 import { describeSync, startSyncPolling, useSyncStore } from "@/features/sync/store";
 import { FOCUS_LABEL, useWritingStore } from "@/features/writing/store";
@@ -26,6 +31,9 @@ export function StatusBar({ info }: { info: AppInfo | null }) {
   const cycleFocus = useWritingStore((s) => s.cycleFocus);
   const toggleTypewriter = useWritingStore((s) => s.toggleTypewriter);
   const indexStatus = useIndexStore((s) => s.status);
+  const openRight = useLayoutStore((s) => s.openPanel);
+  const dailyGoal = Number(useSettingsStore((s) => s.dailyGoal)) || 0;
+  const todayWords = useGoalsStore((s) => s.history[todayIso()] ?? 0);
   // Sync is polled from launch, not from the first Folio: the sidecar starts with the app,
   // and "it is still coming up" is exactly what you want to see while you are waiting.
   useEffect(() => startSyncPolling(), []);
@@ -42,6 +50,18 @@ export function StatusBar({ info }: { info: AppInfo | null }) {
         {words.toLocaleString("en-AU")} {words === 1 ? "word" : "words"}
       </span>
       {path ? <span>{readingMinutes(words)} min read</span> : null}
+      {dailyGoal > 0 ? (
+        <button
+          type="button"
+          className={styles.statusButton}
+          onClick={() => openRight("right")}
+          title="Today's goal — click for Goals"
+          data-testid="goal-chip"
+        >
+          <ProgressRing done={todayWords} goal={dailyGoal} size={12} />
+          {todayWords.toLocaleString("en-AU")} / {dailyGoal.toLocaleString("en-AU")}
+        </button>
+      ) : null}
       <button
         type="button"
         className={styles.statusButton}

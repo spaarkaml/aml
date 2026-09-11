@@ -4,6 +4,16 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### WP-3.4 — Goals (2026-09-12)
+- **A target for the note**, written as one of its own properties (`target_words`, and `deadline` if it has one) — so it travels with the note, opens in any other editor, and is searchable. The Goals section sets it; the Properties panel shows it as the ordinary field it is.
+- **A target for the day**, saved in the Folio (`goals.daily`), so both machines aim at the same number.
+- **An honest count of what you wrote.** The tally follows the difference in the word count, so opening a 4,000-word chapter adds nothing, switching notes only moves the mark, and deleting counts against you — because it is not writing. It is per device (`localStorage`, ADR-004): a session is a fact about this keyboard, and two machines' sessions must never add up to something neither of them wrote.
+- **The ring** sits in the status bar whenever there is a daily goal, in ADR-013's accent — the colour that ADR named for exactly this — turning to AML's own teal when the goal is met, so "done" reads as arrival rather than as a warning. Click it for the Goals section.
+- **Deadlines** give Q18's words-remaining-÷-days, with today counting as a day you still have. A deadline that has passed or a target already met produces no number at all: "write 4,000 words a day" for a day that has gone is not information.
+- **Streaks** survive the morning. Today does not count against you until it is over, so an unmet today is skipped rather than breaking the run.
+- Everything is off until set. A goal you did not set is not a goal you are failing.
+- **Not done, and why:** per-Project goals with a deadline. ADR-011 puts those in `project.aml.yaml` and nothing writes that file until Stage 5. The arithmetic is built and tested against the unit that exists today — the note — and the same functions will serve a Project when there is one.
+
 ### WP-3.3 — Note Types (2026-09-11)
 - **A note can say what it is** — `type: chapter` in its own front matter, as Q9 settled, so nothing leaves plain markdown and nothing has to be migrated. It was already indexed and already searchable as `type:chapter`; what this adds is everything around it.
 - **Nothing is seeded.** A type exists the moment a note or a template says it does. AML finds them three ways — the `type:` a template declares, the `type:` values notes are actually using, and anything you have customised — and the union is the list.

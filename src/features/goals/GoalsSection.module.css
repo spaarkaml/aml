@@ -1,0 +1,90 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--aml-space-2);
+  font-size: var(--aml-size-md);
+}
+
+.today {
+  display: flex;
+  align-items: center;
+  gap: var(--aml-space-2);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.figure {
+  margin: 0;
+  color: var(--aml-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.meta {
+  margin: 0;
+  font-size: var(--aml-size-xs);
+  color: var(--aml-text-3);
+}
+
+.link {
+  font: inherit;
+  font-size: var(--aml-size-xs);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--aml-primary);
+  cursor: default;
+  text-decoration: underline;
+}
+
+.note {
+  display: flex;
+  flex-direction: column;
+  gap: var(--aml-space-1);
+  padding-top: var(--aml-space-2);
+  border-top: 1px solid var(--aml-muted);
+}
+
+/* The note's own progress: a bar rather than a second ring, because it sits under a line of
+   figures and a bar reads left-to-right the way the sentence above it does. */
+.bar {
+  height: 4px;
+  border-radius: var(--aml-radius-pill);
+  background: var(--aml-muted);
+  overflow: hidden;
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--aml-radius-pill);
+  background: var(--aml-accent);
+  transition: width var(--aml-dur-2) var(--aml-ease);
+}
+
+.fieldRow {
+  display: flex;
+  align-items: center;
+  gap: var(--aml-space-2);
+}
+
+.label {
+  flex: none;
+  width: 3.5rem;
+  color: var(--aml-text-2);
+}
+
+.input {
+  flex-grow: 1;
+  min-width: 0;
+  font: inherit;
+  height: var(--aml-row-sm);
+  color: var(--aml-text);
+  background: var(--aml-highlight);
+  border: 0;
+  border-radius: var(--aml-radius-sm);
+  padding: 0 var(--aml-space-1);
+}

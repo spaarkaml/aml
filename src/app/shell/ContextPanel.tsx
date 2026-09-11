@@ -1,3 +1,4 @@
+import { GoalsSection } from "@/features/goals/GoalsSection";
 import { BacklinksPanel } from "@/features/links/BacklinksPanel";
 import { OutlinePanel } from "@/features/outline/OutlinePanel";
 import { PropertiesPanel } from "@/features/properties/PropertiesPanel";
@@ -14,6 +15,10 @@ export function ContextPanel() {
       <details open className={styles.section} data-testid="context-properties">
         <summary className={styles.sectionTitle}>Properties</summary>
         <PropertiesPanel />
+      </details>
+      <details open className={styles.section} data-testid="context-goals">
+        <summary className={styles.sectionTitle}>Goals</summary>
+        <GoalsSection />
       </details>
       <details open className={styles.section} data-testid="context-backlinks">
         <summary className={styles.sectionTitle}>Backlinks</summary>

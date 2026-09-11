@@ -59,6 +59,7 @@ pub fn preferences_write(state: State<AppState>, preferences: Preferences) -> Re
     }
     let tidied = Preferences {
         daily_folder: cleaned,
+        daily_goal: preferences.daily_goal.filter(|n| *n > 0.0).map(f64::round),
     };
     with_folio(&state, |folio| {
         let settings = with_preferences(folio.settings()?, &tidied);

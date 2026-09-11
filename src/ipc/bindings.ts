@@ -339,6 +339,11 @@ export type PendingFolder = {
 export type Preferences = {
 	/**  Folder new Daily notes are written into. Absent means `journal`. */
 	dailyFolder: string | null,
+	/**
+	 *  Words a day to aim for. Absent means no daily goal, which is the default: a goal you
+	 *  did not set is not a goal you are failing (Q18 — all of these are opt-in).
+	 */
+	dailyGoal: number | null,
 };
 
 export type ProjectInfo = {
