@@ -4,6 +4,13 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### Fix — the phantom "changed on disk" banner (2026-09-11)
+- **Removed** the *"This note changed on disk while you were editing"* warning. It was raised from a watcher event alone, and AML's own atomic save trips the watcher exactly as a foreign edit does — with the watcher's 300 ms debounce landing after the save finished and you still typing, it fired roughly every 1.3 seconds of normal writing. Its *Reload from disk* button silently discarded everything typed since the last save, so a false alarm offered a data-losing button.
+- The guard that actually protects you is unchanged: every save sends the mtime it read, and `Folio::write_note` refuses to write over a file that has moved. That refusal is what raises the conflict banner now — checked against the file, never guessed from an event.
+- That banner's buttons now say what they do: **Discard mine and reload** / **Keep mine and overwrite**.
+- A clean note still reloads silently when the disk changes, after comparing mtimes. Unchanged.
+- Not done, and why: suppressing our own writes in the Rust watcher would have been wrong. Tags, links, backlinks and Quick Open all need to hear about a save — it is the editor alone that should ignore its own writes.
+
 ### WP-3.0 — Visual refresh, Apple-light (2026-09-11)
 - **The whole shell was rebuilt on one decided foundation** (ADR-013, chosen from a canvas of three directions): the system interface face instead of Arial, a 11→34px type ramp instead of one flat 11–12px, an 8-point spacing rhythm, four corner radii instead of 4px everywhere, elevation instead of 1px walls, and 120/180/240 ms motion with a single `prefers-reduced-motion` rule that zeroes it.
 - **Paper is neutral now** — `#f5f5f7` chrome on a white page. AML's teal and coral keep their jobs; the warm rose ground does not. Ink is unchanged and still awaiting its Gate 0 approval.

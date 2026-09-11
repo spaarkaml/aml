@@ -17,7 +17,6 @@ beforeEach(() => {
     mtime: null,
     dirty: false,
     conflict: null,
-    externalChanged: false,
   });
 });
 afterEach(() => vi.useRealTimers());
@@ -77,7 +76,7 @@ describe("editor store", () => {
     expect(ipc.noteWrite).toHaveBeenLastCalledWith("a.md", "z\n", null);
   });
 
-  it("reloads silently when the disk changes and the note is clean, flags when dirty", async () => {
+  it("reloads a clean note from disk, and leaves a dirty one alone", async () => {
     ipc.noteRead.mockResolvedValue({
       status: "ok",
       data: { path: "a.md", text: "x\n", mtime: 1, size: 1 },
@@ -90,10 +89,37 @@ describe("editor store", () => {
     useEditorStore.getState().noteChangedOnDisk("a.md");
     await vi.advanceTimersByTimeAsync(0);
     expect(useEditorStore.getState().mtime).toBe(2);
+    // A dirty note is left as it is: our own save trips the watcher the same way a foreign
+    // edit does, so a warning raised from this event fires on every pause in typing. What
+    // the user typed stays, and nothing is re-read behind them.
     useEditorStore.getState().changed(markdownToDoc("typing\n"));
+    ipc.noteRead.mockClear();
     useEditorStore.getState().noteChangedOnDisk("a.md");
-    expect(useEditorStore.getState().externalChanged).toBe(true);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(ipc.noteRead).not.toHaveBeenCalled();
+    expect(useEditorStore.getState().dirty).toBe(true);
+    expect(useEditorStore.getState().conflict).toBeNull();
+
     useEditorStore.getState().noteChangedOnDisk("other.md");
     expect(useEditorStore.getState().path).toBe("a.md");
+  });
+
+  it("raises the conflict from the file itself when a save is refused", async () => {
+    ipc.noteRead.mockResolvedValue({
+      status: "ok",
+      data: { path: "a.md", text: "x\n", mtime: 1, size: 1 },
+    });
+    await useEditorStore.getState().open("a.md");
+    // Something else writes the note while we are typing. The watcher event alone does
+    // nothing; the next save compares mtimes on disk and is refused, and that is the banner.
+    useEditorStore.getState().changed(markdownToDoc("mine\n"));
+    useEditorStore.getState().noteChangedOnDisk("a.md");
+    expect(useEditorStore.getState().conflict).toBeNull();
+    ipc.noteWrite.mockResolvedValue({
+      status: "error",
+      error: { kind: "conflict", detail: { disk_mtime: 42 } },
+    });
+    await vi.advanceTimersByTimeAsync(SAVE_DEBOUNCE_MS + 10);
+    expect(useEditorStore.getState().conflict).toEqual({ diskMtime: 42 });
   });
 });

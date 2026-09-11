@@ -19,7 +19,6 @@ export function NoteEditor() {
   const docVersion = useEditorStore((s) => s.docVersion);
   const changed = useEditorStore((s) => s.changed);
   const conflict = useEditorStore((s) => s.conflict);
-  const externalChanged = useEditorStore((s) => s.externalChanged);
   const reload = useEditorStore((s) => s.reloadFromDisk);
   const overwrite = useEditorStore((s) => s.overwriteDisk);
   const error = useEditorStore((s) => s.error);
@@ -84,18 +83,17 @@ export function NoteEditor() {
       data-scroll="editor"
       data-testid="note-editor"
     >
-      {conflict || externalChanged ? (
+      {conflict ? (
         <div className={styles.banner} role="alert">
           <span>
-            {conflict
-              ? "This note changed on disk since you opened it."
-              : "This note changed on disk while you were editing."}
+            This note changed on disk, so your edits have not been saved. Saving stays paused until
+            you choose.
           </span>
           <button type="button" onClick={reload}>
-            Reload from disk
+            Discard mine and reload
           </button>
           <button type="button" onClick={overwrite}>
-            Keep mine
+            Keep mine and overwrite
           </button>
         </div>
       ) : null}

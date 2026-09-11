@@ -18,9 +18,8 @@ interface EditorState {
   saving: boolean;
   words: number;
   error: string | null;
-  /** Disk changed under a dirty note (from watcher or a Conflict on save). */
+  /** A save was refused because the file on disk is not the one we read. */
   conflict: { diskMtime: number | null } | null;
-  externalChanged: boolean;
   open: (path: string) => Promise<boolean>;
   /** Called by the editor on every transaction with the current document. */
   changed: (doc: PmNode) => void;
@@ -51,7 +50,6 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   words: 0,
   error: null,
   conflict: null,
-  externalChanged: false,
 
   open: async (path) => {
     if (get().dirty) await get().saveNow();
@@ -72,7 +70,6 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       words: countWords(doc),
       error: null,
       conflict: null,
-      externalChanged: false,
     }));
     return true;
   },
@@ -112,26 +109,26 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   reloadFromDisk: async () => {
     const path = get().path;
     if (!path) return;
-    set({ dirty: false, conflict: null, externalChanged: false });
+    set({ dirty: false, conflict: null });
     await get().open(path);
   },
 
   overwriteDisk: async () => {
     const { path } = get();
     if (!path || !latest) return false;
-    set({ conflict: null, externalChanged: false, mtime: null, dirty: true });
+    set({ conflict: null, mtime: null, dirty: true });
     return get().saveNow();
   },
 
   noteChangedOnDisk: (path) => {
     if (path !== get().path) return;
-    // Our own atomic write also trips the watcher; a save in flight or a matching mtime
-    // means nothing foreign happened, so do not reload (which would remount the editor).
-    if (get().saving) return;
-    if (get().dirty) {
-      set({ externalChanged: true });
-      return;
-    }
+    // A dirty note is deliberately left alone. Our own atomic write trips the watcher exactly
+    // as a foreign edit does, and the watcher's 300 ms debounce means that event always lands
+    // *after* the write finished — so anything raised here fires on every pause in typing and
+    // is almost never real. The guard that matters is `expected_mtime` on the next save: if
+    // the file really did move, the write is refused and `conflict` is set from a comparison
+    // against the file itself rather than guessed from an event.
+    if (get().saving || get().dirty) return;
     void commands.noteRead(path).then((r) => {
       if (get().path !== path || get().dirty) return;
       if (r.status === "ok" && r.data.mtime === get().mtime) return;
@@ -157,7 +154,6 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       dirty: false,
       words: 0,
       conflict: null,
-      externalChanged: false,
     });
   },
 }));
