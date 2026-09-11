@@ -19,6 +19,10 @@ export default defineConfig(async () => ({
   test: {
     environment: "jsdom",
     globals: true,
+    // The hosted Windows runner takes ~10s to render the shell in jsdom, where this Mac
+    // takes under one. The default 5s per test fails there for no good reason; a real hang
+    // still fails, just later.
+    testTimeout: 20_000,
     include: ["src/**/*.test.{ts,tsx}"],
     setupFiles: ["src/test-setup.ts"],
     css: { modules: { classNameStrategy: "non-scoped" } },

@@ -94,7 +94,7 @@ All results are `{status:"ok",data}|{status:"error",error:FolioError}`; `FolioEr
 
 ## Quality tooling
 
-`pnpm check` = typecheck → Biome → Vitest → vocabulary grep → clippy `-D warnings` → `cargo test`. CI runs the same on macOS and Windows plus an unsigned bundle build.
+`pnpm check` = typecheck → Biome → Vitest → vocabulary grep → clippy `-D warnings` → `cargo test`. Vitest allows 20 s per test: the hosted Windows runner needs ~10 s to render the shell in jsdom. CI runs the same on macOS and Windows plus an unsigned bundle build.
 
 ## Shell model (WP-0.5)
 
