@@ -18,7 +18,8 @@
     "vocab": "node scripts/check-vocabulary.mjs",
     "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm vocab && pnpm contrast && pnpm rust:check",
     "e2e": "playwright test",
-    "contrast": "node scripts/contrast-report.mjs"
+    "contrast": "node scripts/contrast-report.mjs",
+    "fonts:fetch": "node scripts/fetch-fonts.mjs"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.9.0",

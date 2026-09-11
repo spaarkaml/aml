@@ -21,6 +21,9 @@
   --aml-space-8: 32px;
   --aml-radius: 4px;
 
+  /* Set by Appearance (WP-3.2) when the Folio or this device asks for something else;
+     the editor falls back to its own values when they are absent. */
+
   color-scheme: light;
 }
 

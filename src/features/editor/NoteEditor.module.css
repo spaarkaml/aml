@@ -8,11 +8,11 @@
 }
 
 .content {
-  width: min(70ch, 100%);
+  width: min(var(--aml-measure, 70ch), 100%);
 }
 
 .banner {
-  width: min(70ch, 100%);
+  width: min(var(--aml-measure, 70ch), 100%);
   display: flex;
   align-items: center;
   gap: var(--aml-space-3);
@@ -40,13 +40,13 @@
   user-select: text;
   font-family: var(--aml-font-editor);
   font-size: 17px;
-  line-height: 1.65;
+  line-height: var(--aml-leading, 1.65);
   color: var(--aml-text);
   min-height: 60vh;
 }
 
 .prose :global(p) {
-  margin: 0 0 1em;
+  margin: 0 0 var(--aml-paragraph-spacing, 1em);
 }
 
 .prose :global(h1),

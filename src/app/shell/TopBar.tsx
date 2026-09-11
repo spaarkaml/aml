@@ -1,4 +1,4 @@
-import { useAppearanceStore } from "@/features/appearance/store";
+import { current, type ModeSetting, useAppearanceStore } from "@/features/appearance/store";
 import { usePaletteStore } from "@/features/commands/paletteStore";
 import { commandRegistry, formatShortcut } from "@/features/commands/registry";
 import { useLayoutStore } from "@/features/layout/store";
@@ -15,7 +15,7 @@ export function TopBar() {
   const togglePanel = useLayoutStore((s) => s.togglePanel);
   const left = useLayoutStore((s) => s.left);
   const right = useLayoutStore((s) => s.right);
-  const setting = useAppearanceStore((s) => s.setting);
+  const setting = useAppearanceStore((s) => (current(s).mode ?? "system") as ModeSetting);
   const cycleMode = useAppearanceStore((s) => s.cycle);
   const openPalette = usePaletteStore((s) => s.setOpen);
 

@@ -66,6 +66,10 @@ export const commands = {
 	boundingRemove: (id: string, paths: string[]) => typedError<Bounding[], FolioError>(__TAURI_INVOKE("bounding_remove", { id, paths })),
 	/**  Every folder in the Folio holding a `project.aml.yaml`. */
 	projectsList: () => typedError<ProjectInfo[], FolioError>(__TAURI_INVOKE("projects_list")),
+	/**  The Folio's appearance settings, or all-absent when it has none of its own. */
+	appearanceRead: () => typedError<Appearance, FolioError>(__TAURI_INVOKE("appearance_read")),
+	/**  Saves appearance to `.aml/config.yaml`, leaving every other setting in the file alone. */
+	appearanceWrite: (appearance: Appearance) => typedError<null, FolioError>(__TAURI_INVOKE("appearance_write", { appearance })),
 	/**  The templates in `_templates/`. */
 	templatesList: () => typedError<TemplateInfo[], FolioError>(__TAURI_INVOKE("templates_list")),
 	/**  Creates `path` from the named template, expanding its placeholders. Fails if it exists. */
@@ -124,6 +128,21 @@ export type AppInfo = {
 	platform: string,
 	arch: string,
 	debug: boolean,
+};
+
+/**  Everything the Appearance screen owns. Every field is optional: absent means "AML's own". */
+export type Appearance = {
+	/**  "system", "paper" or "ink". */
+	mode: string | null,
+	uiFont: string | null,
+	editorFont: string | null,
+	/**  Line width in characters. */
+	measure: number | null,
+	leading: number | null,
+	paragraphSpacing: number | null,
+	/**  Token name (`bg`, `text`, …) to `#rrggbb`, per mode. */
+	paper: { [key in string]: string },
+	ink: { [key in string]: string },
 };
 
 export type AssetInfo = {

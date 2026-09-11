@@ -4,6 +4,13 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### WP-3.2 — Appearance settings (2026-09-11)
+- **Appearance** (`⌘,`, palette): Paper / Ink / follow-the-OS, every ADR-010 colour token with a picker, a hex field and live preview, per-token and per-mode reset, and a live WCAG contrast score on the text colours.
+- Type: editor and interface face, measure, leading and paragraph spacing.
+- Saved to `.aml/config.yaml` in the Folio so they follow you between machines; **Keep this machine's own appearance** overrides them on one device without changing the Folio's.
+- Bundled faces (Source Serif 4, Literata, EB Garamond, IBM Plex Mono) are fetched by `pnpm fonts:fetch`, not committed, SIL OFL 1.1 with the licence beside each file.
+- Commands `appearance_read` / `appearance_write`.
+
 ### WP-3.1 — Focus, Typewriter and Zen (2026-09-11)
 - **Focus Mode** (`⌘⌥D`, cycles off → paragraph → sentence): dims everything but the block — or the sentence — the caret is in. Sentence detection keeps decimals, file names, "e.g." and "p. 41" whole.
 - **Typewriter Mode** (`⌘⌥T`): holds the line you are typing at a fixed height on the page.

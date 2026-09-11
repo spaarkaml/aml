@@ -454,6 +454,42 @@ function mockRemapBoundings(from: string, to: string): void {
     );
 }
 
+/* ---- appearance (WP-3.2): stands in for .aml/config.yaml ----
+   Kept in localStorage rather than a module variable, because the real command writes a file
+   in the Folio: settings have to still be there after a reload. */
+const APPEARANCE_KEY = "aml.mock.config";
+
+interface MockAppearance {
+  mode: string | null;
+  uiFont: string | null;
+  editorFont: string | null;
+  measure: number | null;
+  leading: number | null;
+  paragraphSpacing: number | null;
+  paper: Record<string, string>;
+  ink: Record<string, string>;
+}
+
+const EMPTY_APPEARANCE: MockAppearance = {
+  mode: null,
+  uiFont: null,
+  editorFont: null,
+  measure: null,
+  leading: null,
+  paragraphSpacing: null,
+  paper: {},
+  ink: {},
+};
+
+function readAppearance(): MockAppearance {
+  try {
+    const raw = localStorage.getItem(APPEARANCE_KEY);
+    return raw ? { ...EMPTY_APPEARANCE, ...JSON.parse(raw) } : { ...EMPTY_APPEARANCE };
+  } catch {
+    return { ...EMPTY_APPEARANCE };
+  }
+}
+
 const index = { building: false, done: 0, total: 0, lastBuilt: 0, lastDurationMs: 0 };
 function indexStatus() {
   return { notes: notes.size, ...index };
@@ -904,6 +940,14 @@ export function installDevMocks(): void {
         if (!state.folio) throw { kind: "noFolioOpen" };
         // No note in the mock Folio carries a project.aml.yaml yet (Projects are Stage 5).
         return [];
+      }
+      case "appearance_read":
+        if (!state.folio) throw { kind: "noFolioOpen" };
+        return readAppearance();
+      case "appearance_write": {
+        if (!state.folio) throw { kind: "noFolioOpen" };
+        localStorage.setItem(APPEARANCE_KEY, JSON.stringify(a.appearance));
+        return null;
       }
       case "templates_list": {
         if (!state.folio) throw { kind: "noFolioOpen" };

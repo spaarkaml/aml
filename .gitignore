@@ -29,3 +29,6 @@ test-results/
 
 # Syncthing sidecar binaries are fetched by scripts/fetch-syncthing.mjs
 src-tauri/binaries/
+
+# Bundled fonts (pnpm fonts:fetch)
+public/fonts/

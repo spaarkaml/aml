@@ -1,15 +1,30 @@
 import { useEffect } from "react";
-import { applyMode, resolveMode, useAppearanceStore } from "./store";
+import type { ModeSetting } from "./store";
+import { applyAppearance, applyMode, current, resolveMode, useAppearanceStore } from "./store";
 
-/** Applies the resolved mode to <html data-mode> and tracks OS changes while on "system". */
+/**
+ * Keeps `<html data-mode>` and the `:root` custom properties in step with the settings in
+ * charge — the Folio's, or this device's while the override is on — and follows the OS while
+ * the mode is "system".
+ */
 export function useAppearance(): void {
-  const setting = useAppearanceStore((s) => s.setting);
+  const folio = useAppearanceStore((s) => s.folio);
+  const device = useAppearanceStore((s) => s.device);
+  const useDevice = useAppearanceStore((s) => s.useDevice);
+  const appearance = current({ folio, device, useDevice });
+  const setting = (appearance.mode ?? "system") as ModeSetting;
+
   useEffect(() => {
-    applyMode(resolveMode(setting));
+    const paint = (systemDark?: boolean) => {
+      const mode = resolveMode(setting, systemDark);
+      applyMode(mode);
+      applyAppearance(appearance, mode);
+    };
+    paint();
     if (setting !== "system" || !window.matchMedia) return;
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const onChange = () => applyMode(resolveMode("system", mq.matches));
+    const onChange = () => paint(mq.matches);
     mq.addEventListener("change", onChange);
     return () => mq.removeEventListener("change", onChange);
-  }, [setting]);
+  }, [setting, appearance]);
 }

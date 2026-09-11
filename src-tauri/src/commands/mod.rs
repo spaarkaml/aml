@@ -4,6 +4,7 @@
 
 pub mod app;
 pub mod boundings;
+pub mod config;
 pub mod folio;
 pub mod index;
 pub mod links;

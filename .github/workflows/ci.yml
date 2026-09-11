@@ -43,6 +43,9 @@ jobs:
       - name: Fetch Syncthing sidecar
         run: pnpm sidecar:fetch
 
+      - name: Fetch bundled fonts
+        run: pnpm fonts:fetch
+
       - name: Rust format
         run: cargo fmt --check
         working-directory: src-tauri

@@ -1,4 +1,5 @@
 import { type ReactNode, useEffect } from "react";
+import { AppearanceScreen } from "@/features/appearance/AppearanceScreen";
 import { useAppearance } from "@/features/appearance/useAppearance";
 import { CommandPalette } from "@/features/commands/CommandPalette";
 import { useGlobalShortcuts } from "@/features/commands/useGlobalShortcuts";
@@ -88,6 +89,7 @@ export function Shell({ info, left, right, children }: Props) {
       <CommandPalette />
       <QuickOpen />
       <SyncScreen />
+      <AppearanceScreen />
     </div>
   );
 }

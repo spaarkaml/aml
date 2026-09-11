@@ -43,6 +43,7 @@ export const SHORTCUTS = {
   focus: "mod+alt+d",
   typewriter: "mod+alt+t",
   zen: "mod+alt+z",
+  appearance: "mod+,",
 } as const;
 
 function activeTab(): string | null {
@@ -412,6 +413,14 @@ export const SHELL_COMMANDS: Command[] = [
     shortcut: SHORTCUTS.zen,
     global: true,
     run: () => useWritingStore.getState().toggleZen(),
+  },
+  {
+    id: "appearance.settings",
+    title: "Appearance…",
+    group: "View",
+    shortcut: SHORTCUTS.appearance,
+    global: true,
+    run: () => useAppearanceStore.getState().setOpen(true),
   },
   {
     id: "appearance.cycle",
