@@ -17,6 +17,7 @@ import { useQuickOpenStore } from "@/features/quickopen/store";
 import { useSearchStore } from "@/features/search/store";
 import { useSettingsStore } from "@/features/settings/store";
 import { useSpellStore } from "@/features/spell/store";
+import { useStatsStore } from "@/features/stats/store";
 import { useSyncStore } from "@/features/sync/store";
 import { useTabsStore } from "@/features/tabs/store";
 import { useTagsStore } from "@/features/tags/store";
@@ -416,6 +417,12 @@ export const SHELL_COMMANDS: Command[] = [
     shortcut: SHORTCUTS.zen,
     global: true,
     run: () => useWritingStore.getState().toggleZen(),
+  },
+  {
+    id: "stats.open",
+    title: "Statistics…",
+    group: "View",
+    run: () => useStatsStore.getState().setOpen(true),
   },
   {
     id: "settings.open",

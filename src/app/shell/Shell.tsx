@@ -7,6 +7,7 @@ import { useGoals } from "@/features/goals/useGoals";
 import { useLayoutStore } from "@/features/layout/store";
 import { QuickOpen } from "@/features/quickopen/QuickOpen";
 import { SettingsScreen } from "@/features/settings/SettingsScreen";
+import { StatsScreen } from "@/features/stats/StatsScreen";
 import { SyncScreen } from "@/features/sync/SyncScreen";
 import { useWritingStore } from "@/features/writing/store";
 import type { AppInfo } from "@/ipc";
@@ -94,6 +95,7 @@ export function Shell({ info, left, right, children }: Props) {
       <SyncScreen />
       <AppearanceScreen />
       <SettingsScreen />
+      <StatsScreen />
     </div>
   );
 }

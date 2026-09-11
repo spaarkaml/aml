@@ -8,6 +8,7 @@ import { describeIndex, listenIndexProgress, useIndexStore } from "@/features/in
 import { useLayoutStore } from "@/features/layout/store";
 import { useSettingsStore } from "@/features/settings/store";
 import { useSpellStore } from "@/features/spell/store";
+import { useStatsStore } from "@/features/stats/store";
 import { describeSync, startSyncPolling, useSyncStore } from "@/features/sync/store";
 import { FOCUS_LABEL, useWritingStore } from "@/features/writing/store";
 import type { AppInfo } from "@/ipc";
@@ -34,6 +35,7 @@ export function StatusBar({ info }: { info: AppInfo | null }) {
   const openRight = useLayoutStore((s) => s.openPanel);
   const dailyGoal = Number(useSettingsStore((s) => s.dailyGoal)) || 0;
   const todayWords = useGoalsStore((s) => s.history[todayIso()] ?? 0);
+  const openStats = useStatsStore((s) => s.setOpen);
   // Sync is polled from launch, not from the first Folio: the sidecar starts with the app,
   // and "it is still coming up" is exactly what you want to see while you are waiting.
   useEffect(() => startSyncPolling(), []);
@@ -46,9 +48,15 @@ export function StatusBar({ info }: { info: AppInfo | null }) {
   const syncLabel = describeSync(syncStatus, folioRoot, disconnectedSince);
   return (
     <footer className={styles.statusbar}>
-      <span data-testid="word-count">
+      <button
+        type="button"
+        className={styles.statusButton}
+        onClick={() => openStats(true)}
+        title="Statistics for this note"
+        data-testid="word-count"
+      >
         {words.toLocaleString("en-AU")} {words === 1 ? "word" : "words"}
-      </span>
+      </button>
       {path ? <span>{readingMinutes(words)} min read</span> : null}
       {dailyGoal > 0 ? (
         <button

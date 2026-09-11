@@ -1,0 +1,169 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--aml-scrim);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 10vh;
+  z-index: 100;
+}
+
+.backdropButton {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.panel {
+  position: relative;
+  width: min(560px, 92vw);
+  max-height: 82vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--aml-space-4);
+  padding: var(--aml-space-3) var(--aml-space-4) var(--aml-space-4);
+  background: var(--aml-surface);
+  border-radius: var(--aml-radius-xl);
+  box-shadow: var(--aml-shadow-3);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--aml-space-2);
+}
+
+.title {
+  flex-grow: 1;
+  margin: 0;
+  font-size: var(--aml-size-lg);
+  font-weight: var(--aml-weight-semi);
+  color: var(--aml-primary);
+}
+
+.small {
+  font: inherit;
+  font-size: var(--aml-size-xs);
+  padding: 2px 8px;
+  height: var(--aml-row-sm);
+  border: 0;
+  box-shadow: var(--aml-shadow-1);
+  border-radius: var(--aml-radius-sm);
+  background: var(--aml-surface);
+  color: var(--aml-text);
+  cursor: default;
+}
+
+.small:hover {
+  background: var(--aml-highlight);
+}
+
+.where,
+.meta {
+  margin: 0;
+  font-size: var(--aml-size-xs);
+  color: var(--aml-text-3);
+}
+
+/* The figures, in a grid that reflows rather than a row that squashes. */
+.figures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+  gap: var(--aml-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.figure {
+  display: flex;
+  flex-direction: column;
+  padding: var(--aml-space-2);
+  border-radius: var(--aml-radius);
+  background: var(--aml-highlight);
+}
+
+.figureValue {
+  font-size: var(--aml-size-xl);
+  font-weight: var(--aml-weight-semi);
+  color: var(--aml-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.figureLabel {
+  font-size: var(--aml-size-xs);
+  color: var(--aml-text-3);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--aml-space-2);
+}
+
+.heading {
+  margin: 0;
+  font-size: var(--aml-size-xs);
+  font-weight: var(--aml-weight-semi);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--aml-text-3);
+}
+
+.readability {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.sections {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--aml-space-05);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--aml-space-2);
+  font-size: var(--aml-size-md);
+}
+
+.sectionName {
+  flex: 1 1 40%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The bar is the point of the table: which section is long is easier to see than to read. */
+.bar {
+  flex: 1 1 40%;
+  height: 4px;
+  border-radius: var(--aml-radius-pill);
+  background: var(--aml-muted);
+  overflow: hidden;
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--aml-radius-pill);
+  background: var(--aml-primary);
+}
+
+.sectionWords {
+  flex: none;
+  min-width: 3.5rem;
+  text-align: right;
+  color: var(--aml-text-2);
+  font-variant-numeric: tabular-nums;
+}

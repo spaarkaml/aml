@@ -4,6 +4,13 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### WP-3.7 — Statistics (2026-09-12)
+- **Click the word count** in the status bar (or *Statistics…* in the palette) for the note's figures: words, characters with and without spaces, sentences, paragraphs and reading time.
+- **Every figure counts the same text the status bar counts** — Q19's rules, from one place: front matter, code blocks and HTML comments are not prose; headings, lists, tables and quotes are. Two counters with different opinions would be worse than either being wrong, so the e2e asserts the panel's figure against the status bar's.
+- **Readability** as Flesch reading ease and Flesch–Kincaid grade, with the band ("Plain English", "Difficult") leading because that is the part worth acting on. Below twenty words there is **no number at all**: a grade level computed from a sentence and a half is not a measurement, and printing one would invite trusting it.
+- **Where the words are** — every heading with the words in its section, its subsections included, which is the number that answers "how long is chapter three". Same definition of a section as the Outline uses, so the two agree; a bar against the longest, because which chapter has run away with itself is easier to see than to read.
+- Sentences are counted per block with a floor of one, reusing Focus Mode's own sentence boundaries — a heading with no full stop is one sentence, not none.
+
 ### WP-3.4 — Goals (2026-09-12)
 - **A target for the note**, written as one of its own properties (`target_words`, and `deadline` if it has one) — so it travels with the note, opens in any other editor, and is searchable. The Goals section sets it; the Properties panel shows it as the ordinary field it is.
 - **A target for the day**, saved in the Folio (`goals.daily`), so both machines aim at the same number.
