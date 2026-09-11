@@ -14,7 +14,11 @@ vi.mock("@/ipc", () => ({
       debug: true,
     }),
     folioCurrent: vi.fn().mockResolvedValue({ status: "ok", data: null }),
+    // No recents: a first run, which is the only time Welcome is the launch screen.
     folioRecent: vi.fn().mockResolvedValue([]),
+    syncStatus: vi
+      .fn()
+      .mockResolvedValue({ status: "ok", data: { enabled: false, devices: [], folders: [] } }),
   },
   events: { folioChanged: { listen: vi.fn().mockResolvedValue(() => undefined) } },
 }));
@@ -24,7 +28,8 @@ beforeEach(() => useLayoutStore.getState().setLayout("desk"));
 describe("App shell", () => {
   it("renders wordmark, status info and the pinned Browser in Desk layout", async () => {
     render(<App />);
-    expect(screen.getByText("Open a Folio to start writing.")).toBeInTheDocument();
+    // The shell renders nothing in the centre until bootstrap has decided where to land.
+    expect(await screen.findByText("Open a Folio to start writing.")).toBeInTheDocument();
     expect(await screen.findByTestId("app-info")).toHaveTextContent("v0.1.0");
     expect(screen.getByTestId("panel-left")).toHaveAttribute("data-pinned", "true");
     expect(screen.queryByTestId("panel-right")).not.toBeInTheDocument();

@@ -2,8 +2,10 @@ import { expect, type Page, test } from "@playwright/test";
 
 const mod = process.platform === "darwin" ? "Meta" : "Control";
 
+/** First run only: after that the app launches back into the Folio by itself. */
 async function openFolio(page: Page) {
-  await page.getByRole("button", { name: "Open Folio…" }).click();
+  const welcome = page.getByRole("button", { name: "Open Folio…" });
+  if (await welcome.isVisible().catch(() => false)) await welcome.click();
   await expect(page.getByTestId("folio-tree")).toBeVisible();
 }
 

@@ -91,7 +91,13 @@ export const commands = {
 	spellAdd: (word: string) => typedError<null, FolioError>(__TAURI_INVOKE("spell_add", { word })),
 	/**  Ignores the word until the Folio is closed. */
 	spellIgnore: (word: string) => typedError<null, FolioError>(__TAURI_INVOKE("spell_ignore", { word })),
-	/**  Everything the Sync screen and the status bar show; polled by the UI. */
+	/**
+	 *  Everything the Sync screen and the status bar show; polled by the UI.
+	 * 
+	 *  Never waits on the sidecar lock: `start` holds it for as long as Syncthing takes to answer,
+	 *  and a poll that blocks there leaves the status bar blank through the whole launch. While a
+	 *  start is in flight this reports `starting` and lets the next poll pick up the real state.
+	 */
 	syncStatus: () => typedError<SyncStatus, FolioError>(__TAURI_INVOKE("sync_status")),
 	/**  Starts the sidecar now and remembers to start it on every launch. */
 	syncEnable: () => typedError<SyncStatus, FolioError>(__TAURI_INVOKE("sync_enable")),
@@ -362,6 +368,11 @@ export type SyncFolder = {
 export type SyncStatus = {
 	enabled: boolean,
 	running: boolean,
+	/**
+	 *  The sidecar is booting: `start` can take seconds, and "not running yet" and "failed"
+	 *  must not look the same in the status bar.
+	 */
+	starting: boolean,
 	myId: string | null,
 	version: string | null,
 	devices: SyncDevice[],

@@ -4,6 +4,13 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### Launch into your last Folio, and honest sync progress (2026-09-11)
+- **AML reopens the Folio you were last in.** The Welcome screen is now what it says it is — a first run. After that, launch lands you in your work; `folio.open` in the palette (⌘K → "Open Folio…") is the way to another one, and *Close Folio* brings Welcome back with your recent list. A Folio that has moved or been deleted falls through to Welcome with the reason on screen.
+- The shell renders nothing in the centre until it has decided where to land, so there is no flash of a screen you were not meant to see again.
+- **Sync now says what it is doing.** One "NAS offline" used to cover three different waits. The status bar now distinguishes *Starting sync…* (the sidecar booting), *Finding the NAS…* (device not connected yet — Syncthing can take most of a minute over global discovery or a relay), *NAS offline* (still nothing after 60 s), *No NAS paired*, *Syncing n%*, *Scanning…* and *NAS · up to date*.
+- Sync is polled **from launch**, not from the first Folio you open, so the wait is visible while it is happening.
+- `sync_status` no longer queues behind the sidecar's start. `Syncthing::start` blocks for up to 20 s holding the sidecar lock, so every status poll during launch waited on it — the status bar was blank for exactly as long as the user most wanted to be told something was happening. `SyncStatus` gained a `starting` flag and the command answers from it without taking the lock.
+
 ### Release workflow (2026-09-11)
 - `.github/workflows/release.yml`: builds the DMG (Apple silicon) and the MSI + NSIS installer (Windows x64) and attaches them to a **draft** GitHub Release on a `v*` tag. `workflow_dispatch` builds the same installers as artifacts without making a release, which is the way to get an MSI without tagging.
 - The tag is checked against `tauri.conf.json`'s version before anything is built: a release page whose installers claim a different version is worse than no release.

@@ -30,7 +30,6 @@ test("Tags view nests tags with counts; selecting a tag lists and opens its note
 
   // The view choice survives a reload (the mock Folio must be reopened; real AML restores it).
   await page.reload();
-  await page.getByRole("button", { name: "Open Folio…" }).click();
   await expect(page.getByTestId("tags-panel")).toBeVisible();
 });
 

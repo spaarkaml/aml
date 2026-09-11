@@ -5,8 +5,18 @@ import { commands, type SyncStatus } from "@/ipc";
 
 export const POLL_MS = 5000;
 
+/**
+ * How long the NAS may be unreachable before we stop calling it "looking" and call it offline.
+ * Syncthing finds a device on the same LAN in seconds, but a first connection over global
+ * discovery or a relay can take the better part of a minute — reporting "offline" during that
+ * is wrong, and reporting "looking" forever is worse.
+ */
+export const OFFLINE_AFTER_MS = 60_000;
+
 interface SyncState {
   status: SyncStatus | null;
+  /** When the last connected peer went away (or when polling began with none). */
+  disconnectedSince: number | null;
   open: boolean;
   busy: boolean;
   error: string | null;
@@ -56,6 +66,7 @@ export const useSyncStore = create<SyncState>((set) => {
   };
   return {
     status: null,
+    disconnectedSince: null,
     open: false,
     busy: false,
     error: null,
@@ -63,7 +74,12 @@ export const useSyncStore = create<SyncState>((set) => {
     setOpen: (open) => set({ open, error: null }),
     refresh: async () => {
       const r = await commands.syncStatus();
-      if (r.status === "ok") set({ status: r.data });
+      if (r.status !== "ok") return;
+      const anyConnected = r.data.devices.some((d) => d.connected);
+      set((s) => ({
+        status: r.data,
+        disconnectedSince: anyConnected ? null : (s.disconnectedSince ?? Date.now()),
+      }));
     },
     enable: async () => {
       await run(() => commands.syncEnable());
@@ -108,15 +124,32 @@ export function syncedFolderFor(status: SyncStatus | null, path: string | null) 
   );
 }
 
-/** Short label for the status bar. */
-export function describeSync(status: SyncStatus | null, path: string | null): string | null {
+/**
+ * Short label for the status bar. Connecting to a NAS has several distinct waits — the sidecar
+ * booting, the device being found, the folder catching up — and they used to collapse into one
+ * "NAS offline", which reads as a failure while everything is in fact working.
+ */
+export function describeSync(
+  status: SyncStatus | null,
+  path: string | null,
+  disconnectedSince: number | null = null,
+  now: number = Date.now(),
+): string | null {
   if (!status?.enabled) return null;
-  if (!status.running) return "Sync starting…";
+  if (status.starting) return "Starting sync…";
+  if (!status.running) return "Sync stopped";
+  // With no Folio open there is nothing to say about syncing one; the engine states above
+  // still show, so the Welcome screen tells you the sidecar is coming up.
+  if (!path) return null;
   const folder = syncedFolderFor(status, path);
   if (!folder) return "Not synced";
-  const peerOnline = status.devices.some((d) => folder.devices.includes(d.id) && d.connected);
   if (folder.error) return "Sync error";
-  if (!peerOnline) return "NAS offline";
+  const peers = status.devices.filter((d) => folder.devices.includes(d.id));
+  if (peers.length === 0) return "No NAS paired";
+  if (!peers.some((d) => d.connected)) {
+    const waited = disconnectedSince === null ? 0 : now - disconnectedSince;
+    return waited < OFFLINE_AFTER_MS ? "Finding the NAS…" : "NAS offline";
+  }
   if (folder.state === "syncing" || (folder.completion ?? 100) < 100) {
     return `Syncing ${Math.floor(folder.completion ?? 0)}%`;
   }

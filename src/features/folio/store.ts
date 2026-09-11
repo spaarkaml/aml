@@ -19,6 +19,8 @@ interface FolioState {
   error: string | null;
   /** Non-Folio folder the user picked; offered for creation. */
   pendingCreate: string | null;
+  /** True once `bootstrap` has finished, so the shell does not flash Welcome on the way in. */
+  booted: boolean;
   bootstrap: () => Promise<void>;
   openPath: (path: string) => Promise<boolean>;
   createAt: (path: string, name?: string) => Promise<boolean>;
@@ -75,6 +77,7 @@ export const useFolioStore = create<FolioState>((set, get) => ({
   folio: null,
   tree: [],
   recent: [],
+  booted: false,
   busy: false,
   error: null,
   pendingCreate: null,
@@ -83,9 +86,17 @@ export const useFolioStore = create<FolioState>((set, get) => ({
     const [current, recent] = await Promise.all([commands.folioCurrent(), commands.folioRecent()]);
     set({ recent });
     if (current.status === "ok" && current.data) {
-      set({ folio: current.data });
+      set({ folio: current.data, booted: true });
       await get().refreshTree();
+      return;
     }
+    // Launch back into the Folio you were last in. The Welcome screen is for a first run —
+    // after that it is a door you have already walked through, and `folio.open` in the
+    // palette is the way back out to another one. A Folio that has moved or been deleted
+    // falls through to Welcome with the reason on screen rather than failing silently.
+    const last = recent[0];
+    if (last) await get().openPath(last.path);
+    set({ booted: true });
   },
 
   openPath: async (path) => {

@@ -495,6 +495,26 @@ function indexStatus() {
   return { notes: notes.size, ...index };
 }
 
+const RECENT_KEY = "aml.mock.recent";
+
+/** The real `folio_recent` reads a file, so the mock has to survive a reload the same way. */
+function loadRecent(): RecentFolio[] {
+  try {
+    const raw = localStorage.getItem(RECENT_KEY);
+    return raw ? (JSON.parse(raw) as RecentFolio[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveRecent(list: RecentFolio[]): void {
+  try {
+    localStorage.setItem(RECENT_KEY, JSON.stringify(list));
+  } catch {
+    /* private mode: the mock just forgets, as a read-only disk would */
+  }
+}
+
 const state: { folio: FolioInfo | null; tree: TreeNode[]; recent: RecentFolio[] } = {
   folio: null,
   tree: [
@@ -513,7 +533,7 @@ const state: { folio: FolioInfo | null; tree: TreeNode[]; recent: RecentFolio[] 
     node("journal", "journal", "folder", [node("2026-09-09.md", "journal/2026-09-09.md", "note")]),
     node("Inbox.md", "Inbox.md", "note"),
   ],
-  recent: [{ path: MOCK_ROOT, name: "Writing", lastOpened: 1_700_000_000_000 }],
+  recent: loadRecent(),
 };
 
 function findNode(tree: TreeNode[], path: string): TreeNode | undefined {
@@ -668,11 +688,17 @@ export function installDevMocks(): void {
         return state.folio;
       case "folio_recent":
         return state.recent;
+
       case "folio_open":
       case "folio_create": {
         const path = String(a.path ?? MOCK_ROOT);
         if (path.endsWith("not-a-folio")) throw { kind: "notAFolio", detail: path };
         state.folio = { root: path, name: path.split("/").pop() ?? "Folio", noteCount: 5 };
+        state.recent = [
+          { path, name: state.folio.name, lastOpened: Date.now() },
+          ...state.recent.filter((r) => r.path !== path),
+        ];
+        saveRecent(state.recent);
         return state.folio;
       }
       case "folio_close":

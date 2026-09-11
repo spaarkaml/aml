@@ -35,7 +35,7 @@ test("a colour is previewed as it changes, saved to the Folio, and resettable", 
   await page.waitForTimeout(500);
   await page.reload();
   await expect(page.getByTestId("layout-toggle")).toBeVisible();
-  await page.getByRole("button", { name: "Open Folio…" }).click();
+  // No Welcome screen on a relaunch: the Folio opens itself.
   await expect(page.getByTestId("breadcrumb")).toHaveText("Writing");
   expect(await token(page, "bg")).toBe("#101820");
 

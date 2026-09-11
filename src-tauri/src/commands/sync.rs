@@ -1,4 +1,5 @@
 use std::path::Path;
+use std::sync::atomic::Ordering;
 
 use tauri::{AppHandle, Manager, State};
 
@@ -26,9 +27,27 @@ fn with_sync<T>(
 }
 
 /// Everything the Sync screen and the status bar show; polled by the UI.
+///
+/// Never waits on the sidecar lock: `start` holds it for as long as Syncthing takes to answer,
+/// and a poll that blocks there leaves the status bar blank through the whole launch. While a
+/// start is in flight this reports `starting` and lets the next poll pick up the real state.
 #[tauri::command]
 #[specta::specta]
 pub fn sync_status(app: AppHandle, state: State<AppState>) -> Result<SyncStatus> {
+    if state.sync_starting.load(Ordering::Relaxed) {
+        return Ok(SyncStatus {
+            enabled: true,
+            running: false,
+            starting: true,
+            my_id: None,
+            version: None,
+            devices: vec![],
+            folders: vec![],
+            pending: vec![],
+            gui_url: String::new(),
+            error: None,
+        });
+    }
     with_sync(&app, &state, |s| {
         let enabled = s.settings().enabled;
         Ok(s.status(enabled))
@@ -161,12 +180,14 @@ pub fn sync_log_tail(app: AppHandle, state: State<AppState>) -> Result<Vec<Strin
 /// Called from `lib.rs` at start-up: bring the sidecar up if the user enabled sync.
 pub fn autostart(app: &AppHandle) {
     let state: State<AppState> = app.state();
+    state.sync_starting.store(true, Ordering::Relaxed);
     let r = with_sync(app, &state, |s| {
         if s.settings().enabled {
             s.start()?;
         }
         Ok(())
     });
+    state.sync_starting.store(false, Ordering::Relaxed);
     if let Err(e) = r {
         log::warn!("sync autostart failed: {e}");
     }

@@ -89,7 +89,6 @@ test("expanded folders persist across reload; breadcrumb reveals folders", async
   await tree.getByText("Thesis", { exact: true }).click();
   await expect(tree.getByText("chapters", { exact: true })).toHaveCount(0);
   await page.reload();
-  await page.getByRole("button", { name: "Open Folio…" }).click();
   await expect(tree.getByText("Inbox", { exact: true })).toBeVisible();
   await expect(tree.getByText("chapters", { exact: true })).toHaveCount(0);
   await tree.getByText("Thesis", { exact: true }).click();

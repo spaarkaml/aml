@@ -69,6 +69,9 @@ pub struct PendingFolder {
 pub struct SyncStatus {
     pub enabled: bool,
     pub running: bool,
+    /// The sidecar is booting: `start` can take seconds, and "not running yet" and "failed"
+    /// must not look the same in the status bar.
+    pub starting: bool,
     pub my_id: Option<String>,
     pub version: Option<String>,
     pub devices: Vec<SyncDevice>,
@@ -380,6 +383,7 @@ impl Syncthing {
         let mut st = SyncStatus {
             enabled,
             running: false,
+            starting: false,
             my_id: None,
             version: None,
             devices: vec![],

@@ -19,23 +19,23 @@ export function StatusBar({ info }: { info: AppInfo | null }) {
   const toggleSpell = useSpellStore((s) => s.toggle);
   const folioRoot = useFolioStore((s) => s.folio?.root ?? null);
   const syncStatus = useSyncStore((s) => s.status);
+  const disconnectedSince = useSyncStore((s) => s.disconnectedSince);
   const openSync = useSyncStore((s) => s.setOpen);
   const focus = useWritingStore((s) => s.focus);
   const typewriter = useWritingStore((s) => s.typewriter);
   const cycleFocus = useWritingStore((s) => s.cycleFocus);
   const toggleTypewriter = useWritingStore((s) => s.toggleTypewriter);
   const indexStatus = useIndexStore((s) => s.status);
+  // Sync is polled from launch, not from the first Folio: the sidecar starts with the app,
+  // and "it is still coming up" is exactly what you want to see while you are waiting.
+  useEffect(() => startSyncPolling(), []);
+
   useEffect(() => {
     if (!folioRoot) return;
-    const stopSync = startSyncPolling();
-    const stopIndex = listenIndexProgress();
-    return () => {
-      stopSync();
-      stopIndex();
-    };
+    return listenIndexProgress();
   }, [folioRoot]);
   const indexLabel = describeIndex(indexStatus);
-  const syncLabel = folioRoot ? describeSync(syncStatus, folioRoot) : null;
+  const syncLabel = describeSync(syncStatus, folioRoot, disconnectedSince);
   return (
     <footer className={styles.statusbar}>
       <span data-testid="word-count">

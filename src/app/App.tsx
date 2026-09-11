@@ -19,6 +19,8 @@ registerShellCommands();
 export function App() {
   const [info, setInfo] = useState<AppInfo | null>(null);
   const folio = useFolioStore((s) => s.folio);
+  const booted = useFolioStore((s) => s.booted);
+  const bootstrap = useFolioStore((s) => s.bootstrap);
   const notePath = useEditorStore((s) => s.path);
   useFolioEvents();
   useTabsSync();
@@ -27,9 +29,15 @@ export function App() {
     commands.appInfo().then(setInfo);
   }, []);
 
+  // Runs once, before anything decides what to render: bootstrap reopens the Folio you were
+  // last in, and rendering Welcome first would flash a screen you are not meant to see again.
+  useEffect(() => {
+    void bootstrap();
+  }, [bootstrap]);
+
   return (
     <Shell info={info} left={<LeftPanel />} right={<ContextPanel />}>
-      {folio ? notePath ? <NoteEditor /> : <Overview /> : <Welcome />}
+      {!booted ? null : folio ? notePath ? <NoteEditor /> : <Overview /> : <Welcome />}
       <RenameLinksDialog />
       <ShortcutsDialog />
     </Shell>
