@@ -57,6 +57,10 @@ by hand from a release built with a new key.
 ## When it goes wrong
 
 - **"the app version disagrees between files"** — `node scripts/version.mjs <version>`.
+- **"read installers/nsis: is a directory"** — the downloaded artifacts keep the bundler's
+  folders, and `gh release create` takes files. Fixed in the workflow on 2026-09-12; if a
+  release ever fails at the upload step, nothing is published (gh rolls the release back) —
+  delete the tag, fix, and tag again.
 - **"no signed updater bundle for: …"** — the bundler did not sign that platform. Almost
   always a missing secret in the workflow's env, or `createUpdaterArtifacts` gone from
   `tauri.conf.json`.

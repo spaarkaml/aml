@@ -148,9 +148,13 @@ jobs:
         shell: bash
         run: |
           cat notes.txt .github/release-notes.md > body.md
+          # The downloaded artifacts keep the bundler's folders (dmg/, nsis/, macos/, msi/),
+          # and `gh release create` refuses a directory — so the assets are found, not globbed.
+          mapfile -t assets < <(find installers -type f | sort)
+          printf 'uploading %s\n' "${assets[@]}"
           # Published, not a draft: a draft has no `releases/latest`, so the updater in every
           # installed copy would go on reporting that it is already the newest version.
-          gh release create "$GITHUB_REF_NAME" installers/* latest.json \
+          gh release create "$GITHUB_REF_NAME" "${assets[@]}" latest.json \
             --repo "$GITHUB_REPOSITORY" \
             --title "AML $GITHUB_REF_NAME" \
             --notes-file body.md
