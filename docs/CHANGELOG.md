@@ -2,7 +2,10 @@
 
 All notable changes. Format: one entry per work package.
 
-## Unreleased
+## 0.2.0 — 2026-09-12
+
+The first release AML can install by itself. Install this one by hand; everything after it
+arrives through **Updates**.
 
 ### Fixes (2026-09-12)
 - **Sync could never delete a folder, and stuck just short of done.** The `.stignore` AML writes was missing Syncthing's `(?d)` prefix, which is what says "this file may be deleted along with the folder holding it". macOS leaves a `.DS_Store` in every folder Finder has ever opened, so a folder deleted on the other machine could not be removed here: it sat in the queue for ever — *95%, 0 B, 4 items, all of them directories*. Every pattern now carries `(?d)`, `._*` and the other Apple leavings are covered, and opening a Folio upgrades a `.stignore` that is byte-for-byte one AML wrote (a hand-edited one is left alone). The header was also a `#` comment, which `.stignore` does not have — comments are `//`, so that line was quietly being read as a pattern.
