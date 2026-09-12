@@ -13,6 +13,7 @@ mod sidecar;
 mod spell;
 mod state;
 mod templates;
+mod update;
 
 use tauri_specta::{collect_commands, collect_events, Builder};
 
@@ -88,10 +89,13 @@ fn specta_builder() -> Builder<tauri::Wry> {
             commands::sync::sync_share_folder,
             commands::sync::sync_is_synced_path,
             commands::sync::sync_log_tail,
+            commands::update::update_check,
+            commands::update::update_install,
         ])
         .events(collect_events![
             folio::watch::FolioChanged,
-            commands::index::IndexProgress
+            commands::index::IndexProgress,
+            commands::update::UpdateProgress
         ])
 }
 
@@ -114,7 +118,9 @@ pub fn run() {
 
     tauri::Builder::default()
         .manage(state::AppState::default())
+        .manage(update::Pending::default())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(
             tauri_plugin_log::Builder::new()
                 .level(log::LevelFilter::Info)

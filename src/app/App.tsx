@@ -10,6 +10,7 @@ import { Overview } from "@/features/overview/Overview";
 import { ProjectScreen } from "@/features/project/ProjectScreen";
 import { useProjectStore } from "@/features/project/store";
 import { useTabsSync } from "@/features/tabs/useTabsSync";
+import { UpdateScreen } from "@/features/update/UpdateScreen";
 import { type AppInfo, commands } from "@/ipc";
 import { registerShellCommands } from "./commands";
 import { ContextPanel } from "./shell/ContextPanel";
@@ -53,6 +54,7 @@ export function App() {
       )}
       <RenameLinksDialog />
       <ShortcutsDialog />
+      <UpdateScreen info={info} />
     </Shell>
   );
 }

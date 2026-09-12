@@ -10,6 +10,7 @@ import { useSettingsStore } from "@/features/settings/store";
 import { useSpellStore } from "@/features/spell/store";
 import { useStatsStore } from "@/features/stats/store";
 import { describeSync, startSyncPolling, useSyncStore } from "@/features/sync/store";
+import { startUpdateChecks, updateOnOffer, useUpdateStore } from "@/features/update/store";
 import { FOCUS_LABEL, useWritingStore } from "@/features/writing/store";
 import type { AppInfo } from "@/ipc";
 import { readingMinutes } from "@/lib/wordcount";
@@ -36,9 +37,14 @@ export function StatusBar({ info }: { info: AppInfo | null }) {
   const dailyGoal = Number(useSettingsStore((s) => s.dailyGoal)) || 0;
   const todayWords = useGoalsStore((s) => s.history[todayIso()] ?? 0);
   const openStats = useStatsStore((s) => s.setOpen);
+  const openUpdate = useUpdateStore((s) => s.setOpen);
+  const updateReady = useUpdateStore(updateOnOffer);
+  const newVersion = useUpdateStore((s) => s.info?.version ?? null);
   // Sync is polled from launch, not from the first Folio: the sidecar starts with the app,
   // and "it is still coming up" is exactly what you want to see while you are waiting.
   useEffect(() => startSyncPolling(), []);
+  // Updates check themselves on a timer; the chip below is the only thing they interrupt.
+  useEffect(() => startUpdateChecks(), []);
 
   useEffect(() => {
     if (!folioRoot) return;
@@ -133,11 +139,28 @@ export function StatusBar({ info }: { info: AppInfo | null }) {
         </button>
       ) : null}
       <span className={styles.spacer} />
+      {updateReady ? (
+        <button
+          type="button"
+          className={styles.updateChip}
+          onClick={() => openUpdate(true)}
+          title={`AML ${newVersion} is ready to install`}
+          data-testid="update-chip"
+        >
+          Update to {newVersion}
+        </button>
+      ) : null}
       {info ? (
-        <span data-testid="app-info">
+        <button
+          type="button"
+          className={styles.statusButton}
+          onClick={() => openUpdate(true)}
+          title="About AML and updates"
+          data-testid="app-info"
+        >
           v{info.version} · {info.platform}/{info.arch}
           {info.debug ? " · debug" : ""}
-        </span>
+        </button>
       ) : null}
     </footer>
   );

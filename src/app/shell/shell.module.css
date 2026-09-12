@@ -510,3 +510,21 @@
 .chip:hover {
   background: var(--aml-highlight);
 }
+
+/* An update waiting to be installed: the one chip in the status bar that is an invitation
+   rather than a state, so it is filled rather than outlined. */
+.updateChip {
+  font: inherit;
+  font-size: inherit;
+  color: var(--aml-surface);
+  background: var(--aml-primary);
+  border: 0;
+  border-radius: var(--aml-radius-pill);
+  padding: 2px var(--aml-space-2);
+  cursor: pointer;
+  transition: opacity var(--aml-dur-1) var(--aml-ease);
+}
+
+.updateChip:hover {
+  opacity: 0.85;
+}

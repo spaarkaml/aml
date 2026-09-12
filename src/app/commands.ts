@@ -23,6 +23,7 @@ import { useStatsStore } from "@/features/stats/store";
 import { useSyncStore } from "@/features/sync/store";
 import { useTabsStore } from "@/features/tabs/store";
 import { useTagsStore } from "@/features/tags/store";
+import { useUpdateStore } from "@/features/update/store";
 import { useWritingStore } from "@/features/writing/store";
 
 /** Single source of truth for shell shortcuts; the e2e suite presses each one. */
@@ -490,6 +491,13 @@ export const SHELL_COMMANDS: Command[] = [
     shortcut: SHORTCUTS.mode,
     global: true,
     run: () => useAppearanceStore.getState().cycle(),
+  },
+  {
+    id: "app.update",
+    title: "Check for Updates…",
+    group: "View",
+    global: true,
+    run: () => void useUpdateStore.getState().check(),
   },
 ];
 

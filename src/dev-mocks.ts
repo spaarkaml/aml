@@ -902,6 +902,12 @@ function syncStatus() {
   };
 }
 
+/**
+ * What `update_check` answers. Null — nothing waiting — so that the launch check in every
+ * other spec stays quiet; `update.spec.ts` sets `window.__amlMockUpdate` when it wants one.
+ */
+type MockUpdate = { version: string; current: string; notes: string; date: string | null };
+
 export function installDevMocks(): void {
   // Exposed for e2e assertions on what the app wrote.
   (window as unknown as { __amlMockNotes: typeof notes }).__amlMockNotes = notes;
@@ -1504,6 +1510,12 @@ export function installDevMocks(): void {
         notes.set(String(a.source), { text: lines.join("\n"), mtime: Date.now() });
         return true;
       }
+      // The updater: the browser build has no bundle to replace, so the mock offers an
+      // update and refuses to install it — which is what the real thing does in dev too.
+      case "update_check":
+        return (window as unknown as { __amlMockUpdate?: MockUpdate }).__amlMockUpdate ?? null;
+      case "update_install":
+        throw { kind: "install", detail: "a browser tab has no bundle to replace" };
       case "plugin:event|listen":
         return 1;
       case "plugin:event|unlisten":

@@ -191,6 +191,14 @@ The fix is `bundle.macOS.signingIdentity: "-"` in `tauri.conf.json`, which ad-ho
 
 If accepted, this ADR's decision line should read "no Apple Developer or Authenticode certificates; macOS builds are ad-hoc signed so that the first-run instructions below actually work." First-run instructions are shown on the release page and in `06-NAS-SETUP.md` §Install: macOS right-click → Open (or remove the quarantine attribute); Windows SmartScreen → More info → Run anyway. The in-app updater still works: Tauri's updater signs update bundles with its own free minisign key, unrelated to OS code signing. Revisit only if the app is ever shared.
 
+**Second proposed amendment, 2026-09-12 — the updater's endpoint is public GitHub Releases (needs Bryce's yes).** This ADR is titled "local-only updater" and its body never says what that meant; the development plan's WP-8.2 says "auto-update from GitHub Releases", and that is what WP-8.2 built. It is worth writing down which one is the decision.
+
+What shipped: `release.yml` publishes each tagged release on `github.com/spaarkaml/aml`, which is already a public repository, and the app reads `releases/latest/download/latest.json`. So the **installers are downloadable by anyone who finds the repository** — as the source already is — and each machine makes one outbound request to github.com every six hours. Nothing about a Folio leaves the machine: the updater sends a version and a platform, and receives a bundle.
+
+Update bundles are signed with AML's own **minisign** key (private half in the repository's Actions secrets and `~/.tauri/aml-updater.key`, public half compiled into the app). A bundle that does not verify is refused before it is unpacked, so a compromised download cannot become a running AML — which matters *more* for an app with no OS signature, not less. Losing that key ends updating for every installed copy.
+
+If "local-only" was meant literally — updates served from the DRIVESTOR and nowhere else — the change is small: `endpoints` is an array, and a NAS URL can be first with GitHub as the fallback. But a NAS-only endpoint cannot update a laptop that is away from home, which is the case the updater exists for. **Recommended:** accept GitHub Releases as the endpoint, and add the NAS as a second endpoint only if the public one ever becomes unwelcome.
+
 ---
 
 ## ADR-013 — Visual foundation: Apple-light ("Sonoma"), neutral Paper chrome  `ACCEPTED`

@@ -43,6 +43,23 @@
     ],
     "macOS": {
       "signingIdentity": "-"
+    },
+    "createUpdaterArtifacts": true,
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser"
+      }
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEQ2RTcwOTc5QUFGN0UzNDkKUldSSjQvZXFlUW5uMXVva0xiaS9obHBIRWxDa1FCWXZZUDEvVnZURFE4a2xlemRDMlJGT0Joa3YK",
+      "endpoints": [
+        "https://github.com/spaarkaml/aml/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
     }
   }
 }

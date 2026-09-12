@@ -168,12 +168,36 @@ export const commands = {
 	/**  True when `path` is (inside) a folder the sidecar syncs — used to mark a Folio "Synced". */
 	syncIsSyncedPath: (path: string) => typedError<boolean, FolioError>(__TAURI_INVOKE("sync_is_synced_path", { path })),
 	syncLogTail: () => typedError<string[], FolioError>(__TAURI_INVOKE("sync_log_tail")),
+	/**
+	 *  The release the endpoint is offering, or `None` when this is already the newest one.
+	 * 
+	 *  A debug build refuses outright: it was built by `cargo`, not by the bundler, so there is no
+	 *  installed bundle for an update to replace and "installing" one would break the dev copy.
+	 */
+	updateCheck: () => typedError<{
+	/**  The version on offer, e.g. "0.2.0". */
+	version: string,
+	/**  The version running right now. */
+	current: string,
+	/**  The release notes, as written on the GitHub release. Empty when it had none. */
+	notes: string,
+	/**  Publication date (RFC 3339) when the endpoint gave one. */
+	date: string | null,
+} | null, UpdateError>(__TAURI_INVOKE("update_check")),
+	/**
+	 *  Downloads the update found by `update_check`, verifies it and restarts into it.
+	 * 
+	 *  On macOS this returns only if something went wrong — a good run ends in `restart`. On
+	 *  Windows the installer takes over and relaunches AML itself.
+	 */
+	updateInstall: () => typedError<null, UpdateError>(__TAURI_INVOKE("update_install")),
 };
 
 /** Events */
 export const events = {
 	folioChanged: makeEvent<FolioChanged>("folio-changed"),
 	indexProgress: makeEvent<IndexProgress>("index-progress"),
+	updateProgress: makeEvent<UpdateProgress>("update-progress"),
 };
 
 /* Types */
@@ -525,6 +549,44 @@ export type TreeNode = {
 	mtime: number,
 	size: number,
 	children: TreeNode[],
+};
+
+/**
+ *  Errors the update screen can show.
+ * 
+ *  Kept apart from `FolioError`: nothing here is about a Folio, and "File error: dns error"
+ *  would be a lie about what went wrong.
+ */
+export type UpdateError = 
+/**  A build that cannot update itself: `pnpm tauri dev`, or a bundle built before WP-8.2. */
+{ kind: "notConfigured" } | 
+/**  The endpoint could not be reached, or did not answer with a release. */
+{ kind: "unreachable"; detail: string } | 
+/**  The download finished but its signature did not match AML's public key. */
+{ kind: "notTrusted"; detail: string } | 
+/**  Downloaded and verified, but putting it in place failed. */
+{ kind: "install"; detail: string } | 
+/**  `update_install` with nothing found by `update_check`. */
+{ kind: "nothingPending" };
+
+/**  A release newer than the one running. */
+export type UpdateInfo = {
+	/**  The version on offer, e.g. "0.2.0". */
+	version: string,
+	/**  The version running right now. */
+	current: string,
+	/**  The release notes, as written on the GitHub release. Empty when it had none. */
+	notes: string,
+	/**  Publication date (RFC 3339) when the endpoint gave one. */
+	date: string | null,
+};
+
+/**  Emitted while the update downloads. `total` is absent until the server declares a length. */
+export type UpdateProgress = {
+	downloaded: number,
+	total: number | null,
+	/**  True on the last event of a download, when the bytes are all in. */
+	done: boolean,
 };
 
 /* Tauri Specta runtime */

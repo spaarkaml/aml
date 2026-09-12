@@ -16,7 +16,9 @@
     "sidecar:fetch": "node scripts/fetch-syncthing.mjs",
     "rust:check": "cd src-tauri && cargo fmt --check && cargo clippy --all-targets -- -D warnings && cargo test",
     "vocab": "node scripts/check-vocabulary.mjs",
-    "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm vocab && pnpm contrast && pnpm rust:check",
+    "version:check": "node scripts/version.mjs --check",
+    "version:set": "node scripts/version.mjs",
+    "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm vocab && pnpm version:check && pnpm contrast && pnpm rust:check",
     "e2e": "playwright test",
     "contrast": "node scripts/contrast-report.mjs",
     "fonts:fetch": "node scripts/fetch-fonts.mjs"

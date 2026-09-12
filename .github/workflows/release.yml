@@ -77,10 +77,14 @@ jobs:
       - name: Build frontend
         run: pnpm build
 
-      - name: Build installers (unsigned — ADR-012)
+      # No OS certificate (ADR-012): macOS is ad-hoc signed and Windows is not signed at all,
+      # so both installers need their first-run instructions. The key below is AML's own
+      # minisign key and signs the *update* bundles — the updater refuses anything else.
+      - name: Build installers (no OS certificate — ADR-012)
         run: pnpm tauri build --ci
         env:
-          TAURI_SIGNING_PRIVATE_KEY: ""
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
 
       - name: Upload installers
         uses: actions/upload-artifact@v4
@@ -91,6 +95,9 @@ jobs:
             src-tauri/target/release/bundle/dmg/*.dmg
             src-tauri/target/release/bundle/msi/*.msi
             src-tauri/target/release/bundle/nsis/*-setup.exe
+            src-tauri/target/release/bundle/macos/*.app.tar.gz
+            src-tauri/target/release/bundle/macos/*.app.tar.gz.sig
+            src-tauri/target/release/bundle/nsis/*-setup.exe.sig
 
   release:
     name: release
@@ -99,6 +106,15 @@ jobs:
     # Only a tag makes a Release; a manual run just leaves the artifacts on the run.
     if: startsWith(github.ref, 'refs/tags/')
     steps:
+      - uses: actions/checkout@v4
+        with:
+          # The release notes are the commit subjects since the previous tag.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
       - uses: actions/download-artifact@v4
         with:
           path: installers
@@ -107,23 +123,34 @@ jobs:
       - name: What was built
         run: ls -lR installers
 
+      - name: Release notes
+        shell: bash
+        run: |
+          prev=$(git describe --tags --abbrev=0 "$GITHUB_REF_NAME^" 2>/dev/null || true)
+          if [ -n "$prev" ]; then
+            git log --no-merges --pretty='- %s' "$prev..$GITHUB_REF_NAME" > notes.txt
+          else
+            echo "- The first release with an in-app updater." > notes.txt
+          fi
+          cat notes.txt
+
+      # What the running app reads to learn there is a newer one. It must be an asset of the
+      # release itself: the updater's endpoint is .../releases/latest/download/latest.json.
+      - name: Build latest.json
+        shell: bash
+        run: |
+          node scripts/latest-json.mjs installers "${GITHUB_REF_NAME#v}" notes.txt > latest.json
+          cat latest.json
+
       - name: Publish the release
         env:
           GH_TOKEN: ${{ github.token }}
+        shell: bash
         run: |
-          gh release create "$GITHUB_REF_NAME" installers/* \
+          cat notes.txt .github/release-notes.md > body.md
+          # Published, not a draft: a draft has no `releases/latest`, so the updater in every
+          # installed copy would go on reporting that it is already the newest version.
+          gh release create "$GITHUB_REF_NAME" installers/* latest.json \
             --repo "$GITHUB_REPOSITORY" \
             --title "AML $GITHUB_REF_NAME" \
-            --draft \
-            --notes "$(cat <<'NOTES'
-          Unsigned builds (ADR-012) — the OS will object the first time.
-
-          **macOS** (Apple silicon, `.dmg`): right-click AML → **Open** → Open. Or:
-          `xattr -dr com.apple.quarantine /Applications/AML.app`
-
-          **Windows** (`.msi`): SmartScreen → **More info** → **Run anyway**.
-
-          After installing, open a Folio and pair with the NAS from the sync screen;
-          `docs/06-NAS-SETUP.md` has the steps.
-          NOTES
-          )"
+            --notes-file body.md

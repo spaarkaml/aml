@@ -15,3 +15,4 @@ pub mod spell;
 pub mod sync;
 pub mod tags;
 pub mod templates;
+pub mod update;

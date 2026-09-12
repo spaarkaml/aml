@@ -43,8 +43,9 @@ Sync and snapshots protect against mistakes, not against fire, theft, or a dead 
 ## 7. Installing AML on Mac and Windows (unsigned builds, ADR-012)
 - **macOS:** open the `.dmg`, drag AML to Applications, then **right-click → Open** the first time and confirm. If macOS says AML **"is damaged and can't be opened"**, the build predates 2026-09-12 and its bundle was never signed (see ADR-012's amendment); `xattr -dr com.apple.quarantine /Applications/AML.app` in Terminal clears it, and any later build does not need it.
 - Before installing a new build, **eject any AML disk image still mounted** (`hdiutil detach /Volumes/AML`). A second image with the same volume name mounts as `AML 1`, and it is easy to drag the app out of the older window.
-- **Windows:** run the `.msi`; on the SmartScreen dialog click **More info → Run anyway**.
+- **Windows:** run the **`-setup.exe`**; on the SmartScreen dialog click **More info → Run anyway**. (The `.msi` installs for the whole machine but cannot update itself; if you have a copy installed from one, uninstall it first.)
 - First launch: Create Folio → Synced → paste the NAS Device ID → accept the new device in the NAS's Syncthing UI → done.
+- **This is the only time you install AML by hand.** After that it updates itself: it checks a few seconds after launch and every six hours, and a waiting release shows as a chip beside the version in the status bar. Click the version to open **Updates** at any time. Releases are at <https://github.com/spaarkaml/aml/releases>, and `docs/RELEASING.md` says how one is made.
 
 ## 8. Pairing from AML (WP-1.1b)
 1. AML → Welcome → **NAS sync…** (or the palette: "NAS Sync…") → **Turn on**.
