@@ -42,6 +42,7 @@ fn specta_builder() -> Builder<tauri::Wry> {
             commands::index::index_status,
             commands::index::index_rebuild,
             commands::index::index_search,
+            commands::index::graph_build,
             commands::links::link_resolve,
             commands::links::link_rename_preview,
             commands::links::link_rename_apply,

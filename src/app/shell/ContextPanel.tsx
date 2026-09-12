@@ -1,4 +1,5 @@
 import { GoalsSection } from "@/features/goals/GoalsSection";
+import { GraphPanel } from "@/features/graph/GraphPanel";
 import { BacklinksPanel } from "@/features/links/BacklinksPanel";
 import { OutlinePanel } from "@/features/outline/OutlinePanel";
 import { PropertiesPanel } from "@/features/properties/PropertiesPanel";
@@ -23,6 +24,10 @@ export function ContextPanel() {
       <details open className={styles.section} data-testid="context-backlinks">
         <summary className={styles.sectionTitle}>Backlinks</summary>
         <BacklinksPanel />
+      </details>
+      <details className={styles.section} data-testid="context-graph">
+        <summary className={styles.sectionTitle}>Graph</summary>
+        <GraphPanel />
       </details>
     </div>
   );

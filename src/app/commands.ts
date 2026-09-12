@@ -10,6 +10,7 @@ import { insertFootnote } from "@/features/editor/footnotes";
 import { useEditorStore } from "@/features/editor/store";
 import { useBrowserStore } from "@/features/folio/browserStore";
 import { activeDir, useFolioStore } from "@/features/folio/store";
+import { useGraphStore } from "@/features/graph/store";
 import { useIndexStore } from "@/features/index/store";
 import { useLayoutStore } from "@/features/layout/store";
 import { useOutlineStore } from "@/features/outline/store";
@@ -52,6 +53,7 @@ export const SHORTCUTS = {
   split: "mod+shift+k",
   appearance: "mod+alt+,",
   overview: "mod+shift+h",
+  graph: "mod+shift+g",
 } as const;
 
 function activeTab(): string | null {
@@ -491,6 +493,17 @@ export const SHELL_COMMANDS: Command[] = [
     shortcut: SHORTCUTS.mode,
     global: true,
     run: () => useAppearanceStore.getState().cycle(),
+  },
+  {
+    id: "view.graph",
+    title: "Graph…",
+    group: "View",
+    shortcut: SHORTCUTS.graph,
+    global: true,
+    run: () => {
+      if (!useFolioStore.getState().folio) return;
+      useGraphStore.getState().setOpen(true);
+    },
   },
   {
     id: "app.update",

@@ -2,6 +2,21 @@
 
 All notable changes. Format: one entry per work package.
 
+## 0.3.0 — 2026-09-12
+
+The first release that arrives by itself.
+
+### WP-7.3 — Link graph (2026-09-12)
+- **⌘⇧G draws the Folio**: every note, every link, clustered by Bounding in the Bounding's own colour. Notes nothing links to are drawn too — a note with no links is exactly what someone opens a graph to find, and leaving it out would answer a different question.
+- **Around this note** walks out one to three steps **in both directions**. A note that is only ever linked *to* — which is most reference notes — would otherwise be a graph of one dot.
+- **The clustering is the feature, so it has a test.** Notes in the same Bounding settle closer to each other than to another Bounding's *with no links between any of them*: gravity towards each Bounding's centre, plus a push between the Boundings so they land as separate blobs rather than one even spread with the right neighbours.
+- **The same Folio lays out the same way every time.** The seed is a golden-angle spiral with each Bounding starting in its own arc, so nothing depends on chance; a graph that rearranges itself between openings is one you have to re-read from scratch each time.
+- **One rule for what a link means.** Edges are resolved through `Index::resolve`, the same rule backlinks and renames use, so the graph and the Backlinks panel cannot disagree — through a memo, because a Folio repeats its link targets far more often than not. Four links between two notes are one edge carrying a weight, not four lines on top of each other.
+- Click a note to open it, double-click to re-centre the graph on it, drag one to put it somewhere and it stays. Scroll zooms about the pointer.
+- **The Context panel carries the open note's own corner**, one step out and closed by default; two steps in a box that size is a smudge. A note connected to nothing says so rather than drawing a lonely dot.
+- Canvas rather than SVG — a thousand notes is three thousand DOM nodes for React to reconcile sixty times a second while the layout settles — and it reads its colours out of `tokens.css`, repainting when the mode changes, so ADR-013 still holds. Reduced motion gets the finished picture rather than no picture.
+- Past 1200 notes a graph stops being a picture and becomes a texture: a bigger Folio draws its most-connected notes and says so underneath.
+
 ## 0.2.0 — 2026-09-12
 
 The first release AML can install by itself. Install this one by hand; everything after it

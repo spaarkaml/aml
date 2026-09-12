@@ -5,6 +5,7 @@ import { useEditorStore } from "@/features/editor/store";
 import { useFolioStore } from "@/features/folio/store";
 import { useFolioEvents } from "@/features/folio/useFolioEvents";
 import { Welcome } from "@/features/folio/Welcome";
+import { GraphScreen } from "@/features/graph/GraphScreen";
 import { RenameLinksDialog } from "@/features/links/RenameLinksDialog";
 import { Overview } from "@/features/overview/Overview";
 import { ProjectScreen } from "@/features/project/ProjectScreen";
@@ -54,6 +55,7 @@ export function App() {
       )}
       <RenameLinksDialog />
       <ShortcutsDialog />
+      <GraphScreen />
       <UpdateScreen info={info} />
     </Shell>
   );

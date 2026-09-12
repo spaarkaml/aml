@@ -908,6 +908,77 @@ function syncStatus() {
  */
 type MockUpdate = { version: string; current: string; notes: string; date: string | null };
 
+/**
+ * The graph the browser build draws: wiki links between the mock notes, resolved by stem the
+ * way the real one resolves them, so the shell can be driven without an index.
+ */
+function mockGraph(focus: string | null, depth: number) {
+  const paths = [...notes.keys()];
+  const stem = (p: string) => (p.split("/").pop() ?? p).replace(/\.md$/i, "");
+  const counts = new Map<string, number>();
+  for (const [from, note] of notes) {
+    for (const m of note.text.matchAll(/\[\[([^\]|#]+)/g)) {
+      const target = (m[1] ?? "").trim();
+      const to = paths.find((p) => stem(p).toLowerCase() === target.toLowerCase());
+      if (!to || to === from) continue;
+      const key = `${from}\u0000${to}`;
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+  }
+  const edges = [...counts].map(([key, count]) => {
+    const [from = "", to = ""] = key.split("\u0000");
+    return { from, to, count };
+  });
+
+  let keep = new Set(paths);
+  let depths: Map<string, number> | null = null;
+  if (focus) {
+    const near = new Map<string, number>([[focus, 0]]);
+    const queue: Array<[string, number]> = [[focus, 0]];
+    while (queue.length > 0) {
+      const [at, d] = queue.shift() ?? ["", 0];
+      if (d >= depth) continue;
+      for (const e of edges) {
+        for (const next of [e.from === at ? e.to : null, e.to === at ? e.from : null]) {
+          if (next && !near.has(next)) {
+            near.set(next, d + 1);
+            queue.push([next, d + 1]);
+          }
+        }
+      }
+    }
+    keep = new Set(near.keys());
+    depths = near;
+  }
+  const drawn = edges.filter((e) => keep.has(e.from) && keep.has(e.to));
+  const nodes = paths
+    .filter((p) => keep.has(p))
+    .map((path) => ({
+      path,
+      title: stem(path),
+      words: 100,
+      outgoing: drawn.filter((e) => e.from === path).reduce((n, e) => n + e.count, 0),
+      incoming: drawn.filter((e) => e.to === path).reduce((n, e) => n + e.count, 0),
+      cluster: boundings.find((b) => b.notes.includes(path))?.id ?? null,
+      depth: focus ? (depths?.get(path) ?? 0) : 0,
+    }));
+  const on = new Set(nodes.map((n) => n.cluster).filter(Boolean));
+  return {
+    nodes,
+    edges: drawn,
+    clusters: boundings
+      .filter((b) => on.has(b.id))
+      .map((b) => ({
+        id: b.id,
+        name: b.name,
+        colour: b.colour,
+        notes: nodes.filter((n) => n.cluster === b.id).length,
+      })),
+    total: paths.length,
+    truncated: false,
+  };
+}
+
 export function installDevMocks(): void {
   // Exposed for e2e assertions on what the app wrote.
   (window as unknown as { __amlMockNotes: typeof notes }).__amlMockNotes = notes;
@@ -1512,6 +1583,10 @@ export function installDevMocks(): void {
       }
       // The updater: the browser build has no bundle to replace, so the mock offers an
       // update and refuses to install it — which is what the real thing does in dev too.
+      case "graph_build": {
+        if (!state.folio) throw { kind: "noFolioOpen" };
+        return mockGraph(a.focus ? String(a.focus) : null, Number(a.depth) || 1);
+      }
       case "update_check":
         return (window as unknown as { __amlMockUpdate?: MockUpdate }).__amlMockUpdate ?? null;
       case "update_install":

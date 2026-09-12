@@ -5,6 +5,7 @@
 
 pub mod backlinks;
 pub mod extract;
+pub mod graph;
 pub mod links;
 pub mod projects;
 pub mod search;

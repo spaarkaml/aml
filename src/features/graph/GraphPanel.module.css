@@ -1,0 +1,27 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--aml-space-1);
+}
+
+.empty {
+  margin: 0;
+  padding: var(--aml-space-2) 0;
+  color: var(--aml-text-3);
+  font-size: var(--aml-size-sm);
+}
+
+.more {
+  align-self: flex-start;
+  font: inherit;
+  font-size: var(--aml-size-sm);
+  border: 0;
+  background: transparent;
+  color: var(--aml-primary);
+  padding: var(--aml-space-1) 0;
+  cursor: pointer;
+}
+
+.more:hover {
+  text-decoration: underline;
+}

@@ -36,6 +36,13 @@ export const commands = {
 	indexRebuild: () => typedError<null, FolioError>(__TAURI_INVOKE("index_rebuild")),
 	/**  Plain full-text search (words, `"phrases"`); the query language lands in WP-2.5. */
 	indexSearch: (query: string, limit: number | null) => typedError<SearchHit[], FolioError>(__TAURI_INVOKE("index_search", { query, limit })),
+	/**
+	 *  The link graph: the whole Folio, or one note's neighbourhood out to `depth` steps.
+	 * 
+	 *  Boundings come from the Folio rather than the index — they are authored, not derived —
+	 *  and the graph colours its nodes by them.
+	 */
+	graphBuild: (focus: string | null, depth: number) => typedError<Graph, FolioError>(__TAURI_INVOKE("graph_build", { focus, depth })),
 	/**  Resolves each link as seen from `from`; `null` where nothing matches. */
 	linkResolve: (from: string, links: LinkQuery[]) => typedError<(string | null)[], FolioError>(__TAURI_INVOKE("link_resolve", { from, links })),
 	/**  What renaming `from` → `to` would rewrite. Call before `entry_rename`. */
@@ -299,6 +306,51 @@ export type FolioInfo = {
 	root: string,
 	name: string,
 	noteCount: number,
+};
+
+export type Graph = {
+	nodes: GraphNode[],
+	edges: GraphEdge[],
+	clusters: GraphCluster[],
+	/**  Notes in the Folio, whether or not they are drawn. */
+	total: number,
+	/**  True when the Folio has more notes than the graph will draw. */
+	truncated: boolean,
+};
+
+/**  A Bounding, as much of it as the graph draws. */
+export type GraphCluster = {
+	id: string,
+	name: string,
+	colour: string,
+	notes: number,
+};
+
+export type GraphEdge = {
+	from: string,
+	to: string,
+	/**
+	 *  How many links run this way — a note quoted four times is more tied than one quoted
+	 *  once, and the line is drawn heavier for it.
+	 */
+	count: number,
+};
+
+export type GraphNode = {
+	path: string,
+	title: string,
+	words: number,
+	/**  Links from this note that land on another note in the Folio. */
+	outgoing: number,
+	/**  Links from elsewhere that land here. */
+	incoming: number,
+	/**  The id of the first Bounding holding it, if any. */
+	cluster: string | null,
+	/**
+	 *  Steps from the focus note. 0 for the focus itself, and for every node when there is
+	 *  no focus.
+	 */
+	depth: number,
 };
 
 /**  Emitted while a build or refresh runs; `done == total` marks the end. */

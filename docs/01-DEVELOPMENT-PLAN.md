@@ -202,7 +202,7 @@ Roughly 80–95 AI sessions. Stages 2 and 3 can overlap; 6 and 7 can overlap.
 |---|---|
 | 7.1 | Mermaid diagrams inline; SVG in compile |
 | 7.2 | Canvas notes (Excalidraw-style) — if Q15 wants freehand |
-| 7.3 | Link graph: local and Folio-wide, clustered by Bounding |
+| 7.3 | ~~Link graph: local and Folio-wide, clustered by Bounding~~ **done 2026-09-12** (pulled forward). ⌘⇧G for the Folio, a Context-panel section for the open note; `docs/qa/stage-7.md` |
 | 7.4 | Grammar via LanguageTool on the NAS (Docker), AU English — if Q21 = yes |
 | 7.5 | Template scripting — only if wanted |
 

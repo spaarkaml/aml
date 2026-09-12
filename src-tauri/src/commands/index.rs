@@ -7,6 +7,7 @@ use tauri::{AppHandle, Manager, State};
 use tauri_specta::Event;
 
 use crate::folio::{Folio, FolioError, Result};
+use crate::index::graph::Graph;
 use crate::index::{db_path_for, Index, IndexStatus, NoteIndexEntry, SearchHit};
 use crate::state::AppState;
 
@@ -117,4 +118,23 @@ pub fn index_search(
     limit: Option<u32>,
 ) -> Result<Vec<SearchHit>> {
     with_index(&state, |i| i.search(&query, limit.unwrap_or(40)))
+}
+
+/// The link graph: the whole Folio, or one note's neighbourhood out to `depth` steps.
+///
+/// Boundings come from the Folio rather than the index — they are authored, not derived —
+/// and the graph colours its nodes by them.
+#[tauri::command]
+#[specta::specta]
+pub fn graph_build(state: State<AppState>, focus: Option<String>, depth: u32) -> Result<Graph> {
+    let boundings = {
+        let guard = state
+            .folio
+            .lock()
+            .map_err(|e| FolioError::Io(e.to_string()))?;
+        guard.as_ref().ok_or(FolioError::NoFolioOpen)?.boundings()?
+    };
+    with_index(&state, |index| {
+        index.graph(&boundings, focus.as_deref(), depth.clamp(1, 4))
+    })
 }
