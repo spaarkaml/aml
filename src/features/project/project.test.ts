@@ -1,6 +1,15 @@
 import { describe, expect, it } from "vitest";
 import type { BinderItem, Project } from "@/ipc";
-import { cardColour, dropPlan, groupsOf, nestPlan, statsOf, statusesOf } from "./project";
+import {
+  CARD_COLOURS,
+  cardColour,
+  colourScale,
+  dropPlan,
+  groupsOf,
+  nestPlan,
+  statsOf,
+  statusesOf,
+} from "./project";
 import { titleOf } from "./split";
 
 function item(rel: string, patch: Partial<BinderItem> = {}): BinderItem {
@@ -164,5 +173,42 @@ describe("splitting a document", () => {
     expect(titleOf("\n\n")).toBe("Untitled");
     // A heading that would make an unusable file name is made usable.
     expect(titleOf("# 03/04: the crossing")).toBe("03-04- the crossing");
+  });
+});
+
+describe("colourScale", () => {
+  const STATUSES = ["drafting", "revised", "final", "outline", "cut", "notes"];
+
+  it("gives no two values the same colour while the palette lasts", () => {
+    const scale = colourScale(STATUSES);
+    expect(new Set(scale.values()).size).toBe(STATUSES.length);
+  });
+
+  it("is the same map however the values arrive", () => {
+    const forwards = colourScale(STATUSES);
+    const backwards = colourScale([...STATUSES].reverse());
+    expect([...forwards]).toEqual([...backwards]);
+  });
+
+  it("ignores blanks and whitespace rather than spending a colour on them", () => {
+    const scale = colourScale(["drafting", "  ", "", " drafting "]);
+    expect(scale.size).toBe(1);
+    expect(scale.get("drafting")).toBe(cardColour("drafting"));
+  });
+
+  it("keeps the colour a word chooses for itself when nothing else wants it", () => {
+    expect(colourScale(["drafting"]).get("drafting")).toBe(cardColour("drafting"));
+  });
+
+  it("shares again only once every colour is spoken for", () => {
+    const many = Array.from({ length: CARD_COLOURS.length + 3 }, (_, i) => `status ${i}`);
+    const scale = colourScale(many);
+    expect(scale.size).toBe(many.length);
+    expect(new Set(scale.values()).size).toBe(CARD_COLOURS.length);
+  });
+
+  it("has a palette of distinct colours", () => {
+    expect(new Set(CARD_COLOURS).size).toBe(CARD_COLOURS.length);
+    expect(CARD_COLOURS.length).toBeGreaterThanOrEqual(12);
   });
 });

@@ -4,7 +4,7 @@ import { daysLeft, describePace, fraction, pacePerDay } from "@/features/goals/g
 import { ProgressRing } from "@/features/goals/ProgressRing";
 import { useTabsStore } from "@/features/tabs/store";
 import styles from "./Dashboard.module.css";
-import { cardColour, groupsOf, statsOf, statusesOf } from "./project";
+import { colourScale, groupsOf, statsOf, statusesOf } from "./project";
 import { useProjectStore } from "./store";
 
 const figure = (n: number) => n.toLocaleString("en-AU");
@@ -23,6 +23,8 @@ export function Dashboard() {
   const stats = statsOf(project);
   const groups = groupsOf(project);
   const statuses = statusesOf(project);
+  // The same scale the Corkboard uses, so a status is the same colour on both screens.
+  const colours = colourScale(statuses.map((s) => s.status));
   const today = todayIso();
 
   if (!project) return null;
@@ -128,10 +130,7 @@ export function Dashboard() {
           <ul className={styles.statuses} data-testid="project-statuses">
             {statuses.map((s) => (
               <li key={s.status || "none"} data-testid={`project-status-${s.status}`}>
-                <span
-                  className={styles.dot}
-                  style={{ background: cardColour(s.status) ?? undefined }}
-                />
+                <span className={styles.dot} style={{ background: colours.get(s.status.trim()) }} />
                 <span className={styles.statusName}>{s.status || "No status"}</span>
                 <span className={styles.meta}>
                   {s.documents} {s.documents === 1 ? "document" : "documents"} · {figure(s.words)}{" "}

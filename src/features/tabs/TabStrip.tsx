@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { Icon } from "@/app/icons";
 import { useEditorStore } from "@/features/editor/store";
 import { baseName, noteTitle, parentDir } from "@/lib/paths";
@@ -14,12 +15,28 @@ export function TabStrip() {
   const close = useTabsStore((s) => s.close);
   const dirty = useEditorStore((s) => s.dirty);
   const editorPath = useEditorStore((s) => s.path);
+  const strip = useRef<HTMLDivElement>(null);
+
+  // The strip scrolls once there are more tabs than fit, so the tab you just opened can be
+  // off the end of it — which looks exactly like the note having no tab at all.
+  useEffect(() => {
+    if (!active) return;
+    strip.current
+      ?.querySelector(`[data-path="${CSS.escape(active)}"]`)
+      ?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [active]);
 
   const titles = new Map<string, number>();
   for (const t of tabs) titles.set(noteTitle(t), (titles.get(noteTitle(t)) ?? 0) + 1);
 
   return (
-    <div className={styles.strip} role="tablist" aria-label="Open notes" data-testid="tab-strip">
+    <div
+      ref={strip}
+      className={styles.strip}
+      role="tablist"
+      aria-label="Open notes"
+      data-testid="tab-strip"
+    >
       {tabs.map((path) => {
         const title = noteTitle(path);
         const ambiguous = (titles.get(title) ?? 0) > 1;

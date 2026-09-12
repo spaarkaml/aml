@@ -2,7 +2,7 @@ import { type DragEvent, useEffect, useRef, useState } from "react";
 import { useTabsStore } from "@/features/tabs/store";
 import type { BinderItem } from "@/ipc";
 import styles from "./Corkboard.module.css";
-import { cardColour, groupsOf } from "./project";
+import { colourScale, groupsOf } from "./project";
 import { type ColourBy, useProjectStore } from "./store";
 
 const DRAG_TYPE = "application/x-aml-binder";
@@ -32,6 +32,9 @@ export function Corkboard() {
       const v = (colourBy === "label" ? i.label : i.status).trim();
       if (v) values.add(v);
     }
+  // Worked out over the whole board, not one card at a time, so no two values share a colour
+  // while the palette lasts — a key with one colour against two words explains nothing.
+  const colours = colourScale(values);
 
   if (!project) return null;
 
@@ -57,10 +60,7 @@ export function Corkboard() {
           <ul className={styles.key} data-testid="corkboard-key">
             {[...values].sort().map((v) => (
               <li key={v}>
-                <span
-                  className={styles.keyDot}
-                  style={{ background: cardColour(v) ?? undefined }}
-                />
+                <span className={styles.keyDot} style={{ background: colours.get(v) }} />
                 {v}
               </li>
             ))}
@@ -85,7 +85,7 @@ export function Corkboard() {
             </h3>
             <ul className={styles.cards}>
               {group.items.map((item) => (
-                <Card key={item.rel} item={item} colourBy={colourBy} />
+                <Card key={item.rel} item={item} colourBy={colourBy} colours={colours} />
               ))}
             </ul>
           </section>
@@ -95,14 +95,23 @@ export function Corkboard() {
   );
 }
 
-function Card({ item, colourBy }: { item: BinderItem; colourBy: ColourBy }) {
+function Card({
+  item,
+  colourBy,
+  colours,
+}: {
+  item: BinderItem;
+  colourBy: ColourBy;
+  colours: Map<string, string>;
+}) {
   const openTab = useTabsStore((s) => s.open);
   const card = useProjectStore((s) => s.card);
   const drop = useProjectStore((s) => s.drop);
   const [over, setOver] = useState<"before" | "after" | null>(null);
-  const tint = cardColour(
-    colourBy === "label" ? item.label : colourBy === "status" ? item.status : "",
-  );
+  const value = (
+    colourBy === "label" ? item.label : colourBy === "status" ? item.status : ""
+  ).trim();
+  const tint = colours.get(value) ?? null;
 
   return (
     <li

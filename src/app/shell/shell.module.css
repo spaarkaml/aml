@@ -5,6 +5,12 @@
   height: 100vh;
   display: grid;
   grid-template-rows: 52px 1fr 28px;
+  /* A grid column defaults to `auto`, which never shrinks below its content's min-content
+     width — and a row of tabs has a floor of 76px each. With enough notes open the column
+     grew wider than the window, the body and the page grew with it, and the centred text
+     drifted right by half the overflow. `minmax(0, 1fr)` pins the column to the window, so
+     the tab strip's own `overflow-x` is what gives instead. */
+  grid-template-columns: minmax(0, 1fr);
   background: var(--aml-bg);
   color: var(--aml-text);
   overflow: hidden;
@@ -15,6 +21,7 @@
 .topbar {
   display: flex;
   align-items: center;
+  min-width: 0;
   gap: var(--aml-space-2);
   padding: 0 var(--aml-space-3);
   border-bottom: 1px solid var(--aml-muted);
@@ -160,21 +167,14 @@
   min-height: 0;
 }
 
-.panelPinned {
-  composes: panel;
-  flex-shrink: 0;
-}
-
-/* A hairline where two regions meet — the one place ADR-013 keeps a border. */
-.panelPinned[data-side="left"] {
-  border-right: 1px solid var(--aml-muted);
-}
-
-.panelPinned[data-side="right"] {
-  border-left: 1px solid var(--aml-muted);
-}
-
-.panelOverlay {
+/*
+ * A panel looks the same whether it is pinned or not: a floating card, inset from the window,
+ * the way a Sonoma sidebar sits inside its window rather than being welded to the frame.
+ * Pinning does not change the drawing — it changes what happens next: a pinned panel stays,
+ * and the page moves over to make room for it (the margins are set in `Shell`), so nothing is
+ * ever read through a panel. An unpinned one floats over the page and closes behind you.
+ */
+.panelFloat {
   composes: panel;
   position: absolute;
   top: var(--aml-space-2);
@@ -187,11 +187,11 @@
   animation: panel-in var(--aml-dur-2) var(--aml-ease);
 }
 
-.panelOverlay[data-side="left"] {
+.panelFloat[data-side="left"] {
   left: var(--aml-space-2);
 }
 
-.panelOverlay[data-side="right"] {
+.panelFloat[data-side="right"] {
   right: var(--aml-space-2);
 }
 

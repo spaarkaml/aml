@@ -10,8 +10,12 @@ interface Props {
 }
 
 /**
- * A side panel that is either pinned (takes layout space) or an overlay
- * (floats over the centre and closes on backdrop click / Escape).
+ * A side panel: a floating card inset from the window, pinned or not.
+ *
+ * Pinning does not change how it is drawn — both states are the same card, because a panel
+ * that redraws itself when you pin it makes you re-find everything in it. What pinning
+ * changes is what happens next: a pinned panel stays and the page makes room for it (`Shell`
+ * sets the margin), while an unpinned one floats over the page and closes behind you.
  */
 export function SidePanel({ side, title, children }: Props) {
   const panel = useLayoutStore((s) => s[side]);
@@ -39,8 +43,8 @@ export function SidePanel({ side, title, children }: Props) {
 
   return (
     <aside
-      className={panel.pinned ? styles.panelPinned : styles.panelOverlay}
-      style={{ width: panel.width, position: panel.pinned ? "relative" : "absolute" }}
+      className={styles.panelFloat}
+      style={{ width: panel.width }}
       data-side={side}
       data-pinned={panel.pinned}
       data-testid={`panel-${side}`}
@@ -54,7 +58,11 @@ export function SidePanel({ side, title, children }: Props) {
             className={styles.iconButton}
             aria-pressed={panel.pinned}
             onClick={() => togglePinned(side)}
-            title={panel.pinned ? "Unpin (becomes a slide-over)" : "Pin (keeps the panel open)"}
+            title={
+              panel.pinned
+                ? "Unpin — the panel floats over the page and closes behind you"
+                : "Pin — the panel stays open and the page makes room for it"
+            }
           >
             {panel.pinned ? "Pinned" : "Pin"}
           </button>

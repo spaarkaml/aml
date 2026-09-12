@@ -9,26 +9,78 @@ import type { BinderItem, Project } from "@/ipc";
  * derived from the Binder that Rust has already reconciled against the disk.
  */
 
-/** Card colours, the Bounding palette (ADR-010) — a label or a status is a kind of grouping. */
+/**
+ * Card colours: the Bounding palette (ADR-010) and eight more in the same register.
+ *
+ * Six was too few. A manuscript with five statuses had better-than-even odds of two of them
+ * landing on the same colour, and a key with one colour against two words is worse than no
+ * colour at all. These are spaced around the wheel and kept to a middle lightness so each one
+ * reads as itself on the page and in Ink.
+ */
 export const CARD_COLOURS = [
-  "#006078",
-  "#e37c78",
-  "#82bac4",
-  "#7a5c9e",
-  "#4c8b5a",
-  "#c08a2e",
+  "#006078", // teal — AML's own
+  "#e37c78", // salmon
+  "#7a5c9e", // purple
+  "#4c8b5a", // green
+  "#c08a2e", // amber
+  "#2f6fb3", // blue
+  "#b0447a", // magenta
+  "#3f9b8e", // sea green
+  "#b5562f", // rust
+  "#7d8b2f", // olive
+  "#82bac4", // pale cyan
+  "#6d7b8c", // slate
 ] as const;
 
+/** Where a value starts looking for a colour. Stable for ever: it is only its own letters. */
+function colourIndex(value: string): number {
+  let hash = 0;
+  for (const ch of value) hash = (hash * 31 + (ch.codePointAt(0) ?? 0)) >>> 0;
+  return hash % CARD_COLOURS.length;
+}
+
 /**
- * A stable colour for a free-text label or status. Nobody chose these, so they must at least
- * never move: the same word is the same colour in every Project, on every machine, for ever.
+ * A stable colour for a free-text label or status, chosen by the word alone.
+ *
+ * Use `colourScale` wherever the whole set of values is known — this one cannot see the other
+ * values, so it cannot promise that two of them differ.
  */
 export function cardColour(value: string): string | null {
   const v = value.trim().toLowerCase();
   if (!v) return null;
-  let hash = 0;
-  for (const ch of v) hash = (hash * 31 + (ch.codePointAt(0) ?? 0)) >>> 0;
-  return CARD_COLOURS[hash % CARD_COLOURS.length] ?? null;
+  return CARD_COLOURS[colourIndex(v)] ?? null;
+}
+
+/**
+ * Colours for a whole set of values, with no two the same while the palette lasts.
+ *
+ * Each value starts at the colour its own letters choose — so a word usually keeps the colour
+ * it has always had — and takes the next free one if that is spoken for. Values are sorted
+ * first, so the answer depends on *which* words are in the Project and never on the order the
+ * documents happen to be in: the same Project gives the same key on both machines.
+ */
+export function colourScale(values: Iterable<string>): Map<string, string> {
+  const unique = [...new Set([...values].map((v) => v.trim()).filter((v) => v.length > 0))].sort(
+    (a, b) => a.localeCompare(b),
+  );
+  const taken = new Set<string>();
+  const scale = new Map<string, string>();
+  for (const value of unique) {
+    const start = colourIndex(value.toLowerCase());
+    let chosen = CARD_COLOURS[start] as string;
+    for (let step = 0; step < CARD_COLOURS.length; step++) {
+      const candidate = CARD_COLOURS[(start + step) % CARD_COLOURS.length] as string;
+      if (!taken.has(candidate)) {
+        chosen = candidate;
+        break;
+      }
+    }
+    // More values than colours: the extras go back to sharing, which is still better than
+    // refusing to colour them at all.
+    taken.add(chosen);
+    scale.set(value, chosen);
+  }
+  return scale;
 }
 
 export function parentRel(rel: string): string {

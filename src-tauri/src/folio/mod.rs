@@ -114,6 +114,11 @@ impl Folio {
             .file_name()
             .map(|n| n.to_string_lossy().to_string())
             .unwrap_or_else(|| "Folio".to_string());
+        // A Folio created before 2026-09-12 carries a `.stignore` that stops Syncthing ever
+        // removing a folder deleted on the other machine. Opening it is the moment to fix it.
+        if let Err(e) = upgrade_stignore(&root) {
+            log::warn!("could not update .stignore: {e}");
+        }
         Ok(Self { root, name })
     }
 
@@ -134,7 +139,7 @@ impl Folio {
         write_atomic(&aml.join(CONFIG_FILE), config.as_bytes())?;
         write_atomic(
             &path.join(".stignore"),
-            b"// Syncthing ignore file written by AML (ADR-005)\n.DS_Store\nThumbs.db\ndesktop.ini\n*.aml-tmp-*\n(?d).sync-conflict-*.aml-tmp-*\n",
+            crate::sidecar::syncthing::STIGNORE.as_bytes(),
         )?;
         Self::open(path)
     }
@@ -529,6 +534,24 @@ fn count_notes(dir: &Path) -> u32 {
     n
 }
 
+/// Replaces a `.stignore` AML wrote with the current one, and leaves any other alone.
+///
+/// The old ones lacked `(?d)`, so Syncthing would not delete a folder that still held a
+/// `.DS_Store` — which on a Mac is every folder that has ever been opened in Finder. A folder
+/// deleted on the PC then stuck at "95%, 4 items" here for ever. Replacing the file is safe
+/// only when it is byte-for-byte one we wrote: a hand-edited one is the user's.
+pub fn upgrade_stignore(root: &Path) -> Result<()> {
+    let path = root.join(".stignore");
+    let Ok(current) = fs::read_to_string(&path) else {
+        return Ok(());
+    };
+    if crate::sidecar::syncthing::LEGACY_STIGNORE.contains(&current.as_str()) {
+        write_atomic(&path, crate::sidecar::syncthing::STIGNORE.as_bytes())?;
+        log::info!("updated .stignore in {}", root.display());
+    }
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -537,6 +560,51 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         let folio = Folio::create(dir.path(), Some("Test")).unwrap();
         (dir, folio)
+    }
+
+    /// The bug this guards: without `(?d)` Syncthing will not remove a directory that still
+    /// holds an ignored file, and macOS puts a `.DS_Store` in every folder you open. A folder
+    /// deleted on the other machine then stays in the sync queue for ever.
+    #[test]
+    fn every_ignore_pattern_may_be_deleted_with_its_folder() {
+        let text = crate::sidecar::syncthing::STIGNORE;
+        for line in text.lines() {
+            if line.is_empty() {
+                continue;
+            }
+            // Syncthing reads `//` as a comment and `#` as an ordinary pattern.
+            assert!(
+                !line.starts_with('#'),
+                "`#` is not a comment in .stignore: {line}"
+            );
+            if line.starts_with("//") {
+                continue;
+            }
+            assert!(line.starts_with("(?d)"), "pattern without (?d): {line}");
+        }
+        assert!(text.contains("(?d).DS_Store"));
+    }
+
+    #[test]
+    fn opening_an_old_folio_replaces_the_stignore_we_wrote_and_nothing_else() {
+        let (dir, _) = temp_folio();
+        let path = dir.path().join(".stignore");
+
+        for legacy in crate::sidecar::syncthing::LEGACY_STIGNORE {
+            fs::write(&path, legacy).unwrap();
+            Folio::open(dir.path()).unwrap();
+            assert_eq!(
+                fs::read_to_string(&path).unwrap(),
+                crate::sidecar::syncthing::STIGNORE,
+                "a .stignore AML wrote is replaced"
+            );
+        }
+
+        // Anything the user has touched is theirs, however small the change.
+        let mine = "// mine\nsecret/**\n";
+        fs::write(&path, mine).unwrap();
+        Folio::open(dir.path()).unwrap();
+        assert_eq!(fs::read_to_string(&path).unwrap(), mine);
     }
 
     #[test]

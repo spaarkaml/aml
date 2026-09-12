@@ -34,6 +34,9 @@ export function Shell({ info, left, right, children }: Props) {
   const setZen = useWritingStore((s) => s.setZen);
   const overlayOpen =
     (leftPanel.open && !leftPanel.pinned) || (rightPanel.open && !rightPanel.pinned);
+  // A pinned panel floats like every other one, so the page has to be told to move over:
+  // its width, plus the gap it sits in and the same gap again on the inside.
+  const room = (p: typeof leftPanel) => (p.open && p.pinned ? `calc(${p.width}px + 24px)` : "0px");
 
   useEffect(() => {
     if (!overlayOpen) return;
@@ -84,7 +87,12 @@ export function Shell({ info, left, right, children }: Props) {
             data-testid="overlay-backdrop"
           />
         ) : null}
-        <main className={styles.center}>{children}</main>
+        <main
+          className={styles.center}
+          style={{ marginLeft: room(leftPanel), marginRight: room(rightPanel) }}
+        >
+          {children}
+        </main>
         <SidePanel side="right" title="Context">
           {right}
         </SidePanel>

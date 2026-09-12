@@ -21,7 +21,39 @@ use crate::folio::{write_atomic, FolioError, Result};
 pub const GUI_PORT: u16 = 41384;
 const API_KEY_FILE: &str = "aml-apikey";
 const SETTINGS_FILE: &str = "sync-settings.json";
-pub const STIGNORE: &str = "# AML — files never synced (ADR-005)\n.DS_Store\nThumbs.db\ndesktop.ini\n.aml-tmp-*\n*.tmp\n~$*\n";
+/// The `.stignore` AML writes into every synced Folio.
+///
+/// Two things here are not decoration. Comments in a Syncthing ignore file start with `//`,
+/// not `#` — a `#` line is a *pattern*, so the old header was quietly ignoring a file named
+/// after itself. And every pattern carries `(?d)`, which means "this file may be deleted
+/// along with the folder holding it". Without it Syncthing refuses to remove a directory
+/// that still contains an ignored file, and since macOS drops a `.DS_Store` into every
+/// folder you so much as look at, a folder deleted on the other machine can never be removed
+/// here: the folder sits in the sync queue for ever, showing a percentage that never reaches
+/// 100 and a handful of items that are all directories.
+pub const STIGNORE: &str = "\
+// Syncthing ignore file written by AML (ADR-005). Comments are //, not #.\n\
+// (?d) lets Syncthing delete these along with a folder that is going away; without it a\n\
+// folder deleted on another machine can never be removed here.\n\
+(?d).DS_Store\n\
+(?d)._*\n\
+(?d).Spotlight-V100\n\
+(?d).Trashes\n\
+(?d)Thumbs.db\n\
+(?d)desktop.ini\n\
+(?d)*.aml-tmp-*\n\
+(?d).aml-tmp-*\n\
+(?d)*.tmp\n\
+(?d)~$*\n\
+(?d).sync-conflict-*.aml-tmp-*\n";
+
+/// Exactly the `.stignore` texts AML has written before. A file that still matches one of
+/// these was written by us and nobody has touched it, so it is safe to replace; anything else
+/// is the user's and is left alone.
+pub const LEGACY_STIGNORE: [&str; 2] = [
+    "// Syncthing ignore file written by AML (ADR-005)\n.DS_Store\nThumbs.db\ndesktop.ini\n*.aml-tmp-*\n(?d).sync-conflict-*.aml-tmp-*\n",
+    "# AML — files never synced (ADR-005)\n.DS_Store\nThumbs.db\ndesktop.ini\n.aml-tmp-*\n*.tmp\n~$*\n",
+];
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
