@@ -12,6 +12,7 @@ import { useEditorStore } from "@/features/editor/store";
 import { useBrowserStore } from "@/features/folio/browserStore";
 import { activeDir, useFolioStore } from "@/features/folio/store";
 import { useGraphStore } from "@/features/graph/store";
+import { useHistoryStore } from "@/features/history/store";
 import { useIndexStore } from "@/features/index/store";
 import { useLayoutStore } from "@/features/layout/store";
 import { useOutlineStore } from "@/features/outline/store";
@@ -139,6 +140,20 @@ const TAB_COMMANDS: Command[] = [
     title: "New Folder",
     group: "Folio",
     run: () => void useFolioStore.getState().createFolder(activeDir()),
+  },
+  {
+    id: "note.history",
+    title: "Note History…",
+    group: "Note",
+    global: true,
+    run: () => void useHistoryStore.getState().show(),
+  },
+  {
+    id: "note.snapshot",
+    title: "Take Snapshot…",
+    group: "Note",
+    global: true,
+    run: () => void useHistoryStore.getState().show({ labelling: true }),
   },
   {
     id: "note.rename",

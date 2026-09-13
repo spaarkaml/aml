@@ -330,6 +330,7 @@ pub fn link_mention(
         next.push('\r');
     }
     *slot = next;
+    crate::snapshots::before_write(root, source);
     write_atomic(&abs, lines.join("\n").as_bytes())?;
     Ok(true)
 }

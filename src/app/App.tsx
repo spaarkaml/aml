@@ -8,6 +8,7 @@ import { useFolioStore } from "@/features/folio/store";
 import { useFolioEvents } from "@/features/folio/useFolioEvents";
 import { Welcome } from "@/features/folio/Welcome";
 import { GraphScreen } from "@/features/graph/GraphScreen";
+import { HistoryScreen } from "@/features/history/HistoryScreen";
 import { RenameLinksDialog } from "@/features/links/RenameLinksDialog";
 import { Overview } from "@/features/overview/Overview";
 import { ProjectScreen } from "@/features/project/ProjectScreen";
@@ -60,6 +61,7 @@ export function App() {
       <GraphScreen />
       <DiagramScreen />
       <ConflictsScreen />
+      <HistoryScreen />
       <UpdateScreen info={info} />
     </Shell>
   );

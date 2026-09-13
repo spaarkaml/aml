@@ -116,7 +116,7 @@ Roughly 80–95 AI sessions. Stages 2 and 3 can overlap; 6 and 7 can overlap.
 | 3.2 | Appearance settings (ADR-010): light/dark/OS switch, per-token colour editor with live preview and reset, font picker (bundled + system), measure/leading/spacing; saved to `.aml/config.yaml` with per-device override |
 | 3.3 | Note Types (Q9): registry from `_templates/`, colour + icon, "New <Type>" commands, type-specific properties |
 | 3.4 | Goals (Q18): per-note, per-Project + deadline, daily; Sessions; progress ring; Goals panel |
-| 3.5 | Snapshots UI (ADR-006): "Snapshot…" with label, timeline per note, diff, restore (snapshot-before-restore) |
+| 3.5 | ~~Snapshots UI (ADR-006): "Snapshot…" with label, timeline per note, diff, restore (snapshot-before-restore)~~ **done 2026-09-14 with WP-4.1** — History opens from *Saved* in the status bar, the editor's right-click menu or the palette; `docs/qa/stage-4.md` §15–§17 carry Gate 3's snapshot line |
 | 3.6 | Paste intelligence: Word/Google Docs/web → clean markdown; paste-as-plain |
 | 3.7 | Statistics panel: words, characters, sentences, readability, per-heading counts |
 | 3.8 | **Syntax reveal** (Typora-style): show raw markers for the mark/block under the caret; toggleable |
@@ -136,7 +136,7 @@ Roughly 80–95 AI sessions. Stages 2 and 3 can overlap; 6 and 7 can overlap.
 
 | WP | Title |
 |---|---|
-| 4.1 | Snapshot engine hardening: 30-minute scheduler, before-destructive-ops, retention job, size reporting. **Note (2026-09-14): there is no engine to harden** — WP-3.5 was never built, so this WP builds the engine, and is best done together with 3.5's UI |
+| 4.1 | ~~Snapshot engine hardening: 30-minute scheduler, before-destructive-ops, retention job, size reporting~~ **done 2026-09-14, engine and WP-3.5's UI together** (there was no engine to harden). Not a timer: before a note is written, the text on disk is kept if this sitting has not in 30 minutes; labelled ones before a restore and a conflict resolution; retention on Folio open (7 days / daily to 90 / labels / always the newest); size in Settings; `docs/qa/stage-4.md` §15–§20. The Conflicts merge is still two-way — a base Snapshot is the next step for it |
 | 4.2 | ~~**Conflicts panel**: `*.sync-conflict-*` files and external-change-while-dirty cases; side-by-side merge (base = latest Snapshot), keep/merge/discard; also merges `project.aml.yaml` and `boundings.yaml` line-wise~~ **done 2026-09-14**, before 4.1 by decision, so the comparison is **two-way** until Snapshots exist. Copies leave the Browser and the index; everything given up goes to the Trash; `docs/qa/stage-4.md` §1–§9 |
 | 4.3 | ~~Sync status and health: per-Folio state (up to date / syncing / NAS unreachable / paused), last-seen NAS time, out-of-sync banner after N minutes, one-click "open Syncthing UI" for the rare deep dive~~ **done 2026-09-14**. The banner is for a sync that is **stuck while connected** (failed files, or ten minutes without movement), never for being offline — offline says how long in the status bar instead; `docs/qa/stage-4.md` §10–§14 |
 | 4.4 | NAS checklist in Settings: Syncthing versioning enabled on the NAS folder, backup job configured (from `06-NAS-SETUP.md`), free space, last backup — read via Syncthing REST where possible, else manual tick boxes |

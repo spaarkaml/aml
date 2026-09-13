@@ -5,6 +5,7 @@ import { useEditorStore } from "@/features/editor/store";
 import { useFolioStore } from "@/features/folio/store";
 import { ProgressRing } from "@/features/goals/ProgressRing";
 import { useGoalsStore } from "@/features/goals/store";
+import { useHistoryStore } from "@/features/history/store";
 import { describeIndex, listenIndexProgress, useIndexStore } from "@/features/index/store";
 import { useLayoutStore } from "@/features/layout/store";
 import { useSettingsStore } from "@/features/settings/store";
@@ -95,13 +96,19 @@ export function StatusBar({ info }: { info: AppInfo | null }) {
         en-AU{spell ? "" : " off"}
       </button>
       {path ? (
-        <span
+        <button
+          type="button"
           data-testid="save-state"
-          title={path}
-          className={dirty && !saving ? styles.dirtyDot : undefined}
+          // The quiet way into Snapshots: where you look to see that your work is safe is where
+          // you would look for an older version of it.
+          title="This note's history"
+          onClick={() => void useHistoryStore.getState().show()}
+          className={
+            dirty && !saving ? `${styles.statusButton} ${styles.dirtyDot}` : styles.statusButton
+          }
         >
           {saving ? "Saving…" : dirty ? "Unsaved" : "Saved"}
-        </span>
+        </button>
       ) : null}
       {focus !== "off" ? (
         <button

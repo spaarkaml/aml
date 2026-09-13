@@ -150,7 +150,10 @@ fn walk(dir: &Path, prefix: &str, out: &mut Vec<(String, ConflictName, u64)>) {
             // `.aml/` is walked because Boundings, types and settings are synced files that
             // can conflict like any other; every other hidden folder is someone else's.
             let hidden = name.starts_with('.') && !(prefix.is_empty() && name == ".aml");
-            if !hidden && name != "node_modules" {
+            // Snapshots are written once under names unique to the second: they cannot
+            // conflict, and there can be thousands of them.
+            let snapshots = prefix == ".aml" && name == "snapshots";
+            if !hidden && !snapshots && name != "node_modules" {
                 walk(&entry.path(), &rel, out);
             }
         } else if !name.starts_with(".aml-tmp-") {
@@ -272,6 +275,17 @@ impl Folio {
             let disk = mtime_ms(&meta);
             if disk != expected {
                 return Err(FolioError::Conflict { disk_mtime: disk });
+            }
+        }
+        let replaces = matches!(resolution, Resolution::KeepCopy | Resolution::Merge(_));
+        if replaces && parsed.original.to_lowercase().ends_with(".md") {
+            // Besides the Trash: a Snapshot is where you would look for the note's history.
+            if let Err(e) = crate::snapshots::keep_before(
+                self.root(),
+                &original_rel,
+                crate::snapshots::BEFORE_CONFLICT,
+            ) {
+                log::warn!("could not take a snapshot of {original_rel}: {e}");
             }
         }
         match resolution {
@@ -497,6 +511,18 @@ mod tests {
         // Nothing is lost: what was in place and what was set aside are both recoverable.
         assert_eq!(gone, vec!["in place\n", "set aside\n"]);
         assert!(f.conflicts().is_empty());
+        // And a Snapshot, which is where you would look for the note's history (WP-4.1).
+        let kept = f.snapshots("Thesis/03 Influence.md").unwrap();
+        let before = kept
+            .iter()
+            .find(|s| s.label.as_deref() == Some(crate::snapshots::BEFORE_CONFLICT))
+            .expect("the replaced text is a snapshot");
+        assert_eq!(
+            f.read_snapshot("Thesis/03 Influence.md", &before.id)
+                .unwrap(),
+            "in place\n"
+        );
+        assert!(f.conflicts().is_empty(), "snapshots are never conflicts");
     }
 
     #[test]

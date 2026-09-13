@@ -11,6 +11,7 @@ mod index;
 mod note_types;
 mod project;
 mod sidecar;
+mod snapshots;
 mod spell;
 mod state;
 mod templates;
@@ -44,6 +45,11 @@ fn specta_builder() -> Builder<tauri::Wry> {
             commands::conflicts::conflicts_list,
             commands::conflicts::conflict_read,
             commands::conflicts::conflict_resolve,
+            commands::snapshots::snapshots_list,
+            commands::snapshots::snapshot_read,
+            commands::snapshots::snapshot_take,
+            commands::snapshots::snapshot_restore,
+            commands::snapshots::snapshots_usage,
             commands::index::folio_index,
             commands::index::index_status,
             commands::index::index_rebuild,

@@ -39,6 +39,16 @@ export const commands = {
 	conflictRead: (path: string) => typedError<ConflictPair, FolioError>(__TAURI_INVOKE("conflict_read", { path })),
 	/**  Resolves one conflict. Refused with `conflict` if the original changed since it was read. */
 	conflictResolve: (path: string, resolution: Resolution, expectedOriginalMtime: number | null) => typedError<null, FolioError>(__TAURI_INVOKE("conflict_resolve", { path, resolution, expectedOriginalMtime })),
+	/**  A note's Snapshots, newest first. */
+	snapshotsList: (path: string) => typedError<Snapshot[], FolioError>(__TAURI_INVOKE("snapshots_list", { path })),
+	/**  One Snapshot's text. */
+	snapshotRead: (path: string, id: string) => typedError<string, FolioError>(__TAURI_INVOKE("snapshot_read", { path, id })),
+	/**  Keeps the note as it is on disk now, with an optional label. */
+	snapshotTake: (path: string, label: string | null) => typedError<Snapshot, FolioError>(__TAURI_INVOKE("snapshot_take", { path, label })),
+	/**  Puts a Snapshot back as the note, keeping the text it replaces as a Snapshot first. */
+	snapshotRestore: (path: string, id: string) => typedError<NoteMeta, FolioError>(__TAURI_INVOKE("snapshot_restore", { path, id })),
+	/**  How many Snapshots the Folio holds and how much room they take. */
+	snapshotsUsage: () => typedError<SnapshotUsage, FolioError>(__TAURI_INVOKE("snapshots_usage")),
 	/**  Quick Open's entries: every note's title, aliases and headings, straight from SQLite. */
 	folioIndex: () => typedError<NoteIndexEntry[], FolioError>(__TAURI_INVOKE("folio_index")),
 	indexStatus: () => typedError<IndexStatus, FolioError>(__TAURI_INVOKE("index_status")),
@@ -517,6 +527,10 @@ export type Preferences = {
 	 *  did not set is not a goal you are failing (Q18 — all of these are opt-in).
 	 */
 	dailyGoal: number | null,
+	/**  Days every Snapshot is kept. Absent means 7 (ADR-006). */
+	snapshotKeepAllDays: number | null,
+	/**  Days one Snapshot a day is kept, counted from now. Absent means 90. */
+	snapshotKeepDailyDays: number | null,
 };
 
 export type Project = {
@@ -598,6 +612,21 @@ export type SearchSnippet = {
 	/**  The line with matches wrapped in `«»`. */
 	text: string,
 	section: string | null,
+};
+
+export type Snapshot = {
+	/**  The file name, which is also how the UI asks for it back. */
+	id: string,
+	/**  When it was taken, `2026-09-14T10:11:12Z`. */
+	taken: string,
+	label: string | null,
+	words: number,
+	size: number,
+};
+
+export type SnapshotUsage = {
+	count: number,
+	bytes: number,
 };
 
 export type SyncDevice = {

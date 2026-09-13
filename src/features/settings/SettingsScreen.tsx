@@ -3,6 +3,7 @@ import { useAppearanceStore } from "@/features/appearance/store";
 import { useKeymapStore } from "@/features/commands/keymapStore";
 import { todayIso } from "@/features/daily/dates";
 import { useFolioStore } from "@/features/folio/store";
+import { formatBytes } from "@/features/history/timeline";
 import { useSyncStore } from "@/features/sync/store";
 import { TypesSettings } from "@/features/types/TypesSettings";
 import styles from "./SettingsScreen.module.css";
@@ -26,6 +27,9 @@ export function SettingsScreen() {
   const error = useSettingsStore((s) => s.error);
   const saved = useSettingsStore((s) => s.saved);
   const folio = useFolioStore((s) => s.folio);
+  const keepAllDays = useSettingsStore((s) => s.keepAllDays);
+  const keepDailyDays = useSettingsStore((s) => s.keepDailyDays);
+  const usage = useSettingsStore((s) => s.snapshotUsage);
 
   useEffect(() => {
     if (!open) return;
@@ -142,6 +146,55 @@ export function SettingsScreen() {
           <p className={styles.note}>
             What you write today is counted on this machine, so the two do not add up to something
             neither of them wrote. A note's own target is one of its properties.
+          </p>
+        </section>
+
+        <section className={styles.section}>
+          <h3 className={styles.heading}>Snapshots</h3>
+          <form
+            className={styles.field}
+            onSubmit={(e) => {
+              e.preventDefault();
+              void save();
+            }}
+          >
+            <label className={styles.label} htmlFor="keep-all-days">
+              Keep all
+            </label>
+            <input
+              id="keep-all-days"
+              className={styles.days}
+              type="number"
+              min="1"
+              value={keepAllDays}
+              disabled={!folio}
+              onChange={(e) => useSettingsStore.getState().setKeepAllDays(e.target.value)}
+              onBlur={() => void save()}
+              placeholder="7"
+              aria-label="Days every snapshot is kept"
+            />
+            <span className={styles.unit}>days, then one a day until</span>
+            <input
+              className={styles.days}
+              type="number"
+              min="1"
+              value={keepDailyDays}
+              disabled={!folio}
+              onChange={(e) => useSettingsStore.getState().setKeepDailyDays(e.target.value)}
+              onBlur={() => void save()}
+              placeholder="90"
+              aria-label="Days one snapshot a day is kept"
+            />
+            <span className={styles.unit}>days old</span>
+          </form>
+          <p className={styles.note} data-testid="settings-snapshots">
+            A note is kept as it was when you start changing it, and every 30 minutes while you
+            write. Labelled snapshots are kept for ever.
+            {usage
+              ? ` This Folio holds ${usage.count.toLocaleString("en-AU")} ${
+                  usage.count === 1 ? "snapshot" : "snapshots"
+                } (${formatBytes(usage.bytes)}).`
+              : ""}
           </p>
         </section>
 

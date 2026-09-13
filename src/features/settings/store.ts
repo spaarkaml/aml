@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { useDailyStore } from "@/features/daily/store";
 import { useFolioStore } from "@/features/folio/store";
-import { commands } from "@/ipc";
+import { commands, type Preferences, type SnapshotUsage } from "@/ipc";
 
 /** What AML uses when the Folio has not said otherwise; the Rust side agrees (WP-3.10). */
 export const DEFAULT_DAILY_FOLDER = "journal";
@@ -12,6 +12,11 @@ interface SettingsState {
   dailyFolder: string;
   /** Words a day to aim for, as typed. Empty means no daily goal (Q18: all goals opt-in). */
   dailyGoal: string;
+  /** Snapshot retention in days, as typed. Empty means AML's own (7 and 90, ADR-006). */
+  keepAllDays: string;
+  keepDailyDays: string;
+  /** How much room this Folio's Snapshots take; read when the screen opens. */
+  snapshotUsage: SnapshotUsage | null;
   /** Set when the last save was refused, cleared as soon as the field changes. */
   error: string | null;
   /** True between a change and the save landing, so the screen can say "Saved". */
@@ -21,8 +26,25 @@ interface SettingsState {
   clear: () => void;
   setDailyFolder: (value: string) => void;
   setDailyGoal: (value: string) => void;
+  setKeepAllDays: (value: string) => void;
+  setKeepDailyDays: (value: string) => void;
   /** Writes the preferences to the Folio. Returns false when the folder was refused. */
   save: () => Promise<boolean>;
+}
+
+/** A whole number of days, at least one; anything else is "AML's own". */
+function days(value: string): number | null {
+  const n = Number(value.trim());
+  return value.trim() && Number.isFinite(n) && n >= 1 ? Math.round(n) : null;
+}
+
+function fields(p: Preferences) {
+  return {
+    dailyFolder: p.dailyFolder ?? "",
+    dailyGoal: p.dailyGoal ? String(p.dailyGoal) : "",
+    keepAllDays: p.snapshotKeepAllDays ? String(p.snapshotKeepAllDays) : "",
+    keepDailyDays: p.snapshotKeepDailyDays ? String(p.snapshotKeepDailyDays) : "",
+  };
 }
 
 /**
@@ -36,6 +58,9 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   open: false,
   dailyFolder: "",
   dailyGoal: "",
+  keepAllDays: "",
+  keepDailyDays: "",
+  snapshotUsage: null,
   error: null,
   saved: false,
 
@@ -45,19 +70,26 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   },
 
   load: async () => {
-    const r = await commands.preferencesRead();
-    if (r.status === "ok")
-      set({
-        dailyFolder: r.data.dailyFolder ?? "",
-        dailyGoal: r.data.dailyGoal ? String(r.data.dailyGoal) : "",
-        error: null,
-      });
+    const [r, usage] = await Promise.all([commands.preferencesRead(), commands.snapshotsUsage()]);
+    if (r.status === "ok") set({ ...fields(r.data), error: null });
+    set({ snapshotUsage: usage.status === "ok" ? usage.data : null });
   },
 
-  clear: () => set({ dailyFolder: "", dailyGoal: "", error: null, saved: false }),
+  clear: () =>
+    set({
+      dailyFolder: "",
+      dailyGoal: "",
+      keepAllDays: "",
+      keepDailyDays: "",
+      snapshotUsage: null,
+      error: null,
+      saved: false,
+    }),
 
   setDailyFolder: (dailyFolder) => set({ dailyFolder, error: null, saved: false }),
   setDailyGoal: (dailyGoal) => set({ dailyGoal, error: null, saved: false }),
+  setKeepAllDays: (keepAllDays) => set({ keepAllDays, error: null, saved: false }),
+  setKeepDailyDays: (keepDailyDays) => set({ keepDailyDays, error: null, saved: false }),
 
   save: async () => {
     const asked = get().dailyFolder.trim();
@@ -65,17 +97,14 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     const r = await commands.preferencesWrite({
       dailyFolder: asked || null,
       dailyGoal: Number.isFinite(goal) && goal > 0 ? Math.round(goal) : null,
+      snapshotKeepAllDays: days(get().keepAllDays),
+      snapshotKeepDailyDays: days(get().keepDailyDays),
     });
     if (r.status !== "ok") {
       set({ error: `“${asked}” is not a folder inside the Folio.` });
       return false;
     }
-    set({
-      dailyFolder: r.data.dailyFolder ?? "",
-      dailyGoal: r.data.dailyGoal ? String(r.data.dailyGoal) : "",
-      error: null,
-      saved: true,
-    });
+    set({ ...fields(r.data), error: null, saved: true });
     // The strip reads a different folder from now on, and the tree may have gained one.
     await useDailyStore.getState().refresh();
     await useFolioStore.getState().refreshTree();

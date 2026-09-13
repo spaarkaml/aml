@@ -26,3 +26,4 @@ Run against your real Folio on the Mac (and later the PC). Record results in `do
 | 20 | *(WP-3.4)* Meet the goal two days running, then look before writing on the third | The streak says 2 in the morning and 3 once the day is met — it does not collapse just because today has not started | ☐ |
 | 21 | *(WP-3.7)* Open a real chapter and click the word count | The figures match the status bar; the sections are your headings with the subsection words counted in; the readability band is believable for the prose | ☐ |
 | 22 | *(WP-3.9)* Open a real note full of Obsidian callouts, edit one body and one title, save, then diff the file | Every callout renders as a panel with no raw chips; the file changed only where you typed — the head line, the fold markers and any `\|layout` hints are exactly as they were | ☐ |
+| 23 | *(WP-3.5, built with WP-4.1)* Snapshot → edit → compare → restore | **Gate 3's snapshot line.** Run `docs/qa/stage-4.md` §15–§17 and record it there | ☐ |

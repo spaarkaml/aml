@@ -1,7 +1,7 @@
 # Stage 4 — Manual QA script
 
-WP-4.2 (Conflicts, §1–§9) and WP-4.3 (sync health, §10–§14) are built. WP-4.1 (Snapshots),
-4.4 (NAS checklist) and 4.5 (cross-OS names) are not. Record results in
+WP-4.2 (Conflicts, §1–§9), WP-4.3 (sync health, §10–§14) and WP-4.1 (Snapshots, with WP-3.5's
+History screen, §15–§20) are built. 4.4 (NAS checklist) and 4.5 (cross-OS names) are not. Record results in
 `docs/qa/results/YYYY-MM-DD-stage-4.md`.
 
 §1–§4 need **both machines** and are **Quality Gate 4's first line**.
@@ -29,3 +29,17 @@ WP-4.2 (Conflicts, §1–§9) and WP-4.3 (sync health, §10–§14) are built. W
 | 12 | Open **NAS sync** while it is offline | The NAS row says *not connected · last seen …* | ☐ |
 | 13 | Pause the folder in Syncthing's own view (**Open Syncthing's own view** at the bottom of NAS sync) | The status bar says *Sync paused*, not offline and not an error. Resume it: back to up to date | ☐ |
 | 14 | *(If it happens again)* A folder Syncthing cannot finish — the stuck-at-95 % case | The status bar says *Sync stuck · N files*, a banner names the files and why, and NAS sync lists them under the folder | ☐ |
+
+## Snapshots and History (WP-4.1, WP-3.5)
+
+§15–§17 are **Quality Gate 3's snapshot line**; §18 is **Gate 4's fourth line** and needs both
+machines and a week.
+
+| # | Step | Expect | Pass |
+|---|---|---|---|
+| 15 | Open a real chapter you have not touched today. Type a sentence, wait for **Saved**, then click **Saved** | History opens with one snapshot from a moment ago; *1 change from this snapshot to the note now* shows your sentence under what the paragraph said before | ☐ |
+| 16 | **Take snapshot**, label it *Before cuts*, **Keep**. Close; delete two paragraphs; open History (right-click in the note → **Note History…**) and pick *Before cuts* | The two paragraphs show as changes. **Whole snapshot** shows the chapter as it was, with those two tinted | ☐ |
+| 17 | **Restore this snapshot**. Then in Terminal: `cmp "<chapter>.md" ".aml/snapshots/<chapter path>/<the Before cuts file>"` | The paragraphs are back in the editor. `cmp` prints nothing — **byte-identical**. History now also has *Before restoring*, which holds the version without the paragraphs | ☐ |
+| 18 | *(A week later)* On the Mac, restore a snapshot from a week ago; wait for sync | The PC shows the restored note (reopen it if it was open), and its History shows the same snapshots, including *Before restoring* | ☐ |
+| 19 | Write in one note for over an hour in one sitting | History shows a snapshot about every half hour, not one per save | ☐ |
+| 20 | ⌘, → **Snapshots** | Says how many snapshots the Folio holds and how much room they take. Change *Keep all* to 14; the line `keepAllDays: 14` is in `.aml/config.yaml` | ☐ |

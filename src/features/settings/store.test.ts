@@ -5,6 +5,7 @@ const ipc = {
   preferencesWrite: vi.fn(),
   dailyDates: vi.fn(),
   folioTree: vi.fn(),
+  snapshotsUsage: vi.fn(),
 };
 vi.mock("@/ipc", () => ({ commands: ipc }));
 
@@ -16,12 +17,16 @@ beforeEach(() => {
   for (const fn of Object.values(ipc)) fn.mockReset();
   ipc.dailyDates.mockResolvedValue({ status: "ok", data: [] });
   ipc.folioTree.mockResolvedValue({ status: "ok", data: [] });
+  ipc.snapshotsUsage.mockResolvedValue({ status: "ok", data: { count: 3, bytes: 900 } });
   useSettingsStore.setState({
     open: false,
     dailyFolder: "",
     dailyGoal: "",
     error: null,
     saved: false,
+    keepAllDays: "",
+    keepDailyDays: "",
+    snapshotUsage: null,
   });
 });
 
@@ -54,7 +59,12 @@ describe("settings store", () => {
     });
     s().setDailyFolder(" /Days/ ");
     expect(await s().save()).toBe(true);
-    expect(ipc.preferencesWrite).toHaveBeenCalledWith({ dailyFolder: "/Days/", dailyGoal: null });
+    expect(ipc.preferencesWrite).toHaveBeenCalledWith({
+      dailyFolder: "/Days/",
+      dailyGoal: null,
+      snapshotKeepAllDays: null,
+      snapshotKeepDailyDays: null,
+    });
     expect(s().dailyFolder).toBe("Days");
     expect(s().saved).toBe(true);
     // The strip and the tree both look somewhere else from now on.
@@ -69,7 +79,12 @@ describe("settings store", () => {
     });
     s().setDailyFolder("   ");
     expect(await s().save()).toBe(true);
-    expect(ipc.preferencesWrite).toHaveBeenCalledWith({ dailyFolder: null, dailyGoal: null });
+    expect(ipc.preferencesWrite).toHaveBeenCalledWith({
+      dailyFolder: null,
+      dailyGoal: null,
+      snapshotKeepAllDays: null,
+      snapshotKeepDailyDays: null,
+    });
     expect(s().dailyFolder).toBe("");
   });
 
@@ -80,7 +95,12 @@ describe("settings store", () => {
     });
     s().setDailyGoal("500");
     await s().save();
-    expect(ipc.preferencesWrite).toHaveBeenCalledWith({ dailyFolder: null, dailyGoal: 500 });
+    expect(ipc.preferencesWrite).toHaveBeenCalledWith({
+      dailyFolder: null,
+      dailyGoal: 500,
+      snapshotKeepAllDays: null,
+      snapshotKeepDailyDays: null,
+    });
     expect(s().dailyGoal).toBe("500");
 
     ipc.preferencesWrite.mockResolvedValue({
@@ -89,8 +109,50 @@ describe("settings store", () => {
     });
     s().setDailyGoal("0");
     await s().save();
-    expect(ipc.preferencesWrite).toHaveBeenLastCalledWith({ dailyFolder: null, dailyGoal: null });
+    expect(ipc.preferencesWrite).toHaveBeenLastCalledWith({
+      dailyFolder: null,
+      dailyGoal: null,
+      snapshotKeepAllDays: null,
+      snapshotKeepDailyDays: null,
+    });
     expect(s().dailyGoal).toBe("");
+  });
+
+  it("reads and sends snapshot retention, and how much room Snapshots take", async () => {
+    ipc.preferencesRead.mockResolvedValue({
+      status: "ok",
+      data: {
+        dailyFolder: null,
+        dailyGoal: null,
+        snapshotKeepAllDays: 14,
+        snapshotKeepDailyDays: null,
+      },
+    });
+    await s().load();
+    expect(s().keepAllDays).toBe("14");
+    expect(s().keepDailyDays).toBe("");
+    expect(s().snapshotUsage).toEqual({ count: 3, bytes: 900 });
+
+    ipc.preferencesWrite.mockResolvedValue({
+      status: "ok",
+      data: {
+        dailyFolder: null,
+        dailyGoal: null,
+        snapshotKeepAllDays: 14,
+        snapshotKeepDailyDays: 30,
+      },
+    });
+    s().setKeepDailyDays("30.4");
+    s().setKeepAllDays("0");
+    await s().save();
+    // Zero is not a retention: it goes back to AML's own rather than keeping nothing.
+    expect(ipc.preferencesWrite).toHaveBeenLastCalledWith({
+      dailyFolder: null,
+      dailyGoal: null,
+      snapshotKeepAllDays: null,
+      snapshotKeepDailyDays: 30,
+    });
+    expect(s().keepAllDays).toBe("14");
   });
 
   it("keeps a refused folder on screen with the reason", async () => {

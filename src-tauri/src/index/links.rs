@@ -375,6 +375,7 @@ pub fn apply_edits(root: &Path, notes: &[NoteEdits]) -> Result<u32> {
             applied += 1;
         }
         if changed {
+            crate::snapshots::before_write(root, &note.new_path);
             write_atomic(&abs, lines.join("\n").as_bytes())?;
         }
     }

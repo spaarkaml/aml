@@ -44,6 +44,39 @@ type MockConflict = {
 };
 const conflicts: MockConflict[] = [];
 
+/**
+ * Snapshots by note path, newest first, and the notes this page load has already written — the
+ * mock's stand-in for Rust's "first save of a sitting keeps what was on disk" (WP-4.1).
+ */
+type MockSnapshot = { id: string; taken: string; label: string | null; text: string };
+const snapshots = new Map<string, MockSnapshot[]>();
+const sittings = new Set<string>();
+
+function mockTakeSnapshot(path: string, text: string, label: string | null): MockSnapshot {
+  const list = snapshots.get(path) ?? [];
+  let at = Math.floor(Date.now() / 1000) * 1000;
+  const stamp = (ms: number) =>
+    new Date(ms).toISOString().replace(/[-:]/g, "").replace("T", "-").slice(0, 15);
+  const nameOf = (ms: number) => `${stamp(ms)}${label ? `-${label}` : ""}.md`;
+  while (list.some((s) => s.id === nameOf(at))) at += 1000;
+  const snap = {
+    id: nameOf(at),
+    taken: `${new Date(at).toISOString().slice(0, 19)}Z`,
+    label,
+    text,
+  };
+  snapshots.set(
+    path,
+    [snap, ...list].sort((a, b) => b.taken.localeCompare(a.taken)),
+  );
+  return snap;
+}
+
+function mockSnapshotInfo(s: MockSnapshot) {
+  const words = s.text.split(/\s+/).filter((w) => /\w/.test(w)).length;
+  return { id: s.id, taken: s.taken, label: s.label, words, size: s.text.length };
+}
+
 /** Assets the harness has been handed, so a diagram survives being inserted and reopened. */
 const assets = new Map<string, string>();
 
@@ -557,9 +590,16 @@ function mockCleanFolder(value: string | null): string | null {
 interface MockPreferences {
   dailyFolder: string | null;
   dailyGoal: number | null;
+  snapshotKeepAllDays: number | null;
+  snapshotKeepDailyDays: number | null;
 }
 
-const EMPTY_PREFS: MockPreferences = { dailyFolder: null, dailyGoal: null };
+const EMPTY_PREFS: MockPreferences = {
+  dailyFolder: null,
+  dailyGoal: null,
+  snapshotKeepAllDays: null,
+  snapshotKeepDailyDays: null,
+};
 
 function mockPreferences(): MockPreferences {
   try {
@@ -1020,6 +1060,7 @@ export function installDevMocks(): void {
   // Exposed for e2e assertions on what the app wrote.
   (window as unknown as { __amlMockNotes: typeof notes }).__amlMockNotes = notes;
   (window as unknown as { __amlMockConflicts: MockConflict[] }).__amlMockConflicts = conflicts;
+  (window as unknown as { __amlMockSnapshots: typeof snapshots }).__amlMockSnapshots = snapshots;
   mockIPC((cmd, args) => {
     const a = (args ?? {}) as Record<string, unknown>;
     switch (cmd) {
@@ -1065,6 +1106,12 @@ export function installDevMocks(): void {
           if (p === from || p.startsWith(`${from}/`)) {
             notes.delete(p);
             notes.set(to + p.slice(from.length), v);
+          }
+        }
+        for (const [p, v] of [...snapshots]) {
+          if (p === from || p.startsWith(`${from}/`)) {
+            snapshots.delete(p);
+            snapshots.set(to + p.slice(from.length), v);
           }
         }
         return null;
@@ -1146,6 +1193,12 @@ export function installDevMocks(): void {
       }
       case "note_write": {
         const path = String(a.path);
+        const before = notes.get(path)?.text ?? "";
+        if (!sittings.has(path)) {
+          sittings.add(path);
+          const newest = snapshots.get(path)?.[0];
+          if (before.trim() && newest?.text !== before) mockTakeSnapshot(path, before, null);
+        }
         const mtime = Date.now();
         notes.set(path, { text: String(a.text), mtime });
         return { path, mtime, size: String(a.text).length };
@@ -1216,6 +1269,37 @@ export function installDevMocks(): void {
             found.copyText ?? "",
           );
         return null;
+      }
+      case "snapshots_list":
+        if (!state.folio) throw { kind: "noFolioOpen" };
+        return (snapshots.get(String(a.path)) ?? []).map(mockSnapshotInfo);
+      case "snapshot_read": {
+        const found = snapshots.get(String(a.path))?.find((s) => s.id === String(a.id));
+        if (!found) throw { kind: "notFound", detail: String(a.id) };
+        return found.text;
+      }
+      case "snapshot_take": {
+        const path = String(a.path);
+        const label = a.label ? String(a.label).trim() || null : null;
+        return mockSnapshotInfo(mockTakeSnapshot(path, notes.get(path)?.text ?? "", label));
+      }
+      case "snapshot_restore": {
+        const path = String(a.path);
+        const found = snapshots.get(path)?.find((s) => s.id === String(a.id));
+        if (!found) throw { kind: "notFound", detail: String(a.id) };
+        const now = notes.get(path)?.text ?? "";
+        if (now !== found.text) {
+          if (snapshots.get(path)?.[0]?.text !== now)
+            mockTakeSnapshot(path, now, "Before restoring");
+          notes.set(path, { text: found.text, mtime: Date.now() });
+        }
+        const n = notes.get(path) ?? { text: "", mtime: 1 };
+        return { path, mtime: n.mtime, size: n.text.length };
+      }
+      case "snapshots_usage": {
+        if (!state.folio) throw { kind: "noFolioOpen" };
+        const all = [...snapshots.values()].flat();
+        return { count: all.length, bytes: all.reduce((n, s) => n + s.text.length, 0) };
       }
       case "sync_open_gui":
         return null;
@@ -1512,9 +1596,13 @@ export function installDevMocks(): void {
         const cleaned = mockCleanFolder(asked);
         if (asked && !cleaned) throw { kind: "invalidPath", detail: asked };
         const goal = (a.preferences as MockPreferences).dailyGoal ?? 0;
+        const asDays = (n: number | null) => (n && n >= 1 ? Math.round(n) : null);
+        const given = a.preferences as MockPreferences;
         const prefs: MockPreferences = {
           dailyFolder: cleaned,
           dailyGoal: goal > 0 ? Math.round(goal) : null,
+          snapshotKeepAllDays: asDays(given.snapshotKeepAllDays),
+          snapshotKeepDailyDays: asDays(given.snapshotKeepDailyDays),
         };
         localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
         return prefs;

@@ -4,6 +4,18 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### WP-4.1 — Snapshots, and WP-3.5's History screen (2026-09-14)
+- **Every note now has a history you never have to think about.** The first time you change a note in a sitting, AML keeps a full copy of it as it was *before* you started; if you keep writing, another every half hour. A note nobody is changing gets none. Snapshots live in `.aml/snapshots/`, mirroring your folders, so they follow the Folio to the other computer and are readable without AML.
+- **Click *Saved* in the status bar** to see a note's History — or right-click in the note → *Note History…*, or the palette. Nothing else in the window announces it.
+- **See what changed since any snapshot**, paragraph by paragraph with the changed words marked, against the note as it is or against another snapshot; or read the **whole snapshot** as it was.
+- **Restore** puts the snapshot's exact bytes back, and first keeps the note as it was as a snapshot called *Before restoring* — so a restore is itself one step you can take back, and there is no "are you sure?".
+- **Take snapshot**, with an optional label, for the moments you want to mark: *Sent to supervisor*. Labelled snapshots are kept for ever.
+- **AML keeps one itself before it replaces a note's text**: before a restore, and before a Conflicts decision that writes over a note (*Before resolving a conflict*, alongside the Trash copy).
+- **A renamed or moved note keeps its history**, and so does a renamed folder.
+- **Old snapshots thin out on their own**: all of them for a week, then one a day until 90 days, then only labelled ones — and always a note's newest. Both numbers are in **Settings → Snapshots**, which also says how many the Folio holds and how much room they take.
+- Snapshots are written once under names unique to the second, so they never conflict between the two computers, and the Conflicts screen never looks at them.
+- No dependency added.
+
 ### WP-4.2 — Conflicts (2026-09-14)
 - **A note changed on both computers is now a decision, not a duplicate.** When the same file is edited on two machines before they have synced, Syncthing keeps the newer edit and sets the older one aside as `Note.sync-conflict-….md`. AML used to treat that copy as a note of its own — it showed up **twice** in the Browser, Quick Open, search, backlinks and the graph, and nothing said a decision was waiting. Copies are now hidden from all of those and listed in **Conflicts** instead.
 - **A chip in the status bar** — `1 conflict`, outlined in the accent — and **a banner on the note itself** when the open note has a copy set aside. Also *Resolve Conflicts…* in the palette.

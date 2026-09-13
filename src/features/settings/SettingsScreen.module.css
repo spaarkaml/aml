@@ -95,6 +95,22 @@
   color: var(--aml-text-3);
 }
 
+.days {
+  width: 4rem;
+  font: inherit;
+  height: var(--aml-row);
+  padding: 0 var(--aml-space-2);
+  color: var(--aml-text);
+  background: var(--aml-highlight);
+  border: 0;
+  border-radius: var(--aml-radius-sm);
+}
+
+.unit {
+  color: var(--aml-text-2);
+  white-space: nowrap;
+}
+
 .saved {
   flex: none;
   font-size: var(--aml-size-xs);

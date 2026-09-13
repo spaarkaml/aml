@@ -92,6 +92,13 @@ fn install(app: &AppHandle, state: &State<AppState>, folio: Folio) -> Result<Fol
         .lock()
         .map_err(|e| FolioError::Io(e.to_string()))? = Some(folio.clone());
     log::info!("opened Folio {} ({} notes)", info.root, info.note_count);
+    // Snapshot retention walks `.aml/snapshots/`; never make opening a Folio wait for it.
+    let pruning = folio.clone();
+    std::thread::spawn(move || match pruning.prune_snapshots() {
+        Ok(0) => {}
+        Ok(n) => log::info!("snapshot retention removed {n}"),
+        Err(e) => log::warn!("snapshot retention failed: {e}"),
+    });
     super::index::open_for(app, state, &folio)?;
     Ok(info)
 }

@@ -46,6 +46,10 @@ pub struct Preferences {
     /// Words a day to aim for. Absent means no daily goal, which is the default: a goal you
     /// did not set is not a goal you are failing (Q18 — all of these are opt-in).
     pub daily_goal: Option<f64>,
+    /// Days every Snapshot is kept. Absent means 7 (ADR-006).
+    pub snapshot_keep_all_days: Option<f64>,
+    /// Days one Snapshot a day is kept, counted from now. Absent means 90.
+    pub snapshot_keep_daily_days: Option<f64>,
 }
 
 /* ---------------- the file ---------------- */
@@ -163,6 +167,32 @@ pub fn preferences_of(settings: &BTreeMap<String, String>) -> Preferences {
     Preferences {
         daily_folder: settings.get("daily.folder").cloned(),
         daily_goal: number(settings, "goals.daily").filter(|n| *n > 0.0),
+        snapshot_keep_all_days: number(settings, "snapshots.keepAllDays"),
+        snapshot_keep_daily_days: number(settings, "snapshots.keepDailyDays"),
+    }
+}
+
+/// Snapshot retention as the Folio asks for it. Never less than a day of everything, and the
+/// daily stretch never ends before the keep-everything one does.
+pub fn retention_of(settings: &BTreeMap<String, String>) -> crate::snapshots::Retention {
+    let days = |key: &str, default: u32| {
+        number(settings, key)
+            .filter(|n| n.is_finite() && *n >= 1.0)
+            .map(|n| n.round().min(36_500.0) as u32)
+            .unwrap_or(default)
+    };
+    let keep_all_days = days(
+        "snapshots.keepAllDays",
+        crate::snapshots::DEFAULT_KEEP_ALL_DAYS,
+    );
+    let keep_daily_days = days(
+        "snapshots.keepDailyDays",
+        crate::snapshots::DEFAULT_KEEP_DAILY_DAYS,
+    )
+    .max(keep_all_days);
+    crate::snapshots::Retention {
+        keep_all_days,
+        keep_daily_days,
     }
 }
 
@@ -236,6 +266,20 @@ pub fn with_preferences(
             .filter(|n| *n > 0.0)
             .map(|n| n.round().to_string()),
     );
+    let days = |n: Option<f64>| {
+        n.filter(|n| n.is_finite() && *n >= 1.0)
+            .map(|n| n.round().to_string())
+    };
+    put(
+        &mut settings,
+        "snapshots.keepAllDays",
+        days(preferences.snapshot_keep_all_days),
+    );
+    put(
+        &mut settings,
+        "snapshots.keepDailyDays",
+        days(preferences.snapshot_keep_daily_days),
+    );
     settings
 }
 
@@ -299,6 +343,7 @@ mod tests {
             &Preferences {
                 daily_folder: Some("Notes/Days".into()),
                 daily_goal: Some(500.0),
+                ..Preferences::default()
             },
         );
         let text = to_yaml(&settings);
@@ -324,9 +369,34 @@ mod tests {
             &Preferences {
                 daily_folder: None,
                 daily_goal: Some(0.0),
+                ..Preferences::default()
             },
         );
         assert_eq!(preferences_of(&zeroed).daily_goal, None);
+    }
+
+    #[test]
+    fn snapshot_retention_is_read_with_sane_floors() {
+        let mut settings = BTreeMap::new();
+        assert_eq!(
+            retention_of(&settings),
+            crate::snapshots::Retention::default()
+        );
+        settings = with_preferences(
+            settings,
+            &Preferences {
+                snapshot_keep_all_days: Some(14.0),
+                snapshot_keep_daily_days: Some(3.0),
+                ..Preferences::default()
+            },
+        );
+        let text = to_yaml(&settings);
+        assert!(text.contains("snapshots:\n  keepAllDays: 14\n  keepDailyDays: 3\n"));
+        // The daily stretch never ends before the keep-everything one.
+        let r = retention_of(&parse(&text));
+        assert_eq!((r.keep_all_days, r.keep_daily_days), (14, 14));
+        settings.insert("snapshots.keepAllDays".into(), "0".into());
+        assert_eq!(retention_of(&settings).keep_all_days, 7);
     }
 
     #[test]

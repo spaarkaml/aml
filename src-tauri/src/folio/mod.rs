@@ -233,6 +233,8 @@ impl Folio {
         if let Some(parent) = abs.parent() {
             fs::create_dir_all(parent)?;
         }
+        // The version about to be replaced, kept by the Snapshot rule (ADR-006, WP-4.1).
+        crate::snapshots::before_write(&self.root, rel);
         write_atomic(&abs, text.as_bytes())?;
         let meta = fs::metadata(&abs)?;
         Ok(NoteMeta {
@@ -273,6 +275,10 @@ impl Folio {
             fs::create_dir_all(parent)?;
         }
         fs::rename(src, dst)?;
+        // A note's history goes where the note goes.
+        if let Err(e) = crate::snapshots::move_history(&self.root, from, to) {
+            log::warn!("could not move the snapshots of {from}: {e}");
+        }
         Ok(())
     }
 
@@ -415,7 +421,7 @@ fn chrono_stamp() -> String {
 }
 
 /// Howard Hinnant's algorithm: days since 1970-01-01 → (year, month, day).
-fn civil_from_days(z: i64) -> (i64, u32, u32) {
+pub(crate) fn civil_from_days(z: i64) -> (i64, u32, u32) {
     let z = z + 719_468;
     let era = if z >= 0 { z } else { z - 146_096 } / 146_097;
     let doe = (z - era * 146_097) as u64;
