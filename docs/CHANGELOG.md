@@ -2,7 +2,9 @@
 
 All notable changes. Format: one entry per work package.
 
-## Unreleased
+## 0.4.0 — 2026-09-13
+
+Diagrams.
 
 ### WP-7.1 — Diagrams (2026-09-13)
 - **Right-click in a note → Insert diagram.** A drawing surface with a symbol set built for psychological and influence work rather than for flowcharts: Person, Subject, Group and Institution; Belief, Feeling, Behaviour and Body; Event, Channel, Message, Outcome and Note. Nine kinds of link, because the difference between them is the content of the diagram — influences, both ways, **suppresses** (the systems notation for "stops"), tenuous, transmits, and the three genogram ties: close, conflict, cut off. A link carries a label, which is where a causal loop's `+` and `−` go.
