@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useBoundingsStore } from "@/features/boundings/store";
+import { useConflictsStore } from "@/features/conflicts/store";
 import { useDailyStore } from "@/features/daily/store";
 import { useEditorStore } from "@/features/editor/store";
 import { useLinkStore } from "@/features/links/store";
@@ -18,6 +19,7 @@ export function useFolioEvents(): void {
     if (!folio) return;
     let unlisten: (() => void) | null = null;
     let disposed = false;
+    void useConflictsStore.getState().refresh();
     events.folioChanged
       .listen((e) => {
         void refreshTree();
@@ -28,6 +30,11 @@ export function useFolioEvents(): void {
         void useBoundingsStore.getState().refresh();
         void useTypesStore.getState().refresh();
         void useProjectStore.getState().refresh();
+        // Listing conflicts walks the Folio, so only when a copy arrived or went: every autosave
+        // is a change event, and walking ten thousand files per keystroke pause is not free.
+        if (e.payload.paths.some((p) => p.includes(".sync-conflict-"))) {
+          void useConflictsStore.getState().refresh();
+        }
         for (const p of e.payload.paths) useEditorStore.getState().noteChangedOnDisk(p);
       })
       .then((off) => {

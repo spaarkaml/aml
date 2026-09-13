@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ShortcutsDialog } from "@/features/commands/ShortcutsDialog";
+import { ConflictsScreen } from "@/features/conflicts/ConflictsScreen";
 import { DiagramScreen } from "@/features/diagram/DiagramScreen";
 import { NoteEditor } from "@/features/editor/NoteEditor";
 import { useEditorStore } from "@/features/editor/store";
@@ -58,6 +59,7 @@ export function App() {
       <ShortcutsDialog />
       <GraphScreen />
       <DiagramScreen />
+      <ConflictsScreen />
       <UpdateScreen info={info} />
     </Shell>
   );

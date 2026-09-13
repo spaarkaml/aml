@@ -88,8 +88,14 @@ pub struct Folio {
     name: String,
 }
 
+/// Names the Browser, the note count and the index never show. A Syncthing conflict copy is
+/// one of them: it is not a note of its own, and the Conflicts screen is where it is shown
+/// (WP-4.2). The watcher lets copies through regardless — see `watch::passes`.
 pub fn is_ignored_name(name: &str) -> bool {
-    name.starts_with('.') || name == "node_modules" || name.starts_with(TMP_PREFIX)
+    name.starts_with('.')
+        || name == "node_modules"
+        || name.starts_with(TMP_PREFIX)
+        || crate::conflicts::is_conflict_name(name)
 }
 
 pub fn mtime_ms(meta: &fs::Metadata) -> u64 {

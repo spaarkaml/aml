@@ -354,6 +354,12 @@ impl Index {
     pub fn update_paths(&self, paths: &[String]) -> Result<()> {
         let tx = self.conn.unchecked_transaction().map_err(sql_err)?;
         for rel in paths {
+            // The watcher reports conflict copies so the Conflicts screen hears of them; they
+            // are not notes, and an index built before WP-4.2 may still hold one as if it were.
+            if crate::conflicts::is_conflict_name(rel.rsplit('/').next().unwrap_or(rel)) {
+                delete_note(&tx, rel)?;
+                continue;
+            }
             let abs = self.root.join(rel);
             match fs::metadata(&abs) {
                 Ok(meta) if meta.is_dir() => {

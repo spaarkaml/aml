@@ -26,6 +26,8 @@ interface EditorState {
   saveNow: () => Promise<boolean>;
   reloadFromDisk: () => Promise<void>;
   overwriteDisk: () => Promise<boolean>;
+  /** The open note as markdown right now, including edits not yet saved. */
+  currentMarkdown: () => string;
   noteChangedOnDisk: (path: string) => void;
   /** The open note (or a folder above it) was renamed by us; keep following the file. */
   renamed: (from: string, to: string) => void;
@@ -118,6 +120,11 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     if (!path || !latest) return false;
     set({ conflict: null, mtime: null, dirty: true });
     return get().saveNow();
+  },
+
+  currentMarkdown: () => {
+    const doc = latest ?? get().doc;
+    return doc ? docToMarkdown(doc) : "";
   },
 
   noteChangedOnDisk: (path) => {

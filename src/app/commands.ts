@@ -3,6 +3,7 @@ import { useBoundingsStore } from "@/features/boundings/store";
 import { useKeymapStore } from "@/features/commands/keymapStore";
 import { usePaletteStore } from "@/features/commands/paletteStore";
 import { type Command, commandRegistry } from "@/features/commands/registry";
+import { useConflictsStore } from "@/features/conflicts/store";
 import { useDailyStore } from "@/features/daily/store";
 import { BLOCK_ITEMS } from "@/features/editor/blocks";
 import { getActiveEditor } from "@/features/editor/editorRef";
@@ -503,6 +504,16 @@ export const SHELL_COMMANDS: Command[] = [
     run: () => {
       if (!useFolioStore.getState().folio) return;
       useGraphStore.getState().setOpen(true);
+    },
+  },
+  {
+    id: "sync.conflicts",
+    title: "Resolve Conflicts…",
+    group: "View",
+    global: true,
+    run: () => {
+      if (!useFolioStore.getState().folio) return;
+      useConflictsStore.getState().setOpen(true);
     },
   },
   {

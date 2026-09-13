@@ -528,3 +528,20 @@
 .updateChip:hover {
   opacity: 0.85;
 }
+
+/* A decision is waiting (WP-4.2): outlined in the accent, where the update chip is filled —
+   this one is not an invitation, it is something that stays wrong until it is dealt with. */
+.conflictChip {
+  font: inherit;
+  font-size: inherit;
+  color: var(--aml-text);
+  background: transparent;
+  border: 1px solid var(--aml-accent);
+  border-radius: var(--aml-radius-pill);
+  padding: 0 var(--aml-space-2);
+  cursor: pointer;
+}
+
+.conflictChip:hover {
+  background: var(--aml-highlight);
+}

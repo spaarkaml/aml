@@ -205,3 +205,14 @@
   border-radius: var(--aml-radius-sm);
   white-space: pre-wrap;
 }
+
+.failures {
+  margin: var(--aml-space-1) 0 0;
+  padding-left: var(--aml-space-4);
+  font-size: var(--aml-size-xs);
+  color: var(--aml-text-2);
+}
+
+.failures code {
+  font-family: var(--aml-font-mono);
+}

@@ -24,6 +24,26 @@ function node(
   };
 }
 
+/**
+ * Conflict copies the harness pretends Syncthing set aside. Empty unless a spec pushes one onto
+ * `window.__amlMockConflicts`, so every other spec sees a Folio with nothing to resolve.
+ */
+type MockConflict = {
+  conflict: {
+    path: string;
+    original: string;
+    originalExists: boolean;
+    kind: "note" | "settings" | "file";
+    stamp: string;
+    device: string;
+    mtime: number;
+    originalMtime: number;
+  };
+  originalText: string | null;
+  copyText: string | null;
+};
+const conflicts: MockConflict[] = [];
+
 /** Assets the harness has been handed, so a diagram survives being inserted and reopened. */
 const assets = new Map<string, string>();
 
@@ -886,7 +906,14 @@ const added = new Set<string>();
 const sync = {
   enabled: false,
   running: false,
-  devices: [] as Array<{ id: string; name: string; connected: boolean; address: string }>,
+  devices: [] as Array<{
+    id: string;
+    name: string;
+    connected: boolean;
+    address: string;
+    lastSeen: string | null;
+    paused: boolean;
+  }>,
   folders: [] as Array<{
     id: string;
     label: string;
@@ -894,6 +921,9 @@ const sync = {
     state: string;
     completion: number;
     needBytes: number;
+    needItems: number;
+    paused: boolean;
+    failures: Array<{ path: string; error: string }>;
     devices: string[];
     error: string | null;
   }>,
@@ -989,6 +1019,7 @@ function mockGraph(focus: string | null, depth: number) {
 export function installDevMocks(): void {
   // Exposed for e2e assertions on what the app wrote.
   (window as unknown as { __amlMockNotes: typeof notes }).__amlMockNotes = notes;
+  (window as unknown as { __amlMockConflicts: MockConflict[] }).__amlMockConflicts = conflicts;
   mockIPC((cmd, args) => {
     const a = (args ?? {}) as Record<string, unknown>;
     switch (cmd) {
@@ -1163,6 +1194,31 @@ export function installDevMocks(): void {
       case "spell_ignore":
         added.add(String(a.word));
         return null;
+      case "conflicts_list":
+        if (!state.folio) throw { kind: "noFolioOpen" };
+        return conflicts.map((c) => c.conflict);
+      case "conflict_read": {
+        const found = conflicts.find((c) => c.conflict.path === String(a.path));
+        if (!found) throw { kind: "notFound", detail: String(a.path) };
+        return { ...found };
+      }
+      case "conflict_resolve": {
+        const at = conflicts.findIndex((c) => c.conflict.path === String(a.path));
+        const [found] = at === -1 ? [] : conflicts.splice(at, 1);
+        if (!found) throw { kind: "notFound", detail: String(a.path) };
+        const r = a.resolution as { kind: string; text?: string };
+        const put = (path: string, text: string) => notes.set(path, { text, mtime: Date.now() });
+        if (r.kind === "merge") put(found.conflict.original, r.text ?? "");
+        else if (r.kind === "keepCopy") put(found.conflict.original, found.copyText ?? "");
+        else if (r.kind === "keepBoth")
+          put(
+            found.conflict.original.replace(/\.md$/, " (copy from 2026-09-13).md"),
+            found.copyText ?? "",
+          );
+        return null;
+      }
+      case "sync_open_gui":
+        return null;
       case "sync_status":
         return syncStatus();
       case "sync_enable":
@@ -1180,7 +1236,14 @@ export function installDevMocks(): void {
         sync.running = true;
         sync.enabled = true;
         sync.devices = [
-          { id, name: String(a.name || "NAS"), connected: true, address: "192.168.1.20:22000" },
+          {
+            id,
+            name: String(a.name || "NAS"),
+            connected: true,
+            address: "192.168.1.20:22000",
+            lastSeen: new Date().toISOString(),
+            paused: false,
+          },
         ];
         // The mock NAS immediately offers a folder, as a real one does after accepting us.
         sync.pending = [
@@ -1206,6 +1269,9 @@ export function installDevMocks(): void {
           state: "idle",
           completion: 100,
           needBytes: 0,
+          needItems: 0,
+          paused: false,
+          failures: [],
           devices: [String(a.deviceId)],
           error: null,
         });
@@ -1218,6 +1284,9 @@ export function installDevMocks(): void {
           state: "syncing",
           completion: 42,
           needBytes: 1024,
+          needItems: 1,
+          paused: false,
+          failures: [],
           devices: [String(a.deviceId)],
           error: null,
         });

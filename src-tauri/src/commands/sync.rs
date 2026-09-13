@@ -178,6 +178,13 @@ pub fn sync_log_tail(app: AppHandle, state: State<AppState>) -> Result<Vec<Strin
 }
 
 /// Called from `lib.rs` at start-up: bring the sidecar up if the user enabled sync.
+/// Opens Syncthing's own web UI in the browser, for the rare deep dive (WP-4.3).
+#[tauri::command]
+#[specta::specta]
+pub fn sync_open_gui(app: AppHandle, state: State<AppState>) -> Result<()> {
+    with_sync(&app, &state, |s| s.open_gui())
+}
+
 pub fn autostart(app: &AppHandle) {
     let state: State<AppState> = app.state();
     state.sync_starting.store(true, Ordering::Relaxed);

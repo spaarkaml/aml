@@ -4,6 +4,7 @@
 mod boundings;
 mod commands;
 mod config;
+mod conflicts;
 mod folio;
 mod front_matter;
 mod index;
@@ -40,6 +41,9 @@ fn specta_builder() -> Builder<tauri::Wry> {
             commands::folio::asset_import,
             commands::folio::asset_read_text,
             commands::folio::asset_write_text,
+            commands::conflicts::conflicts_list,
+            commands::conflicts::conflict_read,
+            commands::conflicts::conflict_resolve,
             commands::index::folio_index,
             commands::index::index_status,
             commands::index::index_rebuild,
@@ -92,6 +96,7 @@ fn specta_builder() -> Builder<tauri::Wry> {
             commands::sync::sync_share_folder,
             commands::sync::sync_is_synced_path,
             commands::sync::sync_log_tail,
+            commands::sync::sync_open_gui,
             commands::update::update_check,
             commands::update::update_install,
         ])

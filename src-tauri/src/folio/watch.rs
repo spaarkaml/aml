@@ -23,6 +23,25 @@ pub struct FolioChanged {
 
 pub type FolioWatcher = Debouncer<notify::RecommendedWatcher, RecommendedCache>;
 
+/// Whether a changed path is worth telling the UI about.
+///
+/// Hidden and temporary names are dropped — except a Syncthing conflict copy, which is hidden
+/// from the Browser and the index but is exactly the change the Conflicts screen is waiting
+/// for, even when it lands inside `.aml/` (a Boundings file can conflict like any note).
+pub(crate) fn passes(path: &Path) -> bool {
+    let names: Vec<String> = path
+        .components()
+        .map(|c| c.as_os_str().to_string_lossy().to_string())
+        .collect();
+    if names.iter().any(|n| n.starts_with(super::TMP_PREFIX)) {
+        return false;
+    }
+    let is_copy = names
+        .last()
+        .is_some_and(|n| crate::conflicts::is_conflict_name(n));
+    is_copy || !names.iter().any(|n| is_ignored_name(n))
+}
+
 pub fn start(app: AppHandle, folio: &Folio) -> Result<FolioWatcher> {
     let folio = Arc::new(folio.clone());
     let handler = {
@@ -32,10 +51,7 @@ pub fn start(app: AppHandle, folio: &Folio) -> Result<FolioWatcher> {
                 let mut paths: Vec<String> = events
                     .iter()
                     .flat_map(|e| e.paths.iter())
-                    .filter(|p| {
-                        !p.components()
-                            .any(|c| is_ignored_name(&c.as_os_str().to_string_lossy()))
-                    })
+                    .filter(|p| passes(p))
                     .filter_map(|p| folio.relative(p))
                     .collect();
                 paths.sort();
@@ -63,4 +79,26 @@ pub fn start(app: AppHandle, folio: &Folio) -> Result<FolioWatcher> {
         .watch(Path::new(folio.root()), RecursiveMode::Recursive)
         .map_err(|e| FolioError::Io(e.to_string()))?;
     Ok(debouncer)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::passes;
+    use std::path::Path;
+
+    #[test]
+    fn conflict_copies_are_reported_even_where_other_hidden_files_are_not() {
+        assert!(passes(Path::new("/f/Thesis/a.md")));
+        assert!(!passes(Path::new("/f/.aml/boundings.yaml")));
+        assert!(!passes(Path::new("/f/.DS_Store")));
+        assert!(passes(Path::new(
+            "/f/Thesis/a.sync-conflict-20260913-101112-ABC2DEF.md"
+        )));
+        assert!(passes(Path::new(
+            "/f/.aml/boundings.sync-conflict-20260913-101112-ABC2DEF.yaml"
+        )));
+        assert!(!passes(Path::new(
+            "/f/Thesis/.aml-tmp-1.sync-conflict-20260913-101112-ABC2DEF.md"
+        )));
+    }
 }

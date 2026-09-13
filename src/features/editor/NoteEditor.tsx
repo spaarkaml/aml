@@ -1,6 +1,7 @@
 import { EditorContent, useEditor } from "@tiptap/react";
 import { useCallback, useEffect, useMemo } from "react";
 import { BoundingPrompt } from "@/features/boundings/BoundingPrompt";
+import { useConflictsStore } from "@/features/conflicts/store";
 import { LinkMenu } from "@/features/links/LinkMenu";
 import { SpellMenu } from "@/features/spell/SpellMenu";
 import { useWritingStore } from "@/features/writing/store";
@@ -25,6 +26,7 @@ export function NoteEditor() {
   const overwrite = useEditorStore((s) => s.overwriteDisk);
   const error = useEditorStore((s) => s.error);
   const typewriter = useWritingStore((s) => s.typewriter);
+  const setAside = useConflictsStore((s) => s.list.find((c) => c.original === path) ?? null);
 
   // Stable options: Tiptap re-applies changed options on every render, so fresh objects here
   // (extensions, editorProps, callbacks) would churn the view while the user types.
@@ -92,11 +94,36 @@ export function NoteEditor() {
             This note changed on disk, so your edits have not been saved. Saving stays paused until
             you choose.
           </span>
+          <button
+            type="button"
+            onClick={() => void useConflictsStore.getState().compareEditor()}
+            data-testid="compare-disk"
+          >
+            Compare
+          </button>
           <button type="button" onClick={reload}>
             Discard mine and reload
           </button>
           <button type="button" onClick={overwrite}>
             Keep mine and overwrite
+          </button>
+        </div>
+      ) : null}
+      {setAside && !conflict ? (
+        <div className={styles.banner} role="status" data-testid="note-conflict-banner">
+          <span>
+            This note was also changed on another computer before they had synced, and that version
+            was set aside.
+          </span>
+          <button
+            type="button"
+            onClick={() => {
+              const c = useConflictsStore.getState();
+              c.setOpen(true);
+              void c.select(setAside);
+            }}
+          >
+            Compare
           </button>
         </div>
       ) : null}

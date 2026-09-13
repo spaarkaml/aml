@@ -9,6 +9,7 @@ import { QuickOpen } from "@/features/quickopen/QuickOpen";
 import { SettingsScreen } from "@/features/settings/SettingsScreen";
 import { StatsScreen } from "@/features/stats/StatsScreen";
 import { SyncScreen } from "@/features/sync/SyncScreen";
+import { SyncTroubleBanner } from "@/features/sync/SyncTroubleBanner";
 import { useWritingStore } from "@/features/writing/store";
 import type { AppInfo } from "@/ipc";
 import { SidePanel } from "./SidePanel";
@@ -98,6 +99,7 @@ export function Shell({ info, left, right, children }: Props) {
         </SidePanel>
       </div>
       <StatusBar info={info} />
+      <SyncTroubleBanner />
       <CommandPalette />
       <QuickOpen />
       <SyncScreen />

@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useConflictsStore } from "@/features/conflicts/store";
 import { todayIso } from "@/features/daily/dates";
 import { useEditorStore } from "@/features/editor/store";
 import { useFolioStore } from "@/features/folio/store";
@@ -28,6 +29,8 @@ export function StatusBar({ info }: { info: AppInfo | null }) {
   const syncStatus = useSyncStore((s) => s.status);
   const disconnectedSince = useSyncStore((s) => s.disconnectedSince);
   const openSync = useSyncStore((s) => s.setOpen);
+  const conflicts = useConflictsStore((s) => s.list.length);
+  const openConflicts = useConflictsStore((s) => s.setOpen);
   const focus = useWritingStore((s) => s.focus);
   const typewriter = useWritingStore((s) => s.typewriter);
   const cycleFocus = useWritingStore((s) => s.cycleFocus);
@@ -136,6 +139,17 @@ export function StatusBar({ info }: { info: AppInfo | null }) {
           data-testid="sync-state"
         >
           {syncLabel}
+        </button>
+      ) : null}
+      {conflicts > 0 ? (
+        <button
+          type="button"
+          className={styles.conflictChip}
+          onClick={() => openConflicts(true)}
+          title="Two versions of the same file need a decision"
+          data-testid="conflicts-chip"
+        >
+          {conflicts} {conflicts === 1 ? "conflict" : "conflicts"}
         </button>
       ) : null}
       <span className={styles.spacer} />

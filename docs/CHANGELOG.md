@@ -2,6 +2,25 @@
 
 All notable changes. Format: one entry per work package.
 
+## Unreleased
+
+### WP-4.2 — Conflicts (2026-09-14)
+- **A note changed on both computers is now a decision, not a duplicate.** When the same file is edited on two machines before they have synced, Syncthing keeps the newer edit and sets the older one aside as `Note.sync-conflict-….md`. AML used to treat that copy as a note of its own — it showed up **twice** in the Browser, Quick Open, search, backlinks and the graph, and nothing said a decision was waiting. Copies are now hidden from all of those and listed in **Conflicts** instead.
+- **A chip in the status bar** — `1 conflict`, outlined in the accent — and **a banner on the note itself** when the open note has a copy set aside. Also *Resolve Conflicts…* in the palette.
+- **Both versions side by side, paragraph by paragraph**, with the words that differ marked. For each difference: keep what is in place, the set-aside copy, or both. *Take every one from…* does them all at once. Unchanged stretches collapse to the paragraphs either side.
+- **Nothing is ever deleted.** Keeping in place sends the copy to the Trash; using the copy or saving a combination sends the replaced version to the Trash too, under a name that says what it was. *Keep both* turns the copy into an ordinary note beside the original. With no Snapshots yet, the Trash is the way back from a wrong choice.
+- **A decision is refused if the note changed again while you were deciding**, and the screen shows it as it is now. A choice made about text that is no longer there is never applied to text you have not seen.
+- **Boundings, Note Types and settings conflict too** — they are synced files in `.aml/` — and for those every difference starts on *Both*, because one item per line means keeping both sides is almost always right. For a note, nothing is pre-chosen that could lose a paragraph.
+- **Unsaved edits over a changed file** get the same screen: the editor's *this note changed on disk* banner now has **Compare**, with *On disk* against *Your edits*.
+- **Two-way, for now.** A proper three-way merge needs the version both sides started from, which is a Snapshot (WP-4.1) and does not exist yet. So the screen says where the two differ, never who changed what, and leaves each choice to you.
+- It says *written on this computer* or *written on another computer* from the device code Syncthing puts in the copy's name. It does not guess a name: this computer pairs with the NAS, not with the other laptop.
+
+### WP-4.3 — Sync health (2026-09-14)
+- **A sync that never finishes now says so.** If Syncthing cannot update some files — the stuck-at-95 % problem from 2026-09-12 — the status bar says *Sync stuck · 4 files* and a banner names them with the reason. If the NAS is connected but nothing has moved for ten minutes, the banner says that too. Both offer *Open Syncthing* and *Dismiss*.
+- **Being offline never raises a banner.** Travelling is how AML is meant to be used, and a warning on every trip is one you learn to ignore. Instead the status bar says how long it has been: *NAS offline · seen 3 h ago*.
+- **Paused is called paused**, for a paused folder or a paused NAS, rather than looking like a fault.
+- The NAS sync screen shows when the NAS was last seen, how many items a folder still needs, which files failed and why, and a button that opens **Syncthing's own view** in your browser for the rare deep dive.
+
 ## 0.4.0 — 2026-09-13
 
 Diagrams.

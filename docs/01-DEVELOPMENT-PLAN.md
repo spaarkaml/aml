@@ -136,9 +136,9 @@ Roughly 80–95 AI sessions. Stages 2 and 3 can overlap; 6 and 7 can overlap.
 
 | WP | Title |
 |---|---|
-| 4.1 | Snapshot engine hardening: 30-minute scheduler, before-destructive-ops, retention job, size reporting |
-| 4.2 | **Conflicts panel**: `*.sync-conflict-*` files and external-change-while-dirty cases; side-by-side merge (base = latest Snapshot), keep/merge/discard; also merges `project.aml.yaml` and `boundings.yaml` line-wise |
-| 4.3 | Sync status and health: per-Folio state (up to date / syncing / NAS unreachable / paused), last-seen NAS time, out-of-sync banner after N minutes, one-click "open Syncthing UI" for the rare deep dive |
+| 4.1 | Snapshot engine hardening: 30-minute scheduler, before-destructive-ops, retention job, size reporting. **Note (2026-09-14): there is no engine to harden** — WP-3.5 was never built, so this WP builds the engine, and is best done together with 3.5's UI |
+| 4.2 | ~~**Conflicts panel**: `*.sync-conflict-*` files and external-change-while-dirty cases; side-by-side merge (base = latest Snapshot), keep/merge/discard; also merges `project.aml.yaml` and `boundings.yaml` line-wise~~ **done 2026-09-14**, before 4.1 by decision, so the comparison is **two-way** until Snapshots exist. Copies leave the Browser and the index; everything given up goes to the Trash; `docs/qa/stage-4.md` §1–§9 |
+| 4.3 | ~~Sync status and health: per-Folio state (up to date / syncing / NAS unreachable / paused), last-seen NAS time, out-of-sync banner after N minutes, one-click "open Syncthing UI" for the rare deep dive~~ **done 2026-09-14**. The banner is for a sync that is **stuck while connected** (failed files, or ten minutes without movement), never for being offline — offline says how long in the status bar instead; `docs/qa/stage-4.md` §10–§14 |
 | 4.4 | NAS checklist in Settings: Syncthing versioning enabled on the NAS folder, backup job configured (from `06-NAS-SETUP.md`), free space, last backup — read via Syncthing REST where possible, else manual tick boxes |
 | 4.5 | Cross-OS safety: Windows file locks and long paths; macOS/Windows case-collision warning; Unicode normalisation (NFC/NFD) of filenames between macOS and the NAS |
 | 4.6 | *(optional)* **Network** location (SMB direct): polling watcher, remount prompt, unsaved buffer when the share drops; **Offline Copy / Return** with three-way merge. Only built if Synced proves unusable on the DRIVESTOR or you ask for it |

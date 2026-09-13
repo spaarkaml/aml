@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Icon } from "@/app/icons";
 import { useFolioStore } from "@/features/folio/store";
 import styles from "./SyncScreen.module.css";
-import { startSyncPolling, syncedFolderFor, useSyncStore } from "./store";
+import { seenAgo, startSyncPolling, syncedFolderFor, useSyncStore } from "./store";
 
 /**
  * One-time pairing with the NAS and ongoing sync overview (ADR-005). Opened from the Welcome
@@ -22,6 +22,7 @@ export function SyncScreen() {
   const shareFolio = useSyncStore((s) => s.shareFolio);
   const log = useSyncStore((s) => s.log);
   const loadLog = useSyncStore((s) => s.loadLog);
+  const openGui = useSyncStore((s) => s.openGui);
   const folio = useFolioStore((s) => s.folio);
   const openPath = useFolioStore((s) => s.openPath);
   const createAt = useFolioStore((s) => s.createAt);
@@ -156,7 +157,14 @@ export function SyncScreen() {
           {nas ? (
             <div className={styles.row}>
               <span className={nas.connected ? styles.ok : styles.warn} data-testid="nas-state">
-                {nas.name} · {nas.connected ? `connected (${nas.address})` : "not connected yet"}
+                {nas.name} ·{" "}
+                {nas.paused
+                  ? "paused"
+                  : nas.connected
+                    ? `connected (${nas.address})`
+                    : nas.lastSeen
+                      ? `not connected · last seen ${seenAgo(nas.lastSeen)}`
+                      : "not connected yet"}
               </span>
               <button
                 type="button"
@@ -240,10 +248,21 @@ export function SyncScreen() {
                   <span>
                     <strong>{f.label}</strong> <span className={styles.muted}>{f.path}</span>
                     <br />
-                    <span className={f.error ? styles.warn : styles.muted}>
+                    <span className={f.error || f.failures.length ? styles.warn : styles.muted}>
                       {f.error ??
-                        `${f.state}${(f.completion ?? 100) < 100 ? ` · ${Math.floor(f.completion ?? 0)}%` : ""}`}
+                        (f.paused
+                          ? "paused"
+                          : `${f.state}${(f.completion ?? 100) < 100 ? ` · ${Math.floor(f.completion ?? 0)}%` : ""}${f.needItems > 0 ? ` · ${f.needItems} items to go` : ""}`)}
                     </span>
+                    {f.failures.length ? (
+                      <ul className={styles.failures} data-testid="sync-failures">
+                        {f.failures.map((x) => (
+                          <li key={x.path}>
+                            <code>{x.path}</code> — {x.error}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
                   </span>
                   {folio?.root === f.path ? (
                     <span className={styles.ok}>Open</span>
@@ -301,7 +320,15 @@ export function SyncScreen() {
             {showLog ? "Hide log" : "Show sync log"}
           </button>
           {status?.running ? (
-            <span className={styles.muted}>Advanced: Syncthing's own UI is at {status.guiUrl}</span>
+            <button
+              type="button"
+              className={styles.link}
+              onClick={() => void openGui()}
+              title={status.guiUrl}
+              data-testid="sync-open-gui"
+            >
+              Open Syncthing's own view
+            </button>
           ) : null}
         </footer>
         {showLog ? <pre className={styles.log}>{log.join("\n") || "(empty)"}</pre> : null}

@@ -69,6 +69,17 @@ pub struct SyncDevice {
     pub name: String,
     pub connected: bool,
     pub address: String,
+    /// When Syncthing last heard from this device (RFC 3339); `None` if it never has.
+    pub last_seen: Option<String>,
+    pub paused: bool,
+}
+
+/// A file Syncthing tried to bring up to date and could not.
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct SyncFailure {
+    pub path: String,
+    pub error: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
@@ -83,8 +94,14 @@ pub struct SyncFolder {
     pub completion: f64,
     #[specta(type = specta_typescript::Number)]
     pub need_bytes: u64,
+    /// Files this computer still needs; with `need_bytes` at 0 these are usually folders.
+    #[specta(type = specta_typescript::Number)]
+    pub need_items: u64,
     pub devices: Vec<String>,
     pub error: Option<String>,
+    pub paused: bool,
+    /// What "stuck at 95 %" is made of: the files that failed, and why (first 20).
+    pub failures: Vec<SyncFailure>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
@@ -444,6 +461,7 @@ impl Syncthing {
         }
         let conns = self.get("/rest/system/connections")?;
         let devices = self.get("/rest/config/devices")?;
+        let seen = self.get("/rest/stats/device").unwrap_or(Value::Null);
         for d in devices.as_array().into_iter().flatten() {
             let id = d["deviceID"].as_str().unwrap_or_default().to_string();
             if id == my_id {
@@ -454,6 +472,8 @@ impl Syncthing {
                 name: d["name"].as_str().unwrap_or_default().to_string(),
                 connected: c["connected"].as_bool().unwrap_or(false),
                 address: c["address"].as_str().unwrap_or_default().to_string(),
+                last_seen: last_seen(&seen[&id]["lastSeen"]),
+                paused: d["paused"].as_bool().unwrap_or(false),
                 id,
             });
         }
@@ -473,7 +493,17 @@ impl Syncthing {
                 .filter_map(|d| d["deviceID"].as_str().map(String::from))
                 .filter(|d| *d != my_id)
                 .collect();
+            let failures = if db["pullErrors"].as_u64().unwrap_or(0) > 0 {
+                self.get(&format!("/rest/folder/errors?folder={id}"))
+                    .map(|v| failures_from(&v))
+                    .unwrap_or_default()
+            } else {
+                Vec::new()
+            };
             st.folders.push(SyncFolder {
+                paused: f["paused"].as_bool().unwrap_or(false),
+                need_items: comp["needItems"].as_u64().unwrap_or(0),
+                failures,
                 id,
                 label: f["label"].as_str().unwrap_or_default().to_string(),
                 path: f["path"].as_str().unwrap_or_default().to_string(),
@@ -507,6 +537,35 @@ impl Syncthing {
         Ok(())
     }
 
+    /// Opens Syncthing's own web UI in the default browser — the rare deep dive (WP-4.3).
+    pub fn open_gui(&self) -> Result<()> {
+        let url = self.gui_url();
+        #[cfg(target_os = "macos")]
+        let mut cmd = {
+            let mut c = Command::new("open");
+            c.arg(&url);
+            c
+        };
+        #[cfg(windows)]
+        let mut cmd = {
+            let mut c = Command::new("rundll32");
+            c.args(["url.dll,FileProtocolHandler", &url]);
+            c
+        };
+        #[cfg(all(unix, not(target_os = "macos")))]
+        let mut cmd = {
+            let mut c = Command::new("xdg-open");
+            c.arg(&url);
+            c
+        };
+        cmd.stdin(Stdio::null())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .spawn()
+            .map(|_| ())
+            .map_err(|e| FolioError::Io(format!("could not open {url}: {e}")))
+    }
+
     /// Last lines of the sidecar log, for the setup screen's "what went wrong" box.
     pub fn log_tail(&self, lines: usize) -> Vec<String> {
         let Ok(f) = fs::File::open(self.home.join("syncthing.log")) else {
@@ -534,6 +593,26 @@ fn random_key() -> String {
 }
 
 /// Folder ID for a Folio shared from this side: lower-case, dashes, unique enough per name.
+/// Syncthing reports a device it has never seen as the Unix epoch; that is not a time.
+fn last_seen(v: &Value) -> Option<String> {
+    v.as_str()
+        .filter(|t| !t.is_empty() && !t.starts_with("1970-"))
+        .map(String::from)
+}
+
+fn failures_from(v: &Value) -> Vec<SyncFailure> {
+    v["errors"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .take(20)
+        .map(|e| SyncFailure {
+            path: e["path"].as_str().unwrap_or_default().to_string(),
+            error: e["error"].as_str().unwrap_or_default().to_string(),
+        })
+        .collect()
+}
+
 pub fn folder_id_for(name: &str) -> String {
     let slug: String = name
         .to_lowercase()

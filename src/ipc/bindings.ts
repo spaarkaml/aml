@@ -33,6 +33,12 @@ export const commands = {
 	assetReadText: (notePath: string, target: string) => typedError<string, FolioError>(__TAURI_INVOKE("asset_read_text", { notePath, target })),
 	/**  Overwrites an asset a note already references, so editing a diagram keeps the same file. */
 	assetWriteText: (notePath: string, target: string, text: string) => typedError<null, FolioError>(__TAURI_INVOKE("asset_write_text", { notePath, target, text })),
+	/**  Every set-aside copy in the open Folio, newest first. */
+	conflictsList: () => typedError<Conflict[], FolioError>(__TAURI_INVOKE("conflicts_list")),
+	/**  Both sides of one conflict, as text where they are text. */
+	conflictRead: (path: string) => typedError<ConflictPair, FolioError>(__TAURI_INVOKE("conflict_read", { path })),
+	/**  Resolves one conflict. Refused with `conflict` if the original changed since it was read. */
+	conflictResolve: (path: string, resolution: Resolution, expectedOriginalMtime: number | null) => typedError<null, FolioError>(__TAURI_INVOKE("conflict_resolve", { path, resolution, expectedOriginalMtime })),
 	/**  Quick Open's entries: every note's title, aliases and headings, straight from SQLite. */
 	folioIndex: () => typedError<NoteIndexEntry[], FolioError>(__TAURI_INVOKE("folio_index")),
 	indexStatus: () => typedError<IndexStatus, FolioError>(__TAURI_INVOKE("index_status")),
@@ -180,6 +186,11 @@ export const commands = {
 	syncIsSyncedPath: (path: string) => typedError<boolean, FolioError>(__TAURI_INVOKE("sync_is_synced_path", { path })),
 	syncLogTail: () => typedError<string[], FolioError>(__TAURI_INVOKE("sync_log_tail")),
 	/**
+	 *  Called from `lib.rs` at start-up: bring the sidecar up if the user enabled sync.
+	 *  Opens Syncthing's own web UI in the browser, for the rare deep dive (WP-4.3).
+	 */
+	syncOpenGui: () => typedError<null, FolioError>(__TAURI_INVOKE("sync_open_gui")),
+	/**
 	 *  The release the endpoint is offering, or `None` when this is already the newest one.
 	 * 
 	 *  A debug build refuses outright: it was built by `cargo`, not by the bundler, so there is no
@@ -286,6 +297,41 @@ export type Bounding = {
 	icon: string,
 	/**  Folio-relative note paths, in the order they were added. */
 	notes: string[],
+};
+
+export type Conflict = {
+	/**  Folio-relative path of the set-aside copy. */
+	path: string,
+	/**  Folio-relative path of the file it is a copy of. */
+	original: string,
+	/**  False when the original was deleted or renamed on the other machine. */
+	originalExists: boolean,
+	kind: ConflictKind,
+	/**  When the copy was set aside, `YYYY-MM-DD HH:MM:SS`. */
+	stamp: string,
+	/**  Short Device ID of the computer that wrote the set-aside version. */
+	device: string,
+	mtime: number,
+	/**  0 when the original is missing. */
+	originalMtime: number,
+};
+
+export type ConflictKind = 
+/**  A markdown note: compared paragraph by paragraph. */
+"note" | 
+/**
+ *  A Boundings, types, settings or manifest file: one item per line, so both sides can
+ *  usually simply be kept.
+ */
+"settings" | 
+/**  Anything else — an image, a diagram: one side or the other, whole. */
+"file";
+
+export type ConflictPair = {
+	conflict: Conflict,
+	/**  `None` when that side is missing or is not text: the choice is then whole-file. */
+	originalText: string | null,
+	copyText: string | null,
 };
 
 export type DailyNote = {
@@ -515,6 +561,16 @@ export type RenderVars = {
 	time: string,
 };
 
+export type Resolution = 
+/**  The edit in place stays; the set-aside copy goes to the Trash. */
+{ kind: "keepOriginal" } | 
+/**  The set-aside copy replaces the edit in place, which goes to the Trash. */
+{ kind: "keepCopy" } | 
+/**  This text replaces the edit in place; both old versions go to the Trash. */
+{ kind: "merge"; text: string } | 
+/**  Nothing is given up: the copy becomes an ordinary file beside the original. */
+{ kind: "keepBoth" };
+
 export type SearchHit = {
 	path: string,
 	title: string,
@@ -549,6 +605,15 @@ export type SyncDevice = {
 	name: string,
 	connected: boolean,
 	address: string,
+	/**  When Syncthing last heard from this device (RFC 3339); `None` if it never has. */
+	lastSeen: string | null,
+	paused: boolean,
+};
+
+/**  A file Syncthing tried to bring up to date and could not. */
+export type SyncFailure = {
+	path: string,
+	error: string,
 };
 
 export type SyncFolder = {
@@ -560,8 +625,13 @@ export type SyncFolder = {
 	/**  0–100 for this device's copy of the folder. */
 	completion: number | null,
 	needBytes: number,
+	/**  Files this computer still needs; with `need_bytes` at 0 these are usually folders. */
+	needItems: number,
 	devices: string[],
 	error: string | null,
+	paused: boolean,
+	/**  What "stuck at 95 %" is made of: the files that failed, and why (first 20). */
+	failures: SyncFailure[],
 };
 
 export type SyncStatus = {
