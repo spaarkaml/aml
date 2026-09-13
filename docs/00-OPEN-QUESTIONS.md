@@ -110,9 +110,10 @@ Built-in themes only, or user-editable CSS like Typora? Do you want a dark mode?
 "Arial, Times New Roman and a few others." Proposal for the "few others" (all free to bundle and embed in PDFs): **Source Serif 4** (book body), **Literata** (screen reading), **EB Garamond** (classic fiction), **Inter** (UI), **IBM Plex Mono** (code). Arial/Times are OS fonts and cannot be bundled, but are used when present.
 **Answer:** all approved. **Applied** in ADR-010.
 
-### Q15. Diagrams (Stage 7)
+### Q15. Diagrams (Stage 7)  ✅ answered
 Text-based (**Mermaid**: flowcharts, mind maps, timelines — AI-friendly, diffs well) vs freehand canvas (**Excalidraw**-style, stored as JSON alongside the note) vs both.
-**Working assumption:** Mermaid first (cheap), Excalidraw-style canvas second.
+~~**Working assumption:** Mermaid first (cheap), Excalidraw-style canvas second.~~
+**Answer (2026-09-13):** neither, as put. One charting feature, structured rather than freehand, for psychological systems analysis — formulation, genogram, sociogram, relationship and influence maps. Not text-editable; reached by right-clicking in a note. **Mermaid dropped**: it decides the layout, and in these diagrams position carries the meaning. **Applied (WP-7.1)**, with 7.2 folded into it: a structured editor whose output is a re-editable `.svg` in the note's `assets/`, referenced by an ordinary image link. A Mermaid fence still round-trips as an ordinary code fence, so ADR-001 needed no amendment.
 
 ---
 

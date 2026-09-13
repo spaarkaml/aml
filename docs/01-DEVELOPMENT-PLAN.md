@@ -200,8 +200,8 @@ Roughly 80–95 AI sessions. Stages 2 and 3 can overlap; 6 and 7 can overlap.
 
 | WP | Title |
 |---|---|
-| 7.1 | Mermaid diagrams inline; SVG in compile |
-| 7.2 | Canvas notes (Excalidraw-style) — if Q15 wants freehand |
+| 7.1 | ~~Diagrams: a structured editor for formulation, genogram, sociogram and influence maps, written as a re-editable SVG in the note's `assets/`~~ **done 2026-09-13**. **WP-7.2 folded in by decision** (one charting feature, not two) and **Mermaid dropped**: it decides the layout, and in these diagrams position *is* the meaning. Mermaid fences still round-trip untouched; `docs/qa/stage-7.md` §10–§18 |
+| 7.2 | ~~Canvas notes (Excalidraw-style) — if Q15 wants freehand~~ **folded into 7.1, 2026-09-13**: freehand was not wanted, a structured editor was |
 | 7.3 | ~~Link graph: local and Folio-wide, clustered by Bounding~~ **done 2026-09-12** (pulled forward). ⌘⇧G for the Folio, a Context-panel section for the open note; `docs/qa/stage-7.md` |
 | 7.4 | Grammar via LanguageTool on the NAS (Docker), AU English — if Q21 = yes |
 | 7.5 | Template scripting — only if wanted |

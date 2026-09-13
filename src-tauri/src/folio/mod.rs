@@ -325,6 +325,32 @@ impl Folio {
         Ok(normalised)
     }
 
+    /// Reads an asset a note references, as text.
+    ///
+    /// Diagrams (WP-7.1) are SVG files carrying their own model in a `<metadata>` block, so
+    /// re-opening one for editing means reading the file the note points at. Guarded by the
+    /// same path check as every other asset call: a note cannot reach outside the Folio.
+    pub fn read_asset_text(&self, note_rel: &str, target: &str) -> Result<String> {
+        let abs = self.resolve_from_note(note_rel, target)?;
+        if !abs.exists() {
+            return Err(FolioError::NotFound(target.to_string()));
+        }
+        Ok(fs::read_to_string(abs)?)
+    }
+
+    /// Overwrites an asset a note already references, in place.
+    ///
+    /// Editing a diagram has to keep the same file: the note's markdown points at it, and
+    /// writing a new file each time would leave the old one orphaned in `assets/` and the
+    /// link pointing at a stale drawing.
+    pub fn write_asset_text(&self, note_rel: &str, target: &str, text: &str) -> Result<()> {
+        let abs = self.resolve_from_note(note_rel, target)?;
+        if let Some(parent) = abs.parent() {
+            fs::create_dir_all(parent)?;
+        }
+        write_atomic(&abs, text.as_bytes())
+    }
+
     /// Moves an entry to the OS trash / recycle bin — never a hard delete.
     pub fn trash(&self, rel: &str) -> Result<()> {
         let abs = self.resolve(rel)?;
@@ -720,6 +746,51 @@ mod tests {
             .unwrap();
         assert_eq!(resolved, f.root().join(&a.path));
         assert!(f.resolve_from_note("Inbox.md", "../../etc/passwd").is_err());
+    }
+
+    #[test]
+    fn a_diagram_is_edited_in_place_rather_than_written_again() {
+        let (_d, f) = temp_folio();
+        f.create_folder("Thesis/chapters").unwrap();
+        f.write_note("Thesis/chapters/03.md", "x", None).unwrap();
+        let a = f
+            .write_asset(
+                "Thesis/chapters/03.md",
+                "formulation.svg",
+                b"<svg>one</svg>",
+            )
+            .unwrap();
+
+        // The note references the file by a relative path; editing has to follow that path
+        // back to the same bytes, or the drawing in the note and the one you edited differ.
+        let text = f
+            .read_asset_text("Thesis/chapters/03.md", &a.markdown_path)
+            .unwrap();
+        assert_eq!(text, "<svg>one</svg>");
+
+        f.write_asset_text("Thesis/chapters/03.md", &a.markdown_path, "<svg>two</svg>")
+            .unwrap();
+        assert_eq!(
+            f.read_asset_text("Thesis/chapters/03.md", &a.markdown_path)
+                .unwrap(),
+            "<svg>two</svg>"
+        );
+        // One file, still: an edit must not leave the old drawing orphaned in assets/.
+        let count = fs::read_dir(f.root().join("Thesis/assets"))
+            .unwrap()
+            .count();
+        assert_eq!(count, 1);
+    }
+
+    #[test]
+    fn an_asset_path_cannot_walk_out_of_the_folio() {
+        let (_d, f) = temp_folio();
+        f.write_note("Inbox.md", "x", None).unwrap();
+        assert!(f.read_asset_text("Inbox.md", "../../secrets.svg").is_err());
+        assert!(f
+            .write_asset_text("Inbox.md", "../../secrets.svg", "no")
+            .is_err());
+        assert!(f.read_asset_text("Inbox.md", "nothing-here.svg").is_err());
     }
 
     #[test]

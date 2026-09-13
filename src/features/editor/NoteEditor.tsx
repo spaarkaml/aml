@@ -5,6 +5,7 @@ import { LinkMenu } from "@/features/links/LinkMenu";
 import { SpellMenu } from "@/features/spell/SpellMenu";
 import { useWritingStore } from "@/features/writing/store";
 import type { PmNode } from "@/lib/markdown";
+import { EditorMenu } from "./EditorMenu";
 import { setActiveEditor } from "./editorRef";
 import { amlExtensions } from "./extensions";
 import styles from "./NoteEditor.module.css";
@@ -109,6 +110,7 @@ export function NoteEditor() {
       {editor ? <SlashMenu editor={editor} /> : null}
       {editor ? <LinkMenu editor={editor} /> : null}
       {editor ? <SpellMenu editor={editor} /> : null}
+      <EditorMenu />
       <EditorContent editor={editor} className={styles.content} />
     </div>
   );

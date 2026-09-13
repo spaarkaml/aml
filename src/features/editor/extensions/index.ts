@@ -17,6 +17,7 @@ import {
   WikiLink,
 } from "./aml-nodes";
 import { AutoPair } from "./autopair";
+import { AmlContextMenu } from "./context";
 import { AmlImage } from "./image";
 import { LinkMenu } from "./linkmenu";
 import { NoteLinks } from "./links";
@@ -91,5 +92,7 @@ export function amlExtensions(): Extensions {
     TagClicks,
     WritingModes,
     SpellCheck,
+    // After SpellCheck: a right-click on a misspelled word belongs to the suggestions.
+    AmlContextMenu,
   ];
 }

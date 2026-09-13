@@ -1,5 +1,7 @@
 import type { Editor } from "@tiptap/core";
+import { useDiagramStore } from "@/features/diagram/store";
 import { insertFootnote } from "./footnotes";
+import { useEditorStore } from "./store";
 
 /**
  * The block actions AML offers, in one place: the `/` menu lists them, and the Command
@@ -78,6 +80,15 @@ export const BLOCK_ITEMS: BlockItem[] = [
     title: "Code block",
     hint: "```",
     run: (e) => e.chain().focus().toggleCodeBlock().run(),
+  },
+  {
+    id: "diagram",
+    title: "Diagram",
+    hint: "draw",
+    run: () => {
+      const path = useEditorStore.getState().path;
+      if (path) useDiagramStore.getState().create(path);
+    },
   },
   {
     id: "table",

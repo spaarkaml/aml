@@ -246,6 +246,29 @@ pub fn asset_resolve(state: State<AppState>, note_path: String, target: String) 
     })
 }
 
+/// Text of an asset a note references — how a diagram is re-opened for editing (WP-7.1).
+#[tauri::command]
+#[specta::specta]
+pub fn asset_read_text(
+    state: State<AppState>,
+    note_path: String,
+    target: String,
+) -> Result<String> {
+    with_folio(&state, |f| f.read_asset_text(&note_path, &target))
+}
+
+/// Overwrites an asset a note already references, so editing a diagram keeps the same file.
+#[tauri::command]
+#[specta::specta]
+pub fn asset_write_text(
+    state: State<AppState>,
+    note_path: String,
+    target: String,
+    text: String,
+) -> Result<()> {
+    with_folio(&state, |f| f.write_asset_text(&note_path, &target, &text))
+}
+
 /// Copies a file chosen in the native dialog into the note's assets folder.
 #[tauri::command]
 #[specta::specta]

@@ -2,6 +2,20 @@
 
 All notable changes. Format: one entry per work package.
 
+## Unreleased
+
+### WP-7.1 — Diagrams (2026-09-13)
+- **Right-click in a note → Insert diagram.** A drawing surface with a symbol set built for psychological and influence work rather than for flowcharts: Person, Subject, Group and Institution; Belief, Feeling, Behaviour and Body; Event, Channel, Message, Outcome and Note. Nine kinds of link, because the difference between them is the content of the diagram — influences, both ways, **suppresses** (the systems notation for "stops"), tenuous, transmits, and the three genogram ties: close, conflict, cut off. A link carries a label, which is where a causal loop's `+` and `−` go.
+- **Groupings are the big circle**: a circle or box drawn behind everything, with a name. Membership is positional — a group holds whatever is standing in it — and dragging a group moves what it holds, because that is the point of drawing a circle round things.
+- **What lands in the note is an ordinary `.svg`** in the note's `assets/` folder, referenced by an ordinary image link. It renders in Obsidian, on the NAS, in Quick Look, in a browser and in a compiled PDF with AML nowhere in the picture — and it is vector, so it is crisp at any size in print.
+- **The file carries its own model**, in a `<metadata>` block, the way Inkscape and draw.io do. Re-opening a diagram restores what the shapes *mean* rather than guessing it back from their geometry: an arrow that means "suppresses" comes back as "suppresses". The model is one item per line, deterministically written, so a sync conflict is legible and a diff shows what moved.
+- **Editing overwrites the same file.** The note already points at it; writing a new one each time would orphan the old drawing in `assets/` and leave the link showing a stale picture.
+- **The editor and the exported file are the same renderer.** The `.svg` written to the Folio is the component tree that was on screen, through `renderToStaticMarkup` — a separate export path would be a second implementation of the same picture, and the two would eventually disagree about something small that nobody notices until a compiled book looks wrong.
+- **A diagram brings its own paper.** Text, hairlines and the page follow the reader's light/dark setting so a drawing made in Paper stays legible in Ink; the colours you chose do not change, because they are part of the drawing. The background is painted into the file, so it is readable on any background even where the media query never applies.
+- **No Mermaid.** Mermaid decides the layout, and in a formulation, a genogram or a causal loop the position *is* the meaning. A Mermaid fence still round-trips untouched as an ordinary code fence — ADR-001 names it as part of the dialect and never said AML renders it — so no existing file breaks and no ADR needed amending. **WP-7.2 (freehand canvas) is folded into this by decision**: one charting feature, not two.
+- Reading a diagram is deliberately forgiving: an unknown kind, tone or link from a later AML degrades to something sensible rather than throwing, and an edge whose ends have gone is dropped rather than drawn into nowhere.
+- No dependency added. React was already here.
+
 ## 0.3.0 — 2026-09-12
 
 The first release that arrives by itself.

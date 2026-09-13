@@ -38,6 +38,8 @@ fn specta_builder() -> Builder<tauri::Wry> {
             commands::folio::asset_write,
             commands::folio::asset_resolve,
             commands::folio::asset_import,
+            commands::folio::asset_read_text,
+            commands::folio::asset_write_text,
             commands::index::folio_index,
             commands::index::index_status,
             commands::index::index_rebuild,

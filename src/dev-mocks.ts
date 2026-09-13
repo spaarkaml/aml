@@ -24,6 +24,13 @@ function node(
   };
 }
 
+/** Assets the harness has been handed, so a diagram survives being inserted and reopened. */
+const assets = new Map<string, string>();
+
+function decodeBase64(data: string): string {
+  return new TextDecoder().decode(Uint8Array.from(atob(data), (c) => c.charCodeAt(0)));
+}
+
 const notes = new Map<string, { text: string; mtime: number }>([
   [
     "Thesis/chapters/03 Influence networks.md",
@@ -1114,12 +1121,24 @@ export function installDevMocks(): void {
       }
       case "asset_write": {
         const name = String(a.fileName);
+        const path = `assets/20260910-000000-${name}`;
+        // Kept so a diagram written here can be read back and edited, as it is in the app.
+        assets.set(path, decodeBase64(String(a.dataBase64)));
         return {
-          path: `assets/20260910-000000-${name}`,
-          markdownPath: `assets/20260910-000000-${name}`,
+          path,
+          markdownPath: path,
           absolute: `/mock/assets/${name}`,
           size: 1,
         };
+      }
+      case "asset_read_text": {
+        const text = assets.get(String(a.target));
+        if (text === undefined) throw { kind: "notFound", path: String(a.target) };
+        return text;
+      }
+      case "asset_write_text": {
+        assets.set(String(a.target), String(a.text));
+        return null;
       }
       case "asset_import": {
         const name = String(a.source).split("/").pop() ?? "image.png";
@@ -1599,4 +1618,12 @@ export function installDevMocks(): void {
         throw new Error(`dev mock: unhandled command ${cmd}`);
     }
   });
+
+  // `mockIPC` installs the invoke bridge but not the asset protocol, and an image asks for
+  // that the moment it is inserted — without this every image logs an unhandled rejection.
+  const internals = (window as unknown as { __TAURI_INTERNALS__?: Record<string, unknown> })
+    .__TAURI_INTERNALS__;
+  if (internals) {
+    internals.convertFileSrc = (path: string) => `/mock-asset/${encodeURIComponent(path)}`;
+  }
 }

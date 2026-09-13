@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ShortcutsDialog } from "@/features/commands/ShortcutsDialog";
+import { DiagramScreen } from "@/features/diagram/DiagramScreen";
 import { NoteEditor } from "@/features/editor/NoteEditor";
 import { useEditorStore } from "@/features/editor/store";
 import { useFolioStore } from "@/features/folio/store";
@@ -56,6 +57,7 @@ export function App() {
       <RenameLinksDialog />
       <ShortcutsDialog />
       <GraphScreen />
+      <DiagramScreen />
       <UpdateScreen info={info} />
     </Shell>
   );

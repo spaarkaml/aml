@@ -29,6 +29,10 @@ export const commands = {
 	assetResolve: (notePath: string, target: string) => typedError<string, FolioError>(__TAURI_INVOKE("asset_resolve", { notePath, target })),
 	/**  Copies a file chosen in the native dialog into the note's assets folder. */
 	assetImport: (notePath: string, source: string) => typedError<AssetInfo, FolioError>(__TAURI_INVOKE("asset_import", { notePath, source })),
+	/**  Text of an asset a note references — how a diagram is re-opened for editing (WP-7.1). */
+	assetReadText: (notePath: string, target: string) => typedError<string, FolioError>(__TAURI_INVOKE("asset_read_text", { notePath, target })),
+	/**  Overwrites an asset a note already references, so editing a diagram keeps the same file. */
+	assetWriteText: (notePath: string, target: string, text: string) => typedError<null, FolioError>(__TAURI_INVOKE("asset_write_text", { notePath, target, text })),
 	/**  Quick Open's entries: every note's title, aliases and headings, straight from SQLite. */
 	folioIndex: () => typedError<NoteIndexEntry[], FolioError>(__TAURI_INVOKE("folio_index")),
 	indexStatus: () => typedError<IndexStatus, FolioError>(__TAURI_INVOKE("index_status")),
