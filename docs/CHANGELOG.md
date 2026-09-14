@@ -4,6 +4,25 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+## 0.5.0 — 2026-09-14
+
+### Fix — the window no longer scrolls, and the Browser scrolls only its list (2026-09-14)
+- **The whole window could be scrolled on a Mac**, top bar and status bar included — a trackpad flick rubber-banded the page as if it were a web page. The window is now fixed; only the regions inside it scroll, and a scroll that reaches the end of one stops there.
+- **The Browser's view switch and *+ Note / + Folder* stay put.** Only the file tree scrolls, inside its own box, and it no longer slides underneath the week at the foot of the panel. Boundings, Search and the Binder scroll the same way.
+- **The week tray is part of the Browser now**, not a grey band set into it: a hairline above it, the same quiet uppercase label as the Browser's other headings, today's date in a filled circle the way Calendar marks it, and *Open today's note* as a tinted row rather than a raised button.
+
+### WP-7.3 follow-up — the graph, redrawn (2026-09-14)
+- **The graph now reads as a map, not a hairball.** Each Bounding is a softly tinted territory with its name written over it, instead of a scatter of same-coloured dots on an empty field.
+- **Notes are beads with a ring of the page around them**, so a dot sitting on a line is visibly on top of it; a note in no Bounding is an open ring. The note a graph is drawn around is larger, with a halo, and notes further out from it are quieter.
+- **Links are gentle curves**, coloured by the Bounding they stay inside and neutral between Boundings; two links in opposite directions bend apart rather than overlapping.
+- **Names make room for each other.** The most connected notes keep their names when zoomed out, and zooming in makes room for the rest; every name has a halo, so it stays legible over a line.
+- **Hover a note for a small frosted card**: its name, its Bounding, its links and its words, with the rest of the graph stepping back.
+- **The picture runs edge to edge**, and the controls float over it on glass: the scope and steps at the top, the key at the bottom left, and zoom out / show everything / zoom in at the bottom right. **Hover a Bounding in the key** to bring it forward.
+- **The camera frames the graph as it settles**, instead of fitting once to where the notes started and leaving them in a small clump in the middle. A graph of a handful of notes is no longer blown up to fill the screen.
+- **Two fingers pan and a pinch zooms**, as everywhere else on a Mac; a mouse wheel still zooms.
+- **⌥-click a note to centre the graph on it.** Double-click could not work on the screen, because the first click had already opened the note and closed the graph.
+- No dependency added.
+
 ### WP-4.1 — Snapshots, and WP-3.5's History screen (2026-09-14)
 - **Every note now has a history you never have to think about.** The first time you change a note in a sitting, AML keeps a full copy of it as it was *before* you started; if you keep writing, another every half hour. A note nobody is changing gets none. Snapshots live in `.aml/snapshots/`, mirroring your folders, so they follow the Folio to the other computer and are readable without AML.
 - **Click *Saved* in the status bar** to see a note's History — or right-click in the note → *Note History…*, or the palette. Nothing else in the window announces it.
