@@ -4,6 +4,13 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### One top to the window (2026-09-14)
+- **The window's title bar and AML's top bar are now the same bar.** There used to be two tops: the system's grey strip with the window buttons, and AML's own bar under it.
+- **On a Mac** the red, yellow and green buttons sit at the left end of AML's top bar, and the bar starts after them. In full screen, where macOS hides them, the bar uses the room.
+- **On Windows** minimise, maximise and close are at the right end of the top bar, full height, with close turning red under the pointer the way Windows draws it. The window still resizes from its edges and keeps its shadow.
+- **Drag the top bar anywhere that is not a button or a tab** to move the window; double-click it to maximise.
+- One thing Windows does not give a window without its own frame: the Snap Layouts flyout when you hover maximise. **Win+Z** still opens it.
+
 ### A new app icon (2026-09-14)
 - **AML has its own icon**: the stencil A, M and L, overlapping, with rounded corners, in light blue and white.
 - **Drawn for each system.** On the Mac it sits on a white squircle like Apple's own icons. On Windows it has no plate, and the letters themselves are the icon in a light-blue gradient, the way Windows 11 draws Office and Edge.

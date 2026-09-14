@@ -73,6 +73,10 @@
   --aml-callout-warn: #8a6212;
   --aml-callout-danger: #b04a46;
 
+  /* Windows' own red under the close button (WP-3.0 follow-up, the merged title bar). It is the
+     platform's colour, not AML's, which is why it is the same in Paper and Ink. */
+  --aml-caption-close: #c42b1c;
+
   /* ---- elevation: a ½px ring plus a shadow, instead of a 1px wall ---- */
   --aml-shadow-1: 0 0 0 0.5px rgb(0 0 0 / 6%), 0 1px 2px rgb(0 0 0 / 5%);
   --aml-shadow-2:

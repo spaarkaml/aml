@@ -18,6 +18,17 @@
 
 /* ---- toolbar ---- */
 
+/* The top bar is also the window's title bar (titleBar.ts). On a Mac the traffic lights float
+   over its left end, so it starts after them — unless the window is in full screen, where
+   macOS hides them. On Windows the caption buttons are its last children, flush to the edge. */
+.topbar[data-titlebar="mac"]:not([data-fullscreen]) {
+  padding-left: 84px;
+}
+
+.topbar[data-titlebar="windows"] {
+  padding-right: 0;
+}
+
 .topbar {
   display: flex;
   align-items: center;
@@ -127,6 +138,52 @@
 .iconButton[aria-pressed="true"] {
   background: var(--aml-highlight);
   color: var(--aml-primary);
+}
+
+/* Windows caption buttons: the full height of the bar, 46px wide, square-cornered and flush
+   to the window's edge, as Windows 11 draws its own. Above any sheet's backdrop, so a dialog
+   never takes away the way to close the window. */
+.windowControls {
+  display: flex;
+  align-self: stretch;
+  margin-left: var(--aml-space-2);
+  position: relative;
+  z-index: 95;
+}
+
+.caption,
+.captionClose {
+  width: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--aml-text);
+  cursor: default;
+  transition:
+    background var(--aml-dur-1) var(--aml-ease),
+    color var(--aml-dur-1) var(--aml-ease);
+}
+
+.caption:hover {
+  background: var(--aml-highlight);
+}
+
+.caption:active {
+  background: color-mix(in srgb, var(--aml-text) 12%, transparent);
+}
+
+.captionClose:hover,
+.captionClose:active {
+  background: var(--aml-caption-close);
+  color: var(--aml-surface);
+}
+
+:root[data-mode="ink"] .captionClose:hover,
+:root[data-mode="ink"] .captionClose:active {
+  color: var(--aml-text);
 }
 
 /* The ⌘K affordance reads as a key, not a button. */

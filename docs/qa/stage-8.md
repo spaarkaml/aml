@@ -20,3 +20,15 @@ releases to exist; **0.2.0 → 0.3.0 passed on both machines on 2026-09-13**, wh
 | 7 | Pull the network out and press **Check now** | One plain sentence about not reaching the server. Nothing hangs, nothing retries in a loop, and a *silent* check in the same state says nothing at all | ☐ |
 | 8 | On a fresh machine, install from the release page | macOS: right-click → Open gets past Gatekeeper (no "damaged"). Windows: SmartScreen → More info → Run anyway. Then §2 works from that install | ☐ |
 | 9 | After updating, open the same Folio on both machines | Nothing in the Folio changed: notes, `.aml/`, manifests and the index are exactly as they were. An update is not a migration | ☐ |
+
+## One top to the window (2026-09-14)
+
+| # | Step | Expect | Pass |
+|---|---|---|---|
+| T1 | *(Mac)* Open AML | No grey system title bar: the red, yellow and green buttons sit inside AML's top bar, vertically centred, with the monogram just after them | ☐ |
+| T2 | *(Mac)* Drag the top bar by an empty spot, then double-click one | The window moves; double-click zooms it as your Dock setting says. Clicking a tab or a button does its own thing instead | ☐ |
+| T3 | *(Mac)* Enter full screen (green button) | The buttons go away and the monogram moves back to the left edge; leaving full screen puts both back | ☐ |
+| T4 | *(Windows)* Open AML | No white Windows title bar: minimise, maximise and close are at the right end of AML's top bar, full height; close turns red under the pointer | ☐ |
+| T5 | *(Windows)* Drag an edge and a corner; drag the top bar; double-click it; press Win+Z | It resizes from every edge and has a shadow; it moves; double-click maximises and the middle button becomes Restore; Win+Z shows Snap Layouts | ☐ |
+| T6 | *(Windows)* Open Settings (a sheet), then click close | The window closes — the sheet does not swallow the click | ☐ |
+

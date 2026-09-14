@@ -23,6 +23,9 @@ export type IconName =
   | "plus"
   | "minus"
   | "fit"
+  | "winMinimize"
+  | "winMaximize"
+  | "winRestore"
   | "search"
   | "folder"
   | "file"
@@ -46,6 +49,12 @@ const PATHS: Record<IconName, string> = {
   pencil: "M11.1 2.6a1.6 1.6 0 0 1 2.3 2.3L5.6 12.7l-3 .7.7-3zM10 3.7l2.3 2.3",
   plus: "M8 3.4v9.2M3.4 8h9.2",
   minus: "M3.4 8h9.2",
+  // Windows 11's caption glyphs: a line, a square, two squares. Thinner and squarer than the
+  // rest of the set on purpose — they are Windows' shapes, and they sit where Windows puts them.
+  winMinimize: "M3.5 8h9",
+  winMaximize: "M4.5 5.5a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1z",
+  winRestore:
+    "M4 6.9a.9.9 0 0 1 .9-.9h4.2a.9.9 0 0 1 .9.9v4.2a.9.9 0 0 1-.9.9H4.9a.9.9 0 0 1-.9-.9zM6 6V4.9a.9.9 0 0 1 .9-.9h4.2a.9.9 0 0 1 .9.9v4.2a.9.9 0 0 1-.9.9H10",
   // Four corners drawn in: "show me all of it", the way Maps and Freeform say it.
   fit: "M2.6 5.8V3.6a1 1 0 0 1 1-1h2.2M10.2 2.6h2.2a1 1 0 0 1 1 1v2.2M13.4 10.2v2.2a1 1 0 0 1-1 1h-2.2M5.8 13.4H3.6a1 1 0 0 1-1-1v-2.2",
   search: "M11.2 7.2a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM10.1 10.1 13.6 13.6",

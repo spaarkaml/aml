@@ -10,6 +10,8 @@ import { SHORTCUTS } from "../commands";
 import { Icon } from "../icons";
 import { Monogram } from "../Monogram";
 import styles from "./shell.module.css";
+import { TITLE_BAR, useWindowState } from "./titleBar";
+import { WindowControls } from "./WindowControls";
 
 const MODE_LABEL = { system: "Auto", paper: "Paper", ink: "Ink" } as const;
 
@@ -25,9 +27,17 @@ export function TopBar() {
   const openSettings = useSettingsStore((s) => s.setOpen);
   const project = useProjectStore((s) => s.project);
   const showProject = useProjectStore((s) => s.show);
+  const { maximized, fullscreen } = useWindowState(TITLE_BAR);
 
   return (
-    <header className={styles.topbar}>
+    // The top bar is the window's title bar (see `titleBar.ts`): drag it anywhere that is not a
+    // control to move the window, double-click it to zoom. Buttons, tabs and links stay clickable.
+    <header
+      className={styles.topbar}
+      data-titlebar={TITLE_BAR}
+      data-fullscreen={fullscreen || undefined}
+      data-tauri-drag-region="deep"
+    >
       <span className={styles.wordmark} data-testid="wordmark">
         <Monogram height={17} />
       </span>
@@ -104,6 +114,7 @@ export function TopBar() {
           <Icon name="panelRight" />
         </button>
       </div>
+      {TITLE_BAR === "windows" ? <WindowControls maximized={maximized} /> : null}
     </header>
   );
 }

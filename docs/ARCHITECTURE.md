@@ -173,6 +173,22 @@ All results are `{status:"ok",data}|{status:"error",error:E}`; `FolioError` is `
 - Which Project you are in is per device and per Folio (ADR-004, `localStorage`), remembered between launches. The Binder replaces the Folio tree in the Browser rather than adding a fourth tab to the three WP-3.10 settled on.
 - **Split at cursor** writes the tail to its own file *before* removing it from the note it came from, so a failure leaves the text in two places rather than none — the safety argument that stands in for the snapshot ADR-006 wants and WP-4.1 will build.
 
+## The window's title bar
+
+- **One top, not two.** Per-platform window config merges over `tauri.conf.json`:
+  `tauri.macos.conf.json` makes the native title bar an overlay (`titleBarStyle: Overlay`,
+  `hiddenTitle`, `trafficLightPosition` centred in the 52px bar); `tauri.windows.conf.json`
+  removes the frame (`decorations: false`, `shadow: true` — Tauri keeps edge resizing for
+  frameless windows on Windows). The merge replaces the `windows` array whole, so each file
+  restates the window.
+- `app/shell/titleBar.ts` decides `mac` / `windows` / `none` (outside Tauri: the browser build
+  and the tests) and tracks maximised and full screen on resize. `TopBar` is the drag region
+  (`data-tauri-drag-region="deep"`, which Tauri stops at buttons, tabs and links), leaves 84px
+  for the traffic lights except in full screen, and on Windows ends with `WindowControls`
+  (46px caption buttons above any sheet's backdrop). Permissions: `core:window:allow-minimize`,
+  `-toggle-maximize`, `-close`, `-start-dragging`, `-internal-toggle-maximize`, `-is-maximized`,
+  `-is-fullscreen`.
+
 ## Link graph (WP-7.3)
 
 - **Built in Rust from the index** (`index/graph.rs`): every link resolved through
