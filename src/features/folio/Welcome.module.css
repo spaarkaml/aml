@@ -8,14 +8,65 @@
   padding: var(--aml-space-12) var(--aml-space-8);
 }
 
-.wordmark {
-  font-family: var(--aml-font-ui);
-  font-size: var(--aml-size-3xl);
-  font-weight: var(--aml-weight-bold);
-  letter-spacing: 0.22em;
-  text-indent: 0.22em;
+/* The monogram, in the accent, cut in letter by letter — A from the left, M from below, L from
+   the right — once, when the Welcome screen appears. The offsets are in the drawing's own
+   units (a 942-wide viewBox shown ~103px wide), so 160 is about 18px on screen. Everything after it rises in behind. The
+   durations are longer than the interface motion tokens on purpose: this is an entrance, seen
+   once a launch, not a response to a click. */
+.mark {
+  margin: 0 0 var(--aml-space-1);
   color: var(--aml-primary);
-  margin: 0;
+  display: flex;
+}
+
+.mark path {
+  animation: cut 560ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.mark path:nth-child(1) {
+  --from: -160px, 0;
+  animation-delay: 60ms;
+}
+
+.mark path:nth-child(2) {
+  --from: 0, 190px;
+  animation-delay: 280ms;
+}
+
+.mark path:nth-child(3) {
+  --from: 160px, 0;
+  animation-delay: 500ms;
+}
+
+@keyframes cut {
+  from {
+    opacity: 0;
+    transform: translate(var(--from));
+  }
+}
+
+.tagline,
+.actions,
+.recent {
+  animation: rise 480ms var(--aml-ease) 880ms both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* global.css shortens every animation under reduced motion; the delays have to go too, or the
+   screen would sit blank for a second before appearing all at once. */
+@media (prefers-reduced-motion: reduce) {
+  .mark path,
+  .tagline,
+  .actions,
+  .recent {
+    animation-delay: 0ms;
+  }
 }
 
 .tagline {

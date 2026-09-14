@@ -12,7 +12,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("boots with wordmark, status info and pinned Browser (Desk layout)", async ({ page }) => {
-  await expect(page.getByText("Open a Folio to start writing.")).toBeVisible();
+  await expect(page.getByText("A meaningful life")).toBeVisible();
   await expect(page.getByTestId("app-info")).toContainText("0.0.0-browser");
   await expect(page.getByTestId("panel-left")).toHaveAttribute("data-pinned", "true");
 });

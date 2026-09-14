@@ -29,7 +29,7 @@ describe("App shell", () => {
   it("renders wordmark, status info and the pinned Browser in Desk layout", async () => {
     render(<App />);
     // The shell renders nothing in the centre until bootstrap has decided where to land.
-    expect(await screen.findByText("Open a Folio to start writing.")).toBeInTheDocument();
+    expect(await screen.findByText("A meaningful life")).toBeInTheDocument();
     expect(await screen.findByTestId("app-info")).toHaveTextContent("v0.1.0");
     expect(screen.getByTestId("panel-left")).toHaveAttribute("data-pinned", "true");
     expect(screen.queryByTestId("panel-right")).not.toBeInTheDocument();

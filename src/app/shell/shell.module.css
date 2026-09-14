@@ -22,7 +22,9 @@
    over its left end, so it starts after them — unless the window is in full screen, where
    macOS hides them. On Windows the caption buttons are its last children, flush to the edge. */
 .topbar[data-titlebar="mac"]:not([data-fullscreen]) {
-  padding-left: 84px;
+  /* The buttons end about 80pt in (trafficLightPosition x 20, three 14pt buttons 23pt apart);
+     this leaves the same gap after them as the bar keeps between its own controls. */
+  padding-left: 92px;
 }
 
 .topbar[data-titlebar="windows"] {

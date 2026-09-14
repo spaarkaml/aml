@@ -177,7 +177,7 @@ All results are `{status:"ok",data}|{status:"error",error:E}`; `FolioError` is `
 
 - **One top, not two.** Per-platform window config merges over `tauri.conf.json`:
   `tauri.macos.conf.json` makes the native title bar an overlay (`titleBarStyle: Overlay`,
-  `hiddenTitle`, `trafficLightPosition` centred in the 52px bar); `tauri.windows.conf.json`
+  `hiddenTitle`, `trafficLightPosition` `{20, 28}`: measured on macOS 26, the buttons' centre lands about 2pt above `y` — `y: 20` left them 8pt above the 52pt bar's centre line and `y: 38` 10pt below it, so 28 centres them); `tauri.windows.conf.json`
   removes the frame (`decorations: false`, `shadow: true` — Tauri keeps edge resizing for
   frameless windows on Windows). The merge replaces the `windows` array whole, so each file
   restates the window.

@@ -1,3 +1,4 @@
+import { Monogram } from "@/app/Monogram";
 import { useSyncStore } from "@/features/sync/store";
 import { useFolioStore } from "./store";
 import styles from "./Welcome.module.css";
@@ -15,8 +16,11 @@ export function Welcome() {
 
   return (
     <section className={styles.welcome} aria-label="Welcome">
-      <h1 className={styles.wordmark}>AML</h1>
-      <p className={styles.tagline}>Open a Folio to start writing.</p>
+      {/* Stencil: the three letters are cut in one after another, then the rest arrives. */}
+      <h1 className={styles.mark}>
+        <Monogram height={88} />
+      </h1>
+      <p className={styles.tagline}>A meaningful life</p>
       <div className={styles.actions}>
         <button type="button" className={styles.primary} onClick={pickAndOpen} disabled={busy}>
           Open Folio…
