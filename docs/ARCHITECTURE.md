@@ -190,6 +190,11 @@ All results are `{status:"ok",data}|{status:"error",error:E}`; `FolioError` is `
 - **Canvas 2D, not SVG**, reading `--aml-*` through `getComputedStyle` and repainting on a
   `data-mode` change or an OS theme flip, so no colour is written outside `tokens.css`
   (ADR-013). In dev the canvas exposes `__amlGraphAt(path)` so e2e can click a dot.
+- **Drawn as a map**: Bounding territories (a union path of member circles), beads, curved
+  links, rank-ordered labels with collision, a frosted hover card positioned by the draw loop.
+  One `requestAnimationFrame` loop runs layout, camera (follows `fitView` until you pan or
+  zoom), hover and entrance, and stops when all are still. `GraphControls` (zoom, fit) is how
+  the screen's floating buttons reach into the canvas.
 
 ## Snapshots (WP-4.1)
 

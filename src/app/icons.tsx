@@ -21,6 +21,8 @@ export type IconName =
   | "chevronDown"
   | "pencil"
   | "plus"
+  | "minus"
+  | "fit"
   | "search"
   | "folder"
   | "file"
@@ -43,6 +45,9 @@ const PATHS: Record<IconName, string> = {
   chevronDown: "m3.6 6.2 4.4 4 4.4-4",
   pencil: "M11.1 2.6a1.6 1.6 0 0 1 2.3 2.3L5.6 12.7l-3 .7.7-3zM10 3.7l2.3 2.3",
   plus: "M8 3.4v9.2M3.4 8h9.2",
+  minus: "M3.4 8h9.2",
+  // Four corners drawn in: "show me all of it", the way Maps and Freeform say it.
+  fit: "M2.6 5.8V3.6a1 1 0 0 1 1-1h2.2M10.2 2.6h2.2a1 1 0 0 1 1 1v2.2M13.4 10.2v2.2a1 1 0 0 1-1 1h-2.2M5.8 13.4H3.6a1 1 0 0 1-1-1v-2.2",
   search: "M11.2 7.2a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM10.1 10.1 13.6 13.6",
   folder:
     "M2.2 4.5a1.5 1.5 0 0 1 1.5-1.5h2.2l1.4 1.6h5a1.5 1.5 0 0 1 1.5 1.5v5.4a1.5 1.5 0 0 1-1.5 1.5H3.7a1.5 1.5 0 0 1-1.5-1.5z",

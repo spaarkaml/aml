@@ -1,19 +1,76 @@
+.wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--aml-bg);
+}
+
+.compact {
+  composes: wrap;
+  height: 220px;
+  border-radius: var(--aml-radius-lg);
+}
+
 .canvas {
   width: 100%;
   height: 100%;
   display: block;
   touch-action: none;
   cursor: grab;
-  border-radius: var(--aml-radius-lg);
-  background: var(--aml-surface);
 }
 
 .canvas:active {
   cursor: grabbing;
 }
 
-.compact {
-  composes: canvas;
-  height: 220px;
-  background: var(--aml-bg);
+/* The note under the pointer, as a small frosted card rather than a tooltip. Positioned by
+   the canvas every frame, so it never takes the pointer. */
+.card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--aml-space-05);
+  max-width: 260px;
+  padding: var(--aml-space-15) var(--aml-space-3) var(--aml-space-2);
+  border-radius: var(--aml-radius);
+  background: color-mix(in srgb, var(--aml-surface) 82%, transparent);
+  backdrop-filter: saturate(1.8) blur(20px);
+  -webkit-backdrop-filter: saturate(1.8) blur(20px);
+  box-shadow: var(--aml-shadow-2);
+  color: var(--aml-text);
+  pointer-events: none;
+  opacity: 0;
+  white-space: nowrap;
+  transform-origin: 50% 100%;
+}
+
+.cardTitle {
+  font-size: var(--aml-size-md);
+  font-weight: var(--aml-weight-semi);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--aml-space-1);
+  font-size: var(--aml-size-xs);
+  color: var(--aml-text-2);
+}
+
+.cardDot {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: var(--aml-radius-pill);
+}
+
+.cardHint {
+  margin-top: var(--aml-space-05);
+  font-size: var(--aml-size-xs);
+  color: var(--aml-text-3);
 }

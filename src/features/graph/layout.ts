@@ -332,10 +332,11 @@ export function fitView(
   width: number,
   height: number,
   margin = 28,
+  maxScale = 2.2,
 ): { scale: number; x: number; y: number } {
   const w = Math.max(box.maxX - box.minX, 1);
   const h = Math.max(box.maxY - box.minY, 1);
-  const scale = Math.min((width - margin * 2) / w, (height - margin * 2) / h, 2.2);
+  const scale = Math.min((width - margin * 2) / w, (height - margin * 2) / h, maxScale);
   return {
     scale,
     x: width / 2 - ((box.minX + box.maxX) / 2) * scale,

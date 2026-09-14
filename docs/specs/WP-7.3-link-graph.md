@@ -66,6 +66,37 @@ holds: no colour is written in this feature's own code.
 Which scope and depth you like is per device (ADR-004). The graph itself is never persisted:
 it is derived, and it is rebuilt from the index every time it is opened.
 
+### How it looks (redrawn 2026-09-14)
+The first drawing took its look from Obsidian: flat dots, straight grey lines, a legend line
+under a framed canvas. Bryce's brief for the redraw was Apple's hand, so the graph is drawn as
+a **map** — the thing a person would sketch — rather than a physics demo.
+
+- **Territories.** A Bounding is a tinted region: every member's circle goes into one canvas
+  path, which fills as a union (so overlaps do not darken), in two layers for a soft edge. The
+  Bounding's name sits over the top of it, and fades out as you zoom right in.
+- **Beads.** A note is its colour inside a ring of the page, so it sits visibly on its lines;
+  a note in no Bounding is an open ring. The focus note is larger with an accent halo, and a
+  focused graph quietens notes by depth (1, 1, 0.7, 0.48).
+- **Curves.** Links are quadratic curves bent a tenth of their length, coloured by the
+  Bounding when both ends share one; a pair in both directions bends to opposite sides.
+- **Names by rank.** Labels are placed in order of degree and skipped where they would collide
+  with one already placed (a Bounding's name reserves its room first), each with a halo of the
+  ground. Zoomed out you read the landmarks; zooming in makes room.
+- **Hover** eases the rest back and shows a frosted card (DOM, positioned by the draw loop, no
+  React render per frame): title, Bounding, links, words, and the two clicks.
+- **The camera follows the layout** until you pan or zoom, easing to `fitView` each frame; the
+  first ticks run before the first frame, so the picture arrives rather than exploding. The fit
+  is capped at 1.5× so a small graph stays a map.
+- **Glass controls** over an edge-to-edge canvas with a faint dot grid: scope and steps at the
+  top, the key (hover a Bounding to bring it forward) bottom left, zoom and *Show everything*
+  bottom right.
+- **Pointer.** Two-finger scroll pans and a pinch zooms (the wheel listener is non-passive so
+  a pinch never zooms the window); a notched mouse wheel zooms. Click opens; **⌥-click** (or a
+  double-click, where the first click does not close the view) centres the graph on a note.
+- One render loop drives the layout, the camera, the hover and the entrance, and stops when
+  none is moving. Canvas never parses `color-mix()`: dimmer ink is the text token at a lower
+  alpha. Reduced motion still gets the settled picture, with no easing.
+
 **Dependencies:** none added. The force layout and the renderer are ours — a graph library
 would have brought its own DOM, its own colours and its own idea of a theme.
 
@@ -80,6 +111,7 @@ would have brought its own DOM, its own colours and its own idea of a theme.
       where it was put (`features/graph/layout.test.ts`).
 - [x] E2E: ⌘⇧G draws the Folio, names its Boundings and counts what it drew; clicking a note
       opens it; "around this note" finds the note that links *to* it; the Context panel says
-      when a note is connected to nothing (`e2e/graph.spec.ts`).
+      when a note is connected to nothing; the zoom controls and *Show everything* keep the
+      graph clickable (`e2e/graph.spec.ts`).
 - [ ] **Gate 7:** a real Folio's graph is legible and its clusters are the ones you would draw
       by hand (`docs/qa/stage-7.md` §1–§7).

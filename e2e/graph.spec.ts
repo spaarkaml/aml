@@ -80,3 +80,27 @@ test("the Context panel carries the open note's own corner of the graph", async 
   // drawing a single lonely dot.
   await expect(page.getByTestId("graph-panel-empty")).toBeVisible();
 });
+
+test("the zoom controls move the view, and Show everything brings the whole graph back", async ({
+  page,
+}) => {
+  const METHODS = "Thesis/chapters/04 Methods.md";
+  const INFLUENCE = "Thesis/chapters/03 Influence networks.md";
+  // How far apart two notes are on screen — what a zoom changes wherever it is centred.
+  const spread = async () => {
+    const a = await dotAt(page, METHODS);
+    const b = await dotAt(page, INFLUENCE);
+    return Math.hypot(a.x - b.x, a.y - b.y);
+  };
+  await page.keyboard.press(`${mod}+Shift+G`);
+  await expect(page.getByTestId("graph-canvas")).toBeVisible();
+  const before = await spread();
+  await page.getByRole("button", { name: "Zoom out" }).click();
+  expect(await spread()).toBeLessThan(before * 0.9);
+  await page.getByTestId("graph-fit").click();
+  expect(Math.abs((await spread()) - before)).toBeLessThan(2);
+  // Still a working picture after all that: a click opens the note.
+  const at = await dotAt(page, "Inbox.md");
+  await page.mouse.click(at.x, at.y);
+  await expect(page.getByTestId("tab-strip")).toContainText("Inbox");
+});
