@@ -4,6 +4,8 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+## 0.5.1 — 2026-09-14
+
 ### The Welcome screen, cut in stencil (2026-09-14)
 - **The Welcome screen opens with the monogram**, its three letters cut in one after another (A from the left, M from below, L from the right), then *A meaningful life* and the buttons rise in behind. It plays once each time the screen appears, and not at all with reduced motion.
 - The spaced-out "AML" and *Open a Folio to start writing* are gone.
