@@ -21,7 +21,8 @@
     "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm vocab && pnpm version:check && pnpm contrast && pnpm rust:check",
     "e2e": "playwright test",
     "contrast": "node scripts/contrast-report.mjs",
-    "fonts:fetch": "node scripts/fetch-fonts.mjs"
+    "fonts:fetch": "node scripts/fetch-fonts.mjs",
+    "icons": "node scripts/icons.mjs"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.9.0",

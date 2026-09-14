@@ -4,6 +4,12 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+### A new app icon (2026-09-14)
+- **AML has its own icon**: the stencil A, M and L, overlapping, with rounded corners, in light blue and white.
+- **Drawn for each system.** On the Mac it sits on a white squircle like Apple's own icons. On Windows it has no plate, and the letters themselves are the icon in a light-blue gradient, the way Windows 11 draws Office and Edge.
+- **The small sizes are drawn separately**: at 32px and below, the cuts between the letters are wider and the blue a shade deeper, so a Finder list or a small taskbar still shows three letters rather than a blur.
+- `pnpm icons` redraws every icon file from the monogram's shapes. No dependency added: it renders with the Chromium that Playwright already brings.
+
 ## 0.5.0 — 2026-09-14
 
 ### Fix — the window no longer scrolls, and the Browser scrolls only its list (2026-09-14)

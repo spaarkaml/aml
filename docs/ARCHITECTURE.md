@@ -47,7 +47,7 @@ Updated with every work package. If this file and the code disagree, the code is
 | `themes/` | Reserved for Book Designs' CSS previews; app colours live in `tokens.css` |
 | `test-corpus/` | Round-trip markdown corpus, 48 files in 6 categories, `manifest.json` declares expectations |
 | `e2e/` | Playwright specs run in Chromium against Vite with mocked IPC (`src/dev-mocks.ts`); tauri-driver has no macOS support |
-| `scripts/` | `check-vocabulary.mjs`, `contrast-report.mjs`, `version.mjs` (the one version, in three files), `latest-json.mjs` (the updater endpoint, built from the bundler's signatures) |
+| `scripts/` | `check-vocabulary.mjs`, `contrast-report.mjs`, `version.mjs` (the one version, in three files), `latest-json.mjs` (the updater endpoint, built from the bundler's signatures), `icons.mjs` (`pnpm icons`: draws the app icon — the rounded stencil monogram, a white squircle for macOS and a bare light-blue glyph for Windows, with widened cuts at 32px and below — writes the SVG masters to `src-tauri/icons/source/` and renders every PNG, the `.ico` and the `.icns`) |
 
 ## Commands (current)
 
