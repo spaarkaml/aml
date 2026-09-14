@@ -8,6 +8,7 @@ All notable changes. Format: one entry per work package.
 - **AML has its own icon**: the stencil A, M and L, overlapping, with rounded corners, in light blue and white.
 - **Drawn for each system.** On the Mac it sits on a white squircle like Apple's own icons. On Windows it has no plate, and the letters themselves are the icon in a light-blue gradient, the way Windows 11 draws Office and Edge.
 - **The small sizes are drawn separately**: at 32px and below, the cuts between the letters are wider and the blue a shade deeper, so a Finder list or a small taskbar still shows three letters rather than a blur.
+- **The top bar carries the monogram** instead of the letters AML, in the app's own accent colour, so it is teal in Paper, pale blue in Ink, and follows whatever colours you set in Appearance.
 - `pnpm icons` redraws every icon file from the monogram's shapes. No dependency added: it renders with the Chromium that Playwright already brings.
 
 ## 0.5.0 — 2026-09-14

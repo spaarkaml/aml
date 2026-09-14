@@ -28,10 +28,11 @@
   font-size: var(--aml-size-sm);
 }
 
+/* The monogram (src/app/Monogram.tsx), in the app's accent so it follows Paper, Ink and
+   Appearance. A flex box so the drawing sits on the bar's centre line, not a text baseline. */
 .wordmark {
-  font-size: var(--aml-size-sm);
-  font-weight: var(--aml-weight-bold);
-  letter-spacing: 0.14em;
+  display: inline-flex;
+  align-items: center;
   color: var(--aml-primary);
   padding: 0 var(--aml-space-1);
 }

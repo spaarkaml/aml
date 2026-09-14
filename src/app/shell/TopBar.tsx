@@ -8,6 +8,7 @@ import { Breadcrumb } from "@/features/tabs/Breadcrumb";
 import { TabStrip } from "@/features/tabs/TabStrip";
 import { SHORTCUTS } from "../commands";
 import { Icon } from "../icons";
+import { Monogram } from "../Monogram";
 import styles from "./shell.module.css";
 
 const MODE_LABEL = { system: "Auto", paper: "Paper", ink: "Ink" } as const;
@@ -27,7 +28,9 @@ export function TopBar() {
 
   return (
     <header className={styles.topbar}>
-      <span className={styles.wordmark}>AML</span>
+      <span className={styles.wordmark} data-testid="wordmark">
+        <Monogram height={17} />
+      </span>
       <button
         type="button"
         className={styles.iconButton}
