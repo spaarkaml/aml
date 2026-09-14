@@ -31,15 +31,19 @@ const PANELS: Record<LeftView, React.ReactNode> = {
     </>
   ),
   // Replaced by the Binder while a Project is open (WP-5.2); see `LeftPanel` below.
-  boundings: <BoundingsPanel />,
+  boundings: (
+    <div className={styles.leftScroll}>
+      <BoundingsPanel />
+    </div>
+  ),
   search: (
-    <>
+    <div className={styles.leftScroll}>
       <SearchPanel />
       <section className={styles.leftSection} aria-label="Tags">
         <p className={styles.leftLabel}>Tags</p>
         <TagsPanel />
       </section>
-    </>
+    </div>
   ),
 };
 
@@ -73,7 +77,13 @@ export function LeftPanel() {
           </button>
         ))}
       </div>
-      {view === "folio" && project ? <BinderPanel /> : PANELS[view]}
+      {view === "folio" && project ? (
+        <div className={styles.leftScroll}>
+          <BinderPanel />
+        </div>
+      ) : (
+        PANELS[view]
+      )}
     </div>
   );
 }

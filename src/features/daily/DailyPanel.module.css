@@ -1,7 +1,10 @@
+/* The week tray at the foot of the Browser (WP-3.10). Drawn in the Browser's own vocabulary —
+   quiet labels, rows that highlight on hover, the current thing in the primary colour — so it
+   reads as the end of the same list rather than a widget set into it. */
 .panel {
   display: flex;
   flex-direction: column;
-  gap: var(--aml-space-2);
+  gap: var(--aml-space-1);
   font-size: var(--aml-size-sm);
 }
 
@@ -10,13 +13,15 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--aml-space-2);
+  padding: 0 var(--aml-space-05);
 }
 
 .label {
   font-size: var(--aml-size-xs);
   font-weight: var(--aml-weight-semi);
-  letter-spacing: 0.03em;
-  color: var(--aml-text-2);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--aml-text-3);
 }
 
 .arrow {
@@ -28,7 +33,7 @@
   border: 0;
   border-radius: var(--aml-radius-sm);
   background: transparent;
-  color: var(--aml-text-2);
+  color: var(--aml-text-3);
   cursor: default;
   transition:
     background var(--aml-dur-1) var(--aml-ease),
@@ -43,7 +48,7 @@
 .week {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 2px;
+  gap: 0;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -54,15 +59,16 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1px;
+  gap: 2px;
   width: 100%;
   font: inherit;
-  padding: 4px 0 6px;
-  border: 1px solid transparent;
-  border-radius: var(--aml-radius-sm);
+  padding: var(--aml-space-1) 0 var(--aml-space-05);
+  border: 0;
+  border-radius: var(--aml-radius);
   background: transparent;
-  color: inherit;
+  color: var(--aml-text);
   cursor: default;
+  transition: background var(--aml-dur-1) var(--aml-ease);
 }
 
 .day:hover,
@@ -73,19 +79,31 @@
   outline: none;
 }
 
-.dayToday {
-  border-color: var(--aml-primary);
-  color: var(--aml-primary);
-  font-weight: var(--aml-weight-semi);
-}
-
 .weekday {
   font-size: var(--aml-size-xs);
   color: var(--aml-text-3);
 }
 
+/* The date sits in a small round well; today's is filled, the way Calendar marks it. */
 .number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--aml-radius-pill);
   font-variant-numeric: tabular-nums;
+}
+
+.dayToday .weekday {
+  color: var(--aml-primary);
+  font-weight: var(--aml-weight-semi);
+}
+
+.dayToday .number {
+  background: var(--aml-primary);
+  color: var(--aml-surface);
+  font-weight: var(--aml-weight-semi);
 }
 
 /* A day that already has a note carries a dot under its number; the slot is always there so
@@ -104,8 +122,8 @@
   background: var(--aml-accent);
 }
 
-/* The one thing most often wanted from this tray, so it is a full-width button rather than
-   a chip: nothing else in the Browser competes with it. */
+/* The one thing most often wanted from this tray: a row like any other in the Browser, in the
+   primary colour — not a raised button in a band of its own. */
 .today {
   font: inherit;
   font-size: var(--aml-size-sm);
@@ -113,9 +131,8 @@
   width: 100%;
   height: var(--aml-row);
   border: 0;
-  box-shadow: var(--aml-shadow-1);
-  border-radius: var(--aml-radius-sm);
-  background: var(--aml-surface);
+  border-radius: var(--aml-radius);
+  background: color-mix(in srgb, var(--aml-primary) 8%, transparent);
   color: var(--aml-primary);
   cursor: default;
   transition: background var(--aml-dur-1) var(--aml-ease);
@@ -123,6 +140,6 @@
 
 .today:hover,
 .today:focus-visible {
-  background: var(--aml-highlight);
+  background: color-mix(in srgb, var(--aml-primary) 14%, transparent);
   outline: none;
 }

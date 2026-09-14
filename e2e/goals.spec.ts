@@ -1,4 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
+import { LINE_END } from "./helpers";
 
 const mod = process.platform === "darwin" ? "Meta" : "Control";
 
@@ -34,7 +35,7 @@ test("today's tally counts what you write, not what you open", async ({ page }) 
   await expect(page.getByTestId("goal-chip")).toContainText("0 / 50");
 
   await page.getByTestId("note-editor").getByText("Quick thoughts.").click();
-  await page.keyboard.press("End");
+  await page.keyboard.press(LINE_END);
   await page.keyboard.type(" one two three four five");
   await expect(page.getByTestId("goal-chip")).toContainText("5 / 50");
 

@@ -48,28 +48,8 @@ export function FolioTree() {
   ];
 
   return (
-    // biome-ignore lint/a11y/noStaticElementInteractions: drop zone and context-menu surface for the whole Browser
-    <div
-      className={dropRoot ? styles.browserDrop : styles.browser}
-      data-testid="folio-browser"
-      onContextMenu={(e) => {
-        if (e.target !== e.currentTarget) return;
-        e.preventDefault();
-        setMenu({ x: e.clientX, y: e.clientY, items: rootItems });
-      }}
-      onDragOver={(e) => {
-        if (!e.dataTransfer.types.includes(DRAG_TYPE)) return;
-        e.preventDefault();
-        if (e.target === e.currentTarget) setDropRoot(true);
-      }}
-      onDragLeave={() => setDropRoot(false)}
-      onDrop={(e) => {
-        setDropRoot(false);
-        if (e.target !== e.currentTarget) return;
-        e.preventDefault();
-        void moveTo(e.dataTransfer.getData(DRAG_TYPE), "");
-      }}
-    >
+    <div className={styles.browser} data-testid="folio-browser">
+      {/* The toolbar stays where it is; only the tree below it scrolls. */}
       <div className={styles.toolbar}>
         <button type="button" onClick={() => void createNote("")} title="New note at the top level">
           + Note
@@ -82,15 +62,38 @@ export function FolioTree() {
           + Folder
         </button>
       </div>
-      {tree.length === 0 ? (
-        <p className={styles.empty}>This Folio is empty.</p>
-      ) : (
-        <ul className={styles.tree} data-testid="folio-tree">
-          {tree.map((n) => (
-            <Node key={n.path} node={n} depth={0} openMenu={setMenu} />
-          ))}
-        </ul>
-      )}
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: drop zone and context-menu surface for the whole tree */}
+      <div
+        className={dropRoot ? styles.scrollDrop : styles.scroll}
+        data-testid="folio-scroll"
+        onContextMenu={(e) => {
+          if (e.target !== e.currentTarget) return;
+          e.preventDefault();
+          setMenu({ x: e.clientX, y: e.clientY, items: rootItems });
+        }}
+        onDragOver={(e) => {
+          if (!e.dataTransfer.types.includes(DRAG_TYPE)) return;
+          e.preventDefault();
+          if (e.target === e.currentTarget) setDropRoot(true);
+        }}
+        onDragLeave={() => setDropRoot(false)}
+        onDrop={(e) => {
+          setDropRoot(false);
+          if (e.target !== e.currentTarget) return;
+          e.preventDefault();
+          void moveTo(e.dataTransfer.getData(DRAG_TYPE), "");
+        }}
+      >
+        {tree.length === 0 ? (
+          <p className={styles.empty}>This Folio is empty.</p>
+        ) : (
+          <ul className={styles.tree} data-testid="folio-tree">
+            {tree.map((n) => (
+              <Node key={n.path} node={n} depth={0} openMenu={setMenu} />
+            ))}
+          </ul>
+        )}
+      </div>
       {menu ? <ContextMenu x={menu.x} y={menu.y} items={menu.items} onClose={closeMenu} /> : null}
     </div>
   );

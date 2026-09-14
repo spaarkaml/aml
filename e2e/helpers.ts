@@ -1,6 +1,15 @@
 import { expect, type Page } from "@playwright/test";
 
 /**
+ * The keys that move the caret to the start and end of a line. On a Mac, Home and End scroll
+ * the page, as they do in every Mac app, and only fall back to moving the caret when there is
+ * nothing to scroll — which, with the window itself fixed in place, is no longer guaranteed.
+ * ⌘← and ⌘→ are what a Mac user presses for this.
+ */
+export const LINE_START = process.platform === "darwin" ? "Meta+ArrowLeft" : "Home";
+export const LINE_END = process.platform === "darwin" ? "Meta+ArrowRight" : "End";
+
+/**
  * Puts the caret at the end of the first element matching `selector` inside the editor.
  * ProseMirror adopts a mouse-placed caret asynchronously (on `selectionchange`), so this
  * waits until its own selection sits at the end of that block before returning; pressing
@@ -11,7 +20,7 @@ export async function clickEndOf(page: Page, selector: string): Promise<void> {
   const box = await el.boundingBox();
   if (!box) throw new Error(`no box for ${selector}`);
   await page.mouse.click(box.x + box.width - 2, box.y + box.height / 2);
-  await page.keyboard.press("End");
+  await page.keyboard.press(LINE_END);
   await expect
     .poll(
       () =>

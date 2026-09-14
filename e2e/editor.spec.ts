@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { clickEndOf, waitForEditor } from "./helpers";
+import { clickEndOf, LINE_START, waitForEditor } from "./helpers";
 
 const mod = process.platform === "darwin" ? "Meta" : "Control";
 
@@ -70,7 +70,7 @@ test("front matter cannot be deleted by editing", async ({ page }) => {
   const box = await h1.boundingBox();
   if (!box) throw new Error("no h1");
   await page.mouse.click(box.x + 2, box.y + box.height / 2);
-  await page.keyboard.press("Home");
+  await page.keyboard.press(LINE_START);
   await page.keyboard.press("Backspace");
   await page.keyboard.press("Backspace");
   await expect(editor.locator(".aml-front-matter")).toHaveCount(1);

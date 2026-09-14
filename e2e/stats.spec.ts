@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { LINE_END } from "./helpers";
 
 const mod = process.platform === "darwin" ? "Meta" : "Control";
 
@@ -35,7 +36,7 @@ test("the figures are recounted from the note as it is now, not as it was saved"
   page,
 }) => {
   await page.getByTestId("note-editor").locator("h1").click();
-  await page.keyboard.press("End");
+  await page.keyboard.press(LINE_END);
   await page.keyboard.type(" one two three four five");
 
   await page.getByTestId("word-count").click();

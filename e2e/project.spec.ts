@@ -1,5 +1,5 @@
 import { expect, type Locator, type Page, test } from "@playwright/test";
-import { waitForEditor } from "./helpers";
+import { LINE_START, waitForEditor } from "./helpers";
 
 /** True once the caret sits at the very start of the block whose text is `text`. */
 function caretAtStartOf(page: Page, text: string): Promise<boolean> {
@@ -178,9 +178,15 @@ test("Split at Cursor puts the rest of the note in a document of its own", async
   // The editor focuses itself a frame after mounting, so wait for that before clicking into it.
   await waitForEditor(page);
   await page.getByTestId("note-editor").locator("h2").first().click();
-  await page.keyboard.press("Home");
+  // ProseMirror adopts a clicked caret asynchronously, so Home is pressed until it lands.
   await expect
-    .poll(() => caretAtStartOf(page, "Three properties"), { message: "caret at the heading" })
+    .poll(
+      async () => {
+        await page.keyboard.press(LINE_START);
+        return caretAtStartOf(page, "Three properties");
+      },
+      { message: "caret at the heading" },
+    )
     .toBe(true);
   await page.keyboard.press(`${mod}+Shift+K`);
 

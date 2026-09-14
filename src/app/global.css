@@ -9,6 +9,12 @@ body,
 #root {
   margin: 0;
   height: 100%;
+  /* The window is not a page. WebKit on macOS lets the document rubber-band and scroll even
+     when nothing overflows, which dragged the top bar and status bar about with a trackpad
+     flick; only the regions inside the shell scroll, and a scroll that reaches their end stops
+     there instead of handing the gesture on to the window. */
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 body {

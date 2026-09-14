@@ -1,4 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
+import { LINE_END } from "./helpers";
 
 const mod = process.platform === "darwin" ? "Meta" : "Control";
 
@@ -89,7 +90,7 @@ test("Typewriter Mode keeps the caret line in place as the note grows", async ({
   expect(padding).not.toBe("0px");
 
   await caretInProse(page);
-  await page.keyboard.press("End");
+  await page.keyboard.press(LINE_END);
   await page.keyboard.press("Enter");
   for (let i = 0; i < 12; i++) await page.keyboard.type(`Line ${i} of a long draft. `);
 

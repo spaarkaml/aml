@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { LINE_END } from "./helpers";
 
 const mod = process.platform === "darwin" ? "Meta" : "Control";
 
@@ -32,7 +33,9 @@ test("the outline lists headings, follows edits, and jumping moves the highlight
   // The outline is built from the live document, not the index: editing a heading shows now.
   // Jumping leaves the caret in that heading, so End + typing extends it.
   await page.getByTestId("outline-item-0").click();
-  await page.keyboard.press("End");
+  // Jumping hands focus to the editor a frame later; a key pressed before then goes nowhere.
+  await expect(page.getByTestId("note-editor").locator(".ProseMirror")).toBeFocused();
+  await page.keyboard.press(LINE_END);
   await page.keyboard.type(" revised");
   await expect(page.getByTestId("outline-item-0")).toContainText("Influence networks revised");
 });

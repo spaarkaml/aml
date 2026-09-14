@@ -99,22 +99,32 @@
   opacity: 0.8;
 }
 
-/* Grows to fill the Browser, so dropping a note on the space below the tree still means
-   "move it to the root" however short the tree is. */
-.browser,
-.browserDrop {
+.browser {
   flex: 1 1 auto;
   min-height: 0;
-  padding-bottom: var(--aml-space-8);
+  display: flex;
+  flex-direction: column;
 }
 
-.browserDrop {
+/* The tree's own scrolling box. It grows to fill the Browser, so dropping a note on the
+   space below the tree still means "move it to the root" however short the tree is. */
+.scroll,
+.scrollDrop {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding-bottom: var(--aml-space-4);
+}
+
+.scrollDrop {
   outline: 2px solid var(--aml-primary);
   outline-offset: -2px;
   border-radius: var(--aml-radius);
 }
 
 .toolbar {
+  flex: none;
   display: flex;
   gap: var(--aml-space-1);
   padding: 0 0 var(--aml-space-15);

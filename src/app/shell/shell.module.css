@@ -2,7 +2,7 @@
    region is separated by elevation instead. */
 
 .root {
-  height: 100vh;
+  height: 100%;
   display: grid;
   grid-template-rows: 52px 1fr 28px;
   /* A grid column defaults to `auto`, which never shrinks below its content's min-content
@@ -157,6 +157,7 @@
   display: flex;
   flex-direction: column;
   overflow: auto;
+  overscroll-behavior: contain;
   background: var(--aml-surface);
 }
 
@@ -224,7 +225,11 @@
 
 .panelBody {
   flex-grow: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   overflow: auto;
+  overscroll-behavior: contain;
   padding: 0 var(--aml-space-2) var(--aml-space-3);
   font-size: var(--aml-size-md);
 }
@@ -368,19 +373,30 @@
 
 /* ---- left panel view switch (WP-2.4) ---- */
 
-/* Fills the panel body so the Browser's tray can sit at the foot of it rather than
-   wherever the tree happens to end. */
+/* Fills the panel body exactly, and does its own scrolling: the view switch at the top and
+   the tray at the foot stay put, and only the list between them moves — inside its own box,
+   never behind either of them. */
 .left {
+  flex: 1 1 auto;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: var(--aml-space-2);
-  min-height: 100%;
+  overflow: hidden;
+}
+
+.leftScroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
 }
 
 /* macOS segmented control: a recessed track with one raised segment. Three views fit one
    line in the narrowest panel, which is why there are three (WP-3.10); the grid keeps them
    the same width whatever their labels, so Search's icon sits dead centre of its third. */
 .segmented {
+  flex: none;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--aml-space-05);
@@ -424,14 +440,12 @@
 }
 
 /* The bottom tray of the Browser: the week and today's note stay in reach however far the
-   tree is scrolled, the way a Finder sidebar keeps its footer. */
+   tree is scrolled, the way a Finder sidebar keeps its footer. Part of the same card — a
+   hairline above it, the card's own ground — not a band of another colour laid over it. */
 .leftFooter {
-  position: sticky;
-  bottom: 0;
-  margin-top: auto;
-  padding: var(--aml-space-2) 0 var(--aml-space-1);
-  border-top: 1px solid var(--aml-muted);
-  background: var(--aml-bg);
+  flex: none;
+  padding-top: var(--aml-space-2);
+  border-top: 1px solid color-mix(in srgb, var(--aml-text) 9%, transparent);
 }
 
 /* A second list under the first (Tags below Search): separated, not boxed. */

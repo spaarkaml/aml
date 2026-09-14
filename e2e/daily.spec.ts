@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { clickEndOf } from "./helpers";
 
 const mod = process.platform === "darwin" ? "Meta" : "Control";
 
@@ -55,8 +56,7 @@ test("the calendar strip starts today's Daily from the template and marks the da
   await expect(page.getByTestId("daily-today")).toHaveText("Open today\u2019s note");
 
   // Asking again opens the same note rather than writing over it.
-  await page.getByTestId("note-editor").locator("h1").click();
-  await page.keyboard.press("End");
+  await clickEndOf(page, "h1");
   await page.keyboard.type(" — kept");
   await page.keyboard.press(`${mod}+Shift+d`);
   await expect(page.getByTestId("note-editor").locator("h1")).toHaveText(`${heading} — kept`);
