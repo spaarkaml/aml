@@ -17,9 +17,16 @@ export const LINE_END = process.platform === "darwin" ? "Meta+ArrowRight" : "End
  */
 export async function clickEndOf(page: Page, selector: string): Promise<void> {
   const el = page.getByTestId("note-editor").locator(selector).first();
-  const box = await el.boundingBox();
-  if (!box) throw new Error(`no box for ${selector}`);
-  await page.mouse.click(box.x + box.width - 2, box.y + box.height / 2);
+  // The end of the block's *last line*: on a narrow window a paragraph wraps, and the line-end
+  // key (⌘→ on a Mac) only reaches the end of the line the click landed on.
+  const box = await el.evaluate((node) => {
+    const range = document.createRange();
+    range.selectNodeContents(node);
+    const rects = [...range.getClientRects()].filter((r) => r.width > 0);
+    const last = rects[rects.length - 1] ?? node.getBoundingClientRect();
+    return { x: last.right, y: last.top + last.height / 2 };
+  });
+  await page.mouse.click(box.x - 2, box.y);
   await page.keyboard.press(LINE_END);
   await expect
     .poll(

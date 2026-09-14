@@ -65,6 +65,7 @@ test("a pinned panel is the same floating card, and the page makes room for it",
   const panel = page.getByTestId("panel-left");
   await expect(panel).toHaveAttribute("data-pinned", "true");
 
+  await panel.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
   const pinned = await geometry(page);
   // Floating, not welded to the window: it is inset on its own side …
   expect(pinned.left?.left).toBeGreaterThan(0);
@@ -74,6 +75,8 @@ test("a pinned panel is the same floating card, and the page makes room for it",
   await page.getByRole("button", { name: "Pinned" }).click();
   await expect(panel).toHaveAttribute("data-pinned", "false");
 
+  // The panel eases in when it appears; measured mid-animation it is a pixel or two off.
+  await panel.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
   const floating = await geometry(page);
   expect(floating.page?.left).toBe(0);
   // Unpinning changes nothing about the panel itself — only that the page no longer moves.
