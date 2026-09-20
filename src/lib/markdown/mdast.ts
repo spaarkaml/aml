@@ -1,5 +1,10 @@
-import type { Blockquote, Definition, Root, RootContent } from "mdast";
-import { type Options as ToMarkdownOptions, toMarkdown } from "mdast-util-to-markdown";
+import type { Blockquote, Definition, Parents, Root, RootContent } from "mdast";
+import {
+  type Info,
+  type State,
+  type Options as ToMarkdownOptions,
+  toMarkdown,
+} from "mdast-util-to-markdown";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
@@ -8,8 +13,9 @@ import remarkStringify from "remark-stringify";
 import { unified } from "unified";
 import { visit } from "unist-util-visit";
 import { escapeText } from "./escape";
+import { highlightFences, wrapHighlights } from "./highlight";
 import { applyInlineSyntax, serialiseInline } from "./inline-syntax";
-import type { AmlInline } from "./types";
+import type { AmlInline, Highlight } from "./types";
 
 /**
  * Parsing and canonical serialisation of the AML markdown dialect (ADR-003):
@@ -74,11 +80,24 @@ function resolveReferences(tree: Root): void {
 export function parseMarkdown(source: string): Root {
   const tree = parser.parse(normaliseSource(source)) as Root;
   resolveReferences(tree);
+  // Before the inline pass: a highlight's fences are plain text until they are found, and the
+  // text nodes they sit in are the ones that pass replaces with tags and wiki links.
+  wrapHighlights(tree, normaliseSource(source));
   applyInlineSyntax(tree);
   return tree;
 }
 
 const amlInlineHandler = (node: AmlInline) => serialiseInline(node);
+
+const highlightHandler = (node: Highlight, _parent: unknown, state: State, info: Info) => {
+  const [open, close] = highlightFences(node.colour);
+  const text = state.containerPhrasing(node as unknown as Parents, {
+    ...info,
+    before: "=",
+    after: "=",
+  });
+  return `${open}${text}${close}`;
+};
 
 export const toMarkdownOptions: ToMarkdownOptions = {
   bullet: "-",
@@ -100,6 +119,7 @@ export const toMarkdownOptions: ToMarkdownOptions = {
       wikiEmbed: amlInlineHandler,
       tag: amlInlineHandler,
       cite: amlInlineHandler,
+      highlight: highlightHandler,
       // Raw nodes from the editor: emitted byte-for-byte (ADR-003 rule 2).
       rawMarkdown: (node: { value: string }) => node.value,
       rawInlineMarkdown: (node: { value: string }) => node.value,

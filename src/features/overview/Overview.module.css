@@ -205,6 +205,25 @@
 
 /* ---- recents ---- */
 
+/* Recent and the graph share the last row: the list reads down the left, the map sits beside
+   it. Narrow (or with nothing recent yet) the map simply takes the whole width. */
+.pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--aml-space-6);
+  align-items: start;
+}
+
+.pair[data-recent] {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+@media (max-width: 860px) {
+  .pair[data-recent] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .recent {
   margin: 0;
   padding: 0;
@@ -212,7 +231,6 @@
   display: flex;
   flex-direction: column;
   gap: 1px;
-  max-width: 62ch;
 }
 
 .note {

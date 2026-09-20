@@ -104,3 +104,17 @@ test("the zoom controls move the view, and Show everything brings the whole grap
   await page.mouse.click(at.x, at.y);
   await expect(page.getByTestId("tab-strip")).toContainText("Inbox");
 });
+
+test("the Overview carries the whole Folio as a small map, and Expand opens it", async ({
+  page,
+}) => {
+  const card = page.getByTestId("overview-graph");
+  await expect(card).toBeVisible();
+  await expect(card.getByTestId("overview-graph-canvas")).toBeVisible();
+  await card.getByTestId("overview-graph-expand").click();
+  // The same graph, over everything, at the scope the card was showing.
+  await expect(page.getByTestId("graph-backdrop")).toBeVisible();
+  await expect(page.getByTestId("graph-summary")).toContainText("7 notes");
+  await page.getByTestId("graph-close").click();
+  await expect(card.getByTestId("overview-graph-canvas")).toBeVisible();
+});

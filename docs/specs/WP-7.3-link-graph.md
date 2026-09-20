@@ -62,6 +62,12 @@ holds: no colour is written in this feature's own code.
   stays there.
 - **The Context panel** carries the open note's own corner, one step out, closed by default.
   Two steps in a box that size is a smudge.
+- **The Overview** carries the whole Folio as a small map, beside what you were last writing
+  (added 2026-09-20, by request). A shape rather than a tool: which Boundings there are, how
+  big they have grown and what is drifting loose, read in a glance on the way past. It is the
+  same canvas as the screen — territories, names and grid included, with a smaller fit margin —
+  so *Expand* is a change of size, not of picture. With no recents yet the map takes the whole
+  width; under 860px it drops below the list.
 
 Which scope and depth you like is per device (ADR-004). The graph itself is never persisted:
 it is derived, and it is rebuilt from the index every time it is opened.
@@ -112,6 +118,7 @@ would have brought its own DOM, its own colours and its own idea of a theme.
 - [x] E2E: ⌘⇧G draws the Folio, names its Boundings and counts what it drew; clicking a note
       opens it; "around this note" finds the note that links *to* it; the Context panel says
       when a note is connected to nothing; the zoom controls and *Show everything* keep the
-      graph clickable (`e2e/graph.spec.ts`).
+      graph clickable; the Overview's map draws and *Expand* opens the same graph
+      (`e2e/graph.spec.ts`).
 - [ ] **Gate 7:** a real Folio's graph is legible and its clusters are the ones you would draw
       by hand (`docs/qa/stage-7.md` §1–§7).

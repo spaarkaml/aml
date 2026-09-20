@@ -1,0 +1,62 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--aml-space-2);
+  min-width: 0;
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--aml-space-2);
+}
+
+/* The same quiet heading the Overview's other sections wear. */
+.title {
+  margin: 0;
+  font-size: var(--aml-size-xs);
+  font-weight: var(--aml-weight-semi);
+  color: var(--aml-text-3);
+}
+
+.expand {
+  display: flex;
+  align-items: center;
+  gap: var(--aml-space-1);
+  font: inherit;
+  font-size: var(--aml-size-xs);
+  color: var(--aml-primary);
+  background: transparent;
+  border: 0;
+  border-radius: var(--aml-radius-sm);
+  padding: var(--aml-space-05) var(--aml-space-1);
+  cursor: default;
+}
+
+.expand:hover {
+  background: var(--aml-highlight);
+}
+
+/* The canvas paints its own background, so the card is only the frame around it. */
+.stage {
+  height: 100%;
+  min-height: 236px;
+  border-radius: var(--aml-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--aml-shadow-1);
+  display: flex;
+}
+
+.empty {
+  margin: auto;
+  padding: var(--aml-space-4);
+  text-align: center;
+  font-size: var(--aml-size-sm);
+  color: var(--aml-text-3);
+  background: var(--aml-surface);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

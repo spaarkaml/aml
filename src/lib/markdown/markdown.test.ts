@@ -171,6 +171,51 @@ describe("markdown bridge specifics", () => {
     expect(docToMarkdown(markdownToDoc(src))).toBe(src);
   });
 
+  it("a highlight is a mark with a colour, and the fences come back (WP-3.11)", () => {
+    const src = "Plain ==marked== and ==blue one=={blue} here.\n";
+    const doc = markdownToDoc(src);
+    const kids = doc.content[0]?.content ?? [];
+    expect(kids.map((n) => n.marks?.[0]?.attrs?.colour ?? null)).toEqual([
+      null,
+      "yellow",
+      null,
+      "blue",
+      null,
+    ]);
+    expect(docToMarkdown(doc)).toBe(src);
+  });
+
+  it("a highlight holds real markdown, and other marks nest inside it", () => {
+    const src = "==**bold** and [a link](x.md) and [[Wiki]] and #tag=={green}\n";
+    const doc = markdownToDoc(src);
+    const kids = doc.content[0]?.content ?? [];
+    expect(kids.every((n) => n.marks?.some((m) => m.type === "highlight"))).toBe(true);
+    expect(kids.map((n) => n.type)).toEqual([
+      "text",
+      "text",
+      "text",
+      "text",
+      "wikiLink",
+      "text",
+      "tag",
+    ]);
+    expect(docToMarkdown(doc)).toBe(src);
+  });
+
+  it("text that only looks like a fence is left alone, and literal fences are escaped", () => {
+    expect(markdownToDoc("2 == 2\n").content[0]?.content?.[0]?.marks).toBeUndefined();
+    expect(docToMarkdown(markdownToDoc("2 == 2\n"))).toBe("2 == 2\n");
+    // An escaped fence stays text through the whole round trip, colour suffix and all.
+    const literal: PmNode = {
+      type: "doc",
+      content: [{ type: "paragraph", content: [{ type: "text", text: "==not marked==" }] }],
+    };
+    const out = docToMarkdown(literal);
+    expect(out).toBe("\\=\\=not marked\\=\\=\n");
+    expect(markdownToDoc(out).content[0]?.content?.[0]?.marks).toBeUndefined();
+    expect(docToMarkdown(markdownToDoc(out))).toBe(out);
+  });
+
   it("empty document serialises to empty string", () => {
     expect(docToMarkdown({ type: "doc", content: [{ type: "paragraph" }] })).toBe("");
   });

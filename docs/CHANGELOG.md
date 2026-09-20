@@ -4,6 +4,20 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+## 0.5.2 — 2026-09-20
+
+### WP-3.11 — Highlighting (2026-09-20)
+- **Mark a phrase in yellow, blue, green or orange.** Select some text and the toolbar shows a marker button: click it for the four colours, click it again on a marked phrase to clear it. **⌘⇧Y** marks in yellow.
+- **It stays a markdown file.** A highlight is written `==like this==`, the syntax Obsidian, Pandoc and most other markdown tools already use, so a marked note reads as marked anywhere else — and a note marked in Obsidian arrives here already marked. A colour rides in a brace after the fence: `==like this=={blue}`.
+- **A highlight costs you no words.** The fences are punctuation, not words, so marking a sentence does not move your word count or your daily goal, and search snippets stay clean. (That is why it is not `<mark>` tags.)
+- **What you mark is still ordinary writing**: bold, links, wiki links and tags all work inside a highlight, and `2 == 2` is not one.
+- The four tones are Appearance tokens, deep and desaturated in Ink, and every one of them clears 4.5:1 against the text.
+
+### WP-7.3 follow-up — the graph on the Overview (2026-09-20)
+- **The Overview carries the whole Folio as a small map**, beside what you were last writing: which Boundings there are, how big they have grown, and what is drifting loose, in a glance on the way past.
+- **Expand** opens the same graph full size over everything, the way ⌘K opens the palette. Clicking a note in the small map opens it; ⌥-clicking one opens the big graph centred there.
+- With nothing recent yet, the map takes the whole width; on a narrow window it drops under the list.
+
 ## 0.5.1 — 2026-09-14
 
 ### The Welcome screen, cut in stencil (2026-09-14)

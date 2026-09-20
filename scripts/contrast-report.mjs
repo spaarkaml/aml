@@ -37,6 +37,10 @@ const PAIRS = [
   ["aml-accent", "aml-bg", "decorative"],
   ["aml-muted", "aml-bg", "decorative"],
   ["aml-bg", "aml-primary", "text"], // text on primary buttons
+  ["aml-text", "aml-mark-yellow", "text"], // WP-3.11: you have to be able to read what you marked
+  ["aml-text", "aml-mark-blue", "text"],
+  ["aml-text", "aml-mark-green", "text"],
+  ["aml-text", "aml-mark-orange", "text"],
 ];
 
 const modes = { Paper: block(":root"), Ink: block(':root[data-mode="ink"]') };

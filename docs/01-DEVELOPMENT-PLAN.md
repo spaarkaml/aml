@@ -121,6 +121,7 @@ Roughly 80–95 AI sessions. Stages 2 and 3 can overlap; 6 and 7 can overlap.
 | 3.7 | Statistics panel: words, characters, sentences, readability, per-heading counts |
 | 3.8 | **Syntax reveal** (Typora-style): show raw markers for the mark/block under the caret; toggleable |
 | 3.9 | Callouts/admonitions modelled as proper nodes (Obsidian `> [!note]` syntax) — retires those Raw nodes from import |
+| 3.11 | ~~**Highlighting**: mark a phrase in yellow, blue, green or orange~~ **done 2026-09-20, by request**. Written `==marked==` / `==marked=={blue}` — the syntax Obsidian and Pandoc already use, and punctuation rather than tags so a highlight costs no words. Marker button in the selection toolbar, ⌘⇧Y for yellow; an amendment to ADR-003 is proposed in the spec and waits on Bryce |
 
 ### Quality Gate 3
 - [ ] A ≥ 1,500-word session in Focus + Typewriter; zero blockers logged
@@ -202,7 +203,7 @@ Roughly 80–95 AI sessions. Stages 2 and 3 can overlap; 6 and 7 can overlap.
 |---|---|
 | 7.1 | ~~Diagrams: a structured editor for formulation, genogram, sociogram and influence maps, written as a re-editable SVG in the note's `assets/`~~ **done 2026-09-13**. **WP-7.2 folded in by decision** (one charting feature, not two) and **Mermaid dropped**: it decides the layout, and in these diagrams position *is* the meaning. Mermaid fences still round-trip untouched; `docs/qa/stage-7.md` §10–§18 |
 | 7.2 | ~~Canvas notes (Excalidraw-style) — if Q15 wants freehand~~ **folded into 7.1, 2026-09-13**: freehand was not wanted, a structured editor was |
-| 7.3 | ~~Link graph: local and Folio-wide, clustered by Bounding~~ **done 2026-09-12** (pulled forward). ⌘⇧G for the Folio, a Context-panel section for the open note; `docs/qa/stage-7.md` |
+| 7.3 | ~~Link graph: local and Folio-wide, clustered by Bounding~~ **done 2026-09-12** (pulled forward), redrawn as a map 2026-09-14, and on the Overview beside Recent since 2026-09-20. ⌘⇧G for the Folio, a Context-panel section for the open note; `docs/qa/stage-7.md` |
 | 7.4 | Grammar via LanguageTool on the NAS (Docker), AU English — if Q21 = yes |
 | 7.5 | Template scripting — only if wanted |
 

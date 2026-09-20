@@ -18,7 +18,7 @@ import {
   parseMarkdown,
   serialiseMarkdown,
 } from "./mdast";
-import type { AmlInline, PmDoc, PmMark, PmNode } from "./types";
+import type { AmlInline, Highlight, PmDoc, PmMark, PmNode } from "./types";
 
 /**
  * mdast ⇄ ProseMirror JSON. Node names match the Tiptap extensions in
@@ -27,7 +27,7 @@ import type { AmlInline, PmDoc, PmMark, PmNode } from "./types";
  */
 
 type Block = BlockContent | DefinitionContent;
-type Inline = PhrasingContent | AmlInline;
+type Inline = PhrasingContent | AmlInline | Highlight;
 
 // ---------- mdast → PM ----------
 
@@ -194,6 +194,12 @@ function inlineToPm(node: Inline, ctx: Ctx, marks: PmMark[]): PmNode[] {
       return inlinesToPm(node.children as Inline[], ctx, withMark(marks, { type: "bold" }));
     case "delete":
       return inlinesToPm(node.children as Inline[], ctx, withMark(marks, { type: "strike" }));
+    case "highlight":
+      return inlinesToPm(
+        node.children as Inline[],
+        ctx,
+        withMark(marks, { type: "highlight", attrs: { colour: node.colour } }),
+      );
     case "inlineCode":
       return textNode(node.value, withMark(marks, { type: "code" }));
     case "link":
@@ -412,7 +418,7 @@ function cellInlines(cell: PmNode): PmNode[] {
   return out;
 }
 
-const MARK_TYPES = ["link", "bold", "italic", "strike"] as const;
+const MARK_TYPES = ["link", "bold", "italic", "strike", "highlight"] as const;
 type MarkType = (typeof MARK_TYPES)[number];
 
 function hasMark(n: PmNode, type: string): PmMark | undefined {
@@ -516,6 +522,12 @@ function wrapMark(type: string, mark: PmMark, children: PhrasingContent[]): Phra
       return { type: "strong", children };
     case "italic":
       return { type: "emphasis", children };
+    case "highlight":
+      return {
+        type: "highlight",
+        colour: str(mark.attrs?.colour, "yellow"),
+        children,
+      } as unknown as PhrasingContent;
     default:
       return { type: "delete", children };
   }

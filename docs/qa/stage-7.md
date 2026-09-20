@@ -32,3 +32,5 @@ WP-7.3 (link graph, §1–§9) and WP-7.1 (diagrams, §10–§18) are built. Rec
 | 16 | Right-click the drawing → **Edit diagram**, change something, **Save** | It re-opens with everything as it was, including what each link *means*; saving leaves **one** file in `assets/` — not a second copy | ☐ |
 | 17 | Open the same note's `assets/….svg` in Preview, a browser, and on the NAS | It renders as a normal image everywhere, with its own background — nothing missing, nothing dark-on-dark | ☐ |
 | 18 | Switch between Paper and Ink with a diagram on screen and in the editor | The editor follows Appearance; the saved file stays legible in both (its colours are yours and do not change, its text and page do) | ☐ |
+| 19 | *(WP-7.3 follow-up)* Open the Overview with a real Folio | The graph sits beside Recent as a small map, fitted and centred, with the Boundings tinted and named | ☐ |
+| 20 | *(WP-7.3 follow-up)* Click a note in the small map, then come back and press **Expand** | The click opens the note; Expand opens the full graph over everything, showing the whole Folio; Escape closes it and the card is still there | ☐ |

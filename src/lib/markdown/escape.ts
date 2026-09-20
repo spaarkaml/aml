@@ -94,6 +94,16 @@ export function escapeText(text: string, ctx: EscapeContext): string {
       continue;
     }
 
+    if (ch === "=" && text[i + 1] === "=") {
+      // A highlight fence (WP-3.11), but only where one could actually open or close: prose
+      // that compares two things ("x == y") keeps its spaces and needs no backslashes.
+      const prev = i === 0 ? ctx.before : (text[i - 1] ?? "");
+      const next = i + 2 >= text.length ? ctx.after : (text[i + 2] ?? "");
+      const fence = (!isWhitespace(next) && next !== "=") || (!isWhitespace(prev) && prev !== "=");
+      out += fence ? "\\=\\=" : "==";
+      i += 2;
+      continue;
+    }
     if (ch === "~" && text[i + 1] === "~") {
       out += "\\~\\~";
       i += 2;

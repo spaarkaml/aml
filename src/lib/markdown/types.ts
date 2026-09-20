@@ -1,4 +1,4 @@
-import type { Nodes as MdastNodes, Root } from "mdast";
+import type { Nodes as MdastNodes, PhrasingContent, Root } from "mdast";
 
 /** ProseMirror JSON (what Tiptap's `editor.getJSON()` returns and `setContent` accepts). */
 export interface PmMark {
@@ -40,6 +40,17 @@ export interface Cite {
   raw: string;
 }
 
+/**
+ * A highlight (WP-3.11). Unlike the inlines above it has children of its own — what is
+ * highlighted is ordinary markdown — so it is a Parent, not a verbatim run.
+ */
+export type HighlightColour = "yellow" | "blue" | "green" | "orange";
+export interface Highlight {
+  type: "highlight";
+  colour: HighlightColour;
+  children: PhrasingContent[];
+}
+
 export type AmlInline = WikiLink | WikiEmbed | Tag | Cite;
-export type AnyMdast = MdastNodes | AmlInline;
+export type AnyMdast = MdastNodes | AmlInline | Highlight;
 export type { Root };

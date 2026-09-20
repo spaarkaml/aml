@@ -14,6 +14,10 @@ Thresholds: text ≥ 4.5:1 · large ≥ 3:1 · decorative = informational.
 | `--aml-accent` #e37c78 | `--aml-bg` #f5f5f7 | 2.60 : 1 | decorative | ℹ️ |
 | `--aml-muted` #d8d8dd | `--aml-bg` #f5f5f7 | 1.30 : 1 | decorative | ℹ️ |
 | `--aml-bg` #f5f5f7 | `--aml-primary` #006078 | 6.55 : 1 | text | ✅ |
+| `--aml-text` #1d1d1f | `--aml-mark-yellow` #ffe9a8 | 14.00 : 1 | text | ✅ |
+| `--aml-text` #1d1d1f | `--aml-mark-blue` #cfe4fb | 12.94 : 1 | text | ✅ |
+| `--aml-text` #1d1d1f | `--aml-mark-green` #cfeacd | 13.07 : 1 | text | ✅ |
+| `--aml-text` #1d1d1f | `--aml-mark-orange` #ffdcb5 | 12.95 : 1 | text | ✅ |
 
 ## Ink
 
@@ -27,3 +31,7 @@ Thresholds: text ≥ 4.5:1 · large ≥ 3:1 · decorative = informational.
 | `--aml-accent` #e37c78 | `--aml-bg` #17262b | 5.50 : 1 | decorative | ℹ️ |
 | `--aml-muted` #2f4a52 | `--aml-bg` #17262b | 1.65 : 1 | decorative | ℹ️ |
 | `--aml-bg` #17262b | `--aml-primary` #82bac4 | 7.24 : 1 | text | ✅ |
+| `--aml-text` #f0e9e7 | `--aml-mark-yellow` #6a5a1e | 5.66 : 1 | text | ✅ |
+| `--aml-text` #f0e9e7 | `--aml-mark-blue` #234a63 | 7.85 : 1 | text | ✅ |
+| `--aml-text` #f0e9e7 | `--aml-mark-green` #2a5236 | 7.43 : 1 | text | ✅ |
+| `--aml-text` #f0e9e7 | `--aml-mark-orange` #6b4620 | 6.94 : 1 | text | ✅ |

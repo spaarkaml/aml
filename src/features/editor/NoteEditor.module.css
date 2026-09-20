@@ -322,3 +322,27 @@
 .prose :global(.aml-callout) > :global(p:first-of-type) {
   margin-top: 0;
 }
+
+/* Highlights (WP-3.11). The four tones are tokens; a mark keeps its own text colour so it
+   reads the same as the sentence around it, and the corners are the inline-mark radius. */
+.prose :global(mark) {
+  background: var(--aml-mark-yellow);
+  color: inherit;
+  border-radius: var(--aml-radius-xs);
+  padding: 0.05em 0.14em;
+  margin: 0 -0.04em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.prose :global(mark[data-colour="blue"]) {
+  background: var(--aml-mark-blue);
+}
+
+.prose :global(mark[data-colour="green"]) {
+  background: var(--aml-mark-green);
+}
+
+.prose :global(mark[data-colour="orange"]) {
+  background: var(--aml-mark-orange);
+}

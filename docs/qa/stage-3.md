@@ -27,3 +27,8 @@ Run against your real Folio on the Mac (and later the PC). Record results in `do
 | 21 | *(WP-3.7)* Open a real chapter and click the word count | The figures match the status bar; the sections are your headings with the subsection words counted in; the readability band is believable for the prose | ☐ |
 | 22 | *(WP-3.9)* Open a real note full of Obsidian callouts, edit one body and one title, save, then diff the file | Every callout renders as a panel with no raw chips; the file changed only where you typed — the head line, the fold markers and any `\|layout` hints are exactly as they were | ☐ |
 | 23 | *(WP-3.5, built with WP-4.1)* Snapshot → edit → compare → restore | **Gate 3's snapshot line.** Run `docs/qa/stage-4.md` §15–§17 and record it there | ☐ |
+| 24 | *(WP-3.11)* In a real note, mark a phrase yellow from the toolbar and another blue; then look at the file on disk | The file reads `==phrase==` and `==phrase=={blue}`; nothing else in the note changed | ☐ |
+| 25 | *(WP-3.11)* Note the word count, mark a whole sentence, and look again | It has not moved — a highlight costs no words. The daily goal did not move either | ☐ |
+| 26 | *(WP-3.11)* Open that note in Obsidian on the NAS copy | Both phrases show as highlighted there; the blue one has a small `{blue}` after it and nothing is swallowed | ☐ |
+| 27 | *(WP-3.11)* Mark something in Ink, then switch to Paper | All four colours are readable in both — the text on them never goes grey-on-bright | ☐ |
+| 28 | *(WP-3.11)* Write a line that contains `2 == 2` and one with `\=\=escaped\=\=`, save, close and reopen | Neither becomes a highlight, and the file still reads the way you typed it | ☐ |

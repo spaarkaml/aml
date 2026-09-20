@@ -14,6 +14,7 @@ const EDITOR_KEYS: Array<[string, string]> = [
   ["Bold", "mod+b"],
   ["Italic", "mod+i"],
   ["Inline code", "mod+e"],
+  ["Highlight", "mod+shift+y"],
   ["Undo", "mod+z"],
   ["Redo", "mod+shift+z"],
 ];

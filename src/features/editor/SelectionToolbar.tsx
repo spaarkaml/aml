@@ -1,6 +1,8 @@
 import type { Editor } from "@tiptap/core";
 import { useEditorState } from "@tiptap/react";
 import { useEffect, useState } from "react";
+import { HIGHLIGHT_COLOURS } from "@/lib/markdown/highlight";
+import type { HighlightColour } from "@/lib/markdown/types";
 import styles from "./SelectionToolbar.module.css";
 
 /** Formatting toolbar that floats above a non-empty text selection. */
@@ -20,6 +22,8 @@ export function SelectionToolbar({ editor }: { editor: Editor }) {
         strike: e.isActive("strike"),
         code: e.isActive("code"),
         link: e.isActive("link"),
+        highlight: (HIGHLIGHT_COLOURS.find((c) => e.isActive("highlight", { colour: c })) ??
+          null) as HighlightColour | null,
         h1: e.isActive("heading", { level: 1 }),
         h2: e.isActive("heading", { level: 2 }),
         h3: e.isActive("heading", { level: 3 }),
@@ -27,12 +31,16 @@ export function SelectionToolbar({ editor }: { editor: Editor }) {
     },
   });
   const [linkMode, setLinkMode] = useState(false);
+  const [marking, setMarking] = useState(false);
   const [href, setHref] = useState("");
 
   // The link field takes focus from the editor; keep the toolbar while it is in use and
   // drop it only when the selection itself is gone.
   useEffect(() => {
-    if (!state.hasText) setLinkMode(false);
+    if (!state.hasText) {
+      setLinkMode(false);
+      setMarking(false);
+    }
   }, [state.hasText]);
 
   if (!state.hasText || (!state.focused && !linkMode)) return null;
@@ -98,6 +106,44 @@ export function SelectionToolbar({ editor }: { editor: Editor }) {
           {btn("I", state.italic, () => chain().toggleItalic().run(), "Italic")}
           {btn("S", state.strike, () => chain().toggleStrike().run(), "Strikethrough")}
           {btn("<>", state.code, () => chain().toggleCode().run(), "Code")}
+          {marking ? (
+            <span className={styles.swatches} data-testid="highlight-colours">
+              {HIGHLIGHT_COLOURS.map((colour) => (
+                <button
+                  key={colour}
+                  type="button"
+                  className={styles.swatch}
+                  data-colour={colour}
+                  aria-pressed={state.highlight === colour}
+                  aria-label={`Highlight ${colour}`}
+                  title={colour[0]?.toUpperCase() + colour.slice(1)}
+                  data-testid={`highlight-${colour}`}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    chain().toggleHighlight({ colour }).run();
+                    setMarking(false);
+                  }}
+                />
+              ))}
+            </span>
+          ) : (
+            <button
+              type="button"
+              className={styles.marker}
+              data-colour={state.highlight ?? undefined}
+              aria-pressed={state.highlight !== null}
+              aria-label="Highlight"
+              title="Highlight"
+              data-testid="highlight"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                if (state.highlight) chain().unsetHighlight().run();
+                else setMarking(true);
+              }}
+            >
+              <span className={styles.markerDot} />
+            </button>
+          )}
           {btn(
             "Link",
             state.link,

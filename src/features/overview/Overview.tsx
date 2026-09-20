@@ -3,6 +3,7 @@ import { useBoundingsStore } from "@/features/boundings/store";
 import { dayOfMonth, longDate, todayIso, weekdayShort, weekOf } from "@/features/daily/dates";
 import { useDailyStore } from "@/features/daily/store";
 import { useFolioStore } from "@/features/folio/store";
+import { GraphCard } from "@/features/graph/GraphCard";
 import { useLayoutStore } from "@/features/layout/store";
 import { useProjectStore } from "@/features/project/store";
 import { openNoteAt } from "@/features/quickopen/store";
@@ -127,25 +128,29 @@ export function Overview() {
         {projects.length > 0 ? <NewProject /> : null}
       </section>
 
-      {recent.length > 0 ? (
-        <section className={styles.section}>
-          <h2 className={styles.title}>Recent</h2>
-          <ul className={styles.recent} data-testid="overview-recent">
-            {recent.slice(0, RECENTS).map((path) => (
-              <li key={path}>
-                <button
-                  type="button"
-                  className={styles.note}
-                  onClick={() => openNoteAt(path, null)}
-                >
-                  <span className={styles.noteName}>{baseName(path).replace(/\.md$/i, "")}</span>
-                  <span className={styles.noteFolder}>{parentDir(path) || "/"}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+      {/* What you were last writing, and the shape of the whole Folio next to it. */}
+      <div className={styles.pair} data-recent={recent.length > 0 ? "" : undefined}>
+        {recent.length > 0 ? (
+          <section className={styles.section}>
+            <h2 className={styles.title}>Recent</h2>
+            <ul className={styles.recent} data-testid="overview-recent">
+              {recent.slice(0, RECENTS).map((path) => (
+                <li key={path}>
+                  <button
+                    type="button"
+                    className={styles.note}
+                    onClick={() => openNoteAt(path, null)}
+                  >
+                    <span className={styles.noteName}>{baseName(path).replace(/\.md$/i, "")}</span>
+                    <span className={styles.noteFolder}>{parentDir(path) || "/"}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+        <GraphCard />
+      </div>
     </div>
   );
 }

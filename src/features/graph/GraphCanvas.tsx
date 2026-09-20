@@ -35,6 +35,10 @@ interface Props {
   onOpen: (path: string) => void;
   onRefocus?: (path: string) => void;
   compact?: boolean;
+  /** How much room to leave around the picture when it is fitted; the default suits a screen. */
+  margin?: number;
+  /** Named so two graphs can be on screen at once; only the default one carries the e2e hook. */
+  testId?: string;
   controls?: Ref<GraphControls>;
 }
 
@@ -110,6 +114,8 @@ export function GraphCanvas({
   onOpen,
   onRefocus,
   compact = false,
+  margin: marginProp,
+  testId = "graph-canvas",
   controls,
 }: Props) {
   const wrap = useRef<HTMLDivElement>(null);
@@ -142,7 +148,7 @@ export function GraphCanvas({
   const live = useRef({ colours, focus, highlight, compact });
   live.current = { colours, focus, highlight, compact };
 
-  const margin = compact ? 18 : 72;
+  const margin = marginProp ?? (compact ? 18 : 72);
 
   const draw = useCallback(() => {
     const el = canvas.current;
@@ -528,7 +534,7 @@ export function GraphCanvas({
     );
     if (still.current) draw();
     else kick(1);
-    if (import.meta.env.DEV) {
+    if (import.meta.env.DEV && testId === "graph-canvas") {
       // Exposed for e2e only: a canvas has no elements to click, so the suite asks where a
       // note ended up. The same trick `__amlEditor` uses for ProseMirror.
       (
@@ -547,7 +553,7 @@ export function GraphCanvas({
     };
     // `draw` and `kick` change only with the graph, so only a new graph restarts the layout;
     // a new focus, colour or highlight is a repaint (below).
-  }, [graph, draw, kick, margin]);
+  }, [graph, draw, kick, margin, testId]);
 
   // A new focus, colour or highlight is the same picture painted differently.
   // biome-ignore lint/correctness/useExhaustiveDependencies: the props are read through `live`
@@ -658,7 +664,7 @@ export function GraphCanvas({
       <canvas
         ref={canvas}
         className={styles.canvas}
-        data-testid="graph-canvas"
+        data-testid={testId}
         onPointerDown={(e) => {
           const at = toGraph(e.clientX, e.clientY);
           const node = sim.current ? nodeAt(sim.current.nodes, at.x, at.y) : null;

@@ -73,6 +73,14 @@
   --aml-callout-warn: #8a6212;
   --aml-callout-danger: #b04a46;
 
+  /* ---- highlight tones (WP-3.11) ----
+     The four colours a phrase can be marked in. Backgrounds only: the text on them stays
+     --aml-text, and `pnpm contrast` holds every one of them to 4.5:1 against it. */
+  --aml-mark-yellow: #ffe9a8;
+  --aml-mark-blue: #cfe4fb;
+  --aml-mark-green: #cfeacd;
+  --aml-mark-orange: #ffdcb5;
+
   /* Windows' own red under the close button (WP-3.0 follow-up, the merged title bar). It is the
      platform's colour, not AML's, which is why it is the same in Paper and Ink. */
   --aml-caption-close: #c42b1c;
@@ -112,6 +120,11 @@
   --aml-callout-done: #7fb389;
   --aml-callout-warn: #d7a955;
   --aml-callout-danger: #e79b98;
+
+  --aml-mark-yellow: #6a5a1e;
+  --aml-mark-blue: #234a63;
+  --aml-mark-green: #2a5236;
+  --aml-mark-orange: #6b4620;
 
   --aml-shadow-1: 0 0 0 0.5px rgb(255 255 255 / 8%), 0 1px 2px rgb(0 0 0 / 40%);
   --aml-shadow-2:

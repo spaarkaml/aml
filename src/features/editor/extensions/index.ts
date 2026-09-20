@@ -18,6 +18,7 @@ import {
 } from "./aml-nodes";
 import { AutoPair } from "./autopair";
 import { AmlContextMenu } from "./context";
+import { Highlight } from "./highlight";
 import { AmlImage } from "./image";
 import { LinkMenu } from "./linkmenu";
 import { NoteLinks } from "./links";
@@ -73,6 +74,7 @@ export function amlExtensions(): Extensions {
     TableHeader,
     TableCell,
     AmlImage,
+    Highlight,
     FrontMatter,
     Callout,
     CalloutTitle,

@@ -91,6 +91,11 @@
       "expect": "canonicalised",
       "note": "Emphasis normalises to * and **; intraword underscores stay literal"
     },
+    "inline/highlights.md": {
+      "category": "inline",
+      "expect": "canonicalised",
+      "note": "WP-3.11 highlights: ==yellow== and ==phrase=={colour}, marks inside, and text that only looks like one"
+    },
     "inline/code-spans.md": {
       "category": "inline",
       "expect": "lossless",
@@ -159,7 +164,7 @@
     "meta/obsidian-extras.md": {
       "category": "meta",
       "expect": "lossless",
-      "note": "Obsidian comments, dataview fields, block ids and highlights survive as plain text"
+      "note": "Obsidian comments, dataview fields and block ids survive as plain text; its highlights are AML's own (WP-3.11)"
     },
     "edge/empty.md": {
       "category": "edge",
