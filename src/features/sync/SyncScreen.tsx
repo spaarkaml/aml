@@ -108,7 +108,7 @@ export function SyncScreen() {
             AML runs a bundled copy of Syncthing in the background. Nothing leaves your home
             network: relays and global discovery are off.
           </p>
-          <div className={styles.row}>
+          <div className={styles.tile}>
             <span className={running ? styles.ok : styles.warn} data-testid="sync-engine-state">
               {running
                 ? `Running${status?.version ? ` · ${status.version}` : ""}`
@@ -139,8 +139,8 @@ export function SyncScreen() {
           </div>
           {status?.myId ? (
             <div className={styles.idBox}>
-              <span className={styles.muted}>
-                This computer's Device ID (add it on the NAS if it asks):
+              <span className={styles.idLabel}>
+                This computer's Device ID — add it on the NAS if it asks
               </span>
               <code className={styles.deviceId} data-testid="my-device-id">
                 {status.myId}
@@ -155,7 +155,7 @@ export function SyncScreen() {
         <section className={styles.step}>
           <h3>2 · The NAS</h3>
           {nas ? (
-            <div className={styles.row}>
+            <div className={styles.tile}>
               <span className={nas.connected ? styles.ok : styles.warn} data-testid="nas-state">
                 {nas.name} ·{" "}
                 {nas.paused
@@ -224,8 +224,8 @@ export function SyncScreen() {
           {status?.pending.length ? (
             <ul className={styles.list} data-testid="pending-folders">
               {status.pending.map((p) => (
-                <li key={`${p.id}:${p.offeredBy}`} className={styles.row}>
-                  <span>
+                <li key={`${p.id}:${p.offeredBy}`} className={styles.tile}>
+                  <span className={styles.folder}>
                     <strong>{p.label}</strong>{" "}
                     <span className={styles.muted}>offered by {p.offeredByName}</span>
                   </span>
@@ -244,10 +244,11 @@ export function SyncScreen() {
           {status?.folders.length ? (
             <ul className={styles.list} data-testid="synced-folders">
               {status.folders.map((f) => (
-                <li key={f.id} className={styles.row}>
-                  <span>
-                    <strong>{f.label}</strong> <span className={styles.muted}>{f.path}</span>
-                    <br />
+                <li key={f.id} className={styles.tile}>
+                  <span className={styles.folder}>
+                    <span>
+                      <strong>{f.label}</strong> <span className={styles.path}>{f.path}</span>
+                    </span>
                     <span className={f.error || f.failures.length ? styles.warn : styles.muted}>
                       {f.error ??
                         (f.paused
@@ -281,7 +282,7 @@ export function SyncScreen() {
             </ul>
           ) : null}
           {folio && nas && !folioFolder ? (
-            <div className={styles.row}>
+            <div className={styles.tile}>
               <span className={styles.muted}>
                 “{folio.name}” is not synced yet. Share it with the NAS, then accept it there.
               </span>
@@ -315,23 +316,25 @@ export function SyncScreen() {
           </div>
         ) : null}
 
-        <footer className={styles.footer}>
-          <button type="button" className={styles.link} onClick={() => setShowLog((v) => !v)}>
-            {showLog ? "Hide log" : "Show sync log"}
-          </button>
-          {status?.running ? (
-            <button
-              type="button"
-              className={styles.link}
-              onClick={() => void openGui()}
-              title={status.guiUrl}
-              data-testid="sync-open-gui"
-            >
-              Open Syncthing's own view
+        <div className={styles.tail}>
+          <footer className={styles.footer}>
+            <button type="button" className={styles.link} onClick={() => setShowLog((v) => !v)}>
+              {showLog ? "Hide log" : "Show sync log"}
             </button>
-          ) : null}
-        </footer>
-        {showLog ? <pre className={styles.log}>{log.join("\n") || "(empty)"}</pre> : null}
+            {status?.running ? (
+              <button
+                type="button"
+                className={styles.link}
+                onClick={() => void openGui()}
+                title={status.guiUrl}
+                data-testid="sync-open-gui"
+              >
+                Open Syncthing's own view
+              </button>
+            ) : null}
+          </footer>
+          {showLog ? <pre className={styles.log}>{log.join("\n") || "(empty)"}</pre> : null}
+        </div>
       </div>
     </div>
   );

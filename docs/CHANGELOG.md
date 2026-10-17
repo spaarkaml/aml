@@ -4,6 +4,26 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+## 0.5.3 — 2026-10-17
+
+### WP-3.12 — Reformatting, note titles, and the two bars (2026-10-17)
+- **Reformat Note from Markdown.** Markdown pasted as plain text — a heading that is still
+  `## like this`, a list that is still dashes — becomes real formatting on one command, from
+  the palette or the editor's right-click menu. It only touches text that looks like markdown
+  and is not already formatted, and it is one undo.
+- **A new note names itself from its title.** Write `# Thesis outline` at the top of an
+  `Untitled` note and the file becomes `Thesis outline.md`, links and all. A note you have
+  already named is never renamed from its heading.
+- **The NAS sync sheet is the same card as Settings now**: proper padding (it had been
+  missing entirely — a typo in a spacing token threw the whole rule away), states as filled
+  tiles instead of boxed rows, quiet section headings, and one hairline in the sheet rather
+  than four.
+- **The tabs hold still.** The `Folder › Folder › Note` trail has moved to a line of its own
+  under the tabs, so switching or closing a tab no longer shunts the whole row sideways — and
+  the trail now shows the Folio's name as well.
+- Zen was laying the page out in the height of a top bar it does not draw; it has the whole
+  window again.
+
 ## 0.5.2 — 2026-09-20
 
 ### WP-3.11 — Highlighting (2026-09-20)

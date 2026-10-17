@@ -4,7 +4,7 @@
 .root {
   height: 100%;
   display: grid;
-  grid-template-rows: 52px 1fr 28px;
+  grid-template-rows: 52px var(--aml-row) minmax(0, 1fr) 28px;
   /* A grid column defaults to `auto`, which never shrinks below its content's min-content
      width — and a row of tabs has a floor of 76px each. With enough notes open the column
      grew wider than the window, the body and the page grew with it, and the centred text
@@ -14,6 +14,12 @@
   background: var(--aml-bg);
   color: var(--aml-text);
   overflow: hidden;
+}
+
+/* Zen has one child in flow, and it is the page: the bars' rows would otherwise squeeze it
+   into the height of the top bar. */
+.root[data-zen] {
+  grid-template-rows: minmax(0, 1fr);
 }
 
 /* ---- toolbar ---- */
@@ -50,12 +56,26 @@
   padding: 0 var(--aml-space-1);
 }
 
-.crumbs {
+/* ---- the path bar ----
+   Where you are, on a line of its own under the tabs (WP-3.12). It used to share the top bar
+   with them, which meant every switch between notes changed the trail's width and shunted the
+   whole row of tabs sideways. Down here it has room for the Folio's name as well, and the
+   tabs keep still. */
+.pathbar {
   display: flex;
   align-items: center;
   gap: var(--aml-space-1);
+  min-width: 0;
+  padding: 0 var(--aml-space-3);
   color: var(--aml-text-2);
+  font-size: var(--aml-size-sm);
   white-space: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.pathbar::-webkit-scrollbar {
+  display: none;
 }
 
 /* The Project chip (WP-5.2): which book you are in, always in the same place, and the way

@@ -70,6 +70,41 @@ describe("the stylesheets", () => {
     expect(offenders).toEqual([]);
   });
 
+  /**
+   * Set on the root at runtime (Appearance, WP-3.2) or on a node by an extension, so they are
+   * deliberately not in `tokens.css`. Everything else must be, or it silently resolves to
+   * nothing — and a `var()` that does not resolve throws the whole declaration away, which is
+   * how the sync sheet lost the padding off its panel for three releases.
+   */
+  const RUNTIME = new Set([
+    "--aml-measure",
+    "--aml-leading",
+    "--aml-paragraph-spacing",
+    "--aml-callout-label",
+  ]);
+
+  it("name only tokens that exist", () => {
+    const declared = new Set<string>();
+    for (const file of ["src/app/tokens.css", "src/app/global.css"]) {
+      for (const [, name] of readFileSync(file, "utf8").matchAll(/(--aml-[a-z0-9-]+)\s*:/g)) {
+        if (name) declared.add(name);
+      }
+    }
+    const offenders: string[] = [];
+    for (const [path, css] of sheets) {
+      // A sheet may define a custom property of its own, and `var(--x, fallback)` is fine.
+      const local = new Set(
+        [...css.matchAll(/(--aml-[a-z0-9-]+)\s*:/g)].map(([, name]) => name as string),
+      );
+      for (const [, name, fallback] of css.matchAll(/var\((--aml-[a-z0-9-]+)\s*(,?)/g)) {
+        if (!name || fallback === "," || declared.has(name)) continue;
+        if (local.has(name) || RUNTIME.has(name)) continue;
+        offenders.push(`${path}: ${name}`);
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
   it("use the type ramp rather than a px of their own", () => {
     const offenders: string[] = [];
     for (const [path, css] of sheets) {

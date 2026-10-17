@@ -3,6 +3,7 @@ import { AppearanceScreen } from "@/features/appearance/AppearanceScreen";
 import { useAppearance } from "@/features/appearance/useAppearance";
 import { CommandPalette } from "@/features/commands/CommandPalette";
 import { useGlobalShortcuts } from "@/features/commands/useGlobalShortcuts";
+import { useAutoTitle } from "@/features/editor/useAutoTitle";
 import { useGoals } from "@/features/goals/useGoals";
 import { useLayoutStore } from "@/features/layout/store";
 import { QuickOpen } from "@/features/quickopen/QuickOpen";
@@ -10,6 +11,7 @@ import { SettingsScreen } from "@/features/settings/SettingsScreen";
 import { StatsScreen } from "@/features/stats/StatsScreen";
 import { SyncScreen } from "@/features/sync/SyncScreen";
 import { SyncTroubleBanner } from "@/features/sync/SyncTroubleBanner";
+import { Breadcrumb } from "@/features/tabs/Breadcrumb";
 import { useWritingStore } from "@/features/writing/store";
 import type { AppInfo } from "@/ipc";
 import { SidePanel } from "./SidePanel";
@@ -28,6 +30,7 @@ export function Shell({ info, left, right, children }: Props) {
   useAppearance();
   useGlobalShortcuts();
   useGoals();
+  useAutoTitle();
   const leftPanel = useLayoutStore((s) => s.left);
   const rightPanel = useLayoutStore((s) => s.right);
   const closeOverlays = useLayoutStore((s) => s.closeOverlays);
@@ -74,6 +77,10 @@ export function Shell({ info, left, right, children }: Props) {
   return (
     <div className={styles.root}>
       <TopBar />
+      {/* Where you are. Its own line, so switching or closing a tab never moves the tabs. */}
+      <nav className={styles.pathbar} aria-label="Breadcrumb" data-testid="breadcrumb">
+        <Breadcrumb />
+      </nav>
       <div className={styles.body}>
         <SidePanel side="left" title="Browser">
           {left}

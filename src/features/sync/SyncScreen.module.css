@@ -1,12 +1,16 @@
+/* The same modal shape as Settings and Appearance (ADR-013): a raised card on a scrim, with
+   no chrome of its own. What separates one step from the next is space and a filled tile, not
+   a hairline across the sheet — the only rule in here is the one above the footer, because
+   that really is a different region. */
 .backdrop {
   position: fixed;
   inset: 0;
   z-index: 90;
-  background: color-mix(in srgb, var(--aml-text) 18%, transparent);
+  background: var(--aml-scrim);
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  padding-top: 6vh;
+  padding: 8vh var(--aml-space-4) var(--aml-space-6);
   overflow: auto;
 }
 
@@ -20,30 +24,43 @@
 
 .panel {
   position: relative;
-  width: min(640px, 92vw);
-  max-height: 88vh;
-  overflow: auto;
+  width: min(560px, 100%);
+  max-height: 84vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--aml-space-6);
+  padding: var(--aml-space-3) var(--aml-space-4) var(--aml-space-4);
   background: var(--aml-surface);
   color: var(--aml-text);
   border-radius: var(--aml-radius-xl);
   box-shadow: var(--aml-shadow-3);
-  padding: var(--aml-space-4) var(--aml-space-5) var(--aml-space-5);
   font-size: var(--aml-size-md);
 }
 
+/* Stays put while the steps scroll, so the way out is always to hand. */
 .header {
+  position: sticky;
+  top: calc(-1 * var(--aml-space-3));
+  z-index: 1;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: var(--aml-space-2);
+  margin: calc(-1 * var(--aml-space-3)) 0 calc(-1 * var(--aml-space-2));
+  padding: var(--aml-space-3) 0 var(--aml-space-2);
+  background: var(--aml-surface);
 }
 
 .header h2 {
+  flex-grow: 1;
   margin: 0;
   font-size: var(--aml-size-lg);
+  font-weight: var(--aml-weight-semi);
   color: var(--aml-primary);
 }
 
 .close {
+  flex: none;
   width: var(--aml-row);
   height: var(--aml-row);
   display: inline-flex;
@@ -59,16 +76,29 @@
     color var(--aml-dur-1) var(--aml-ease);
 }
 
-.step {
-  margin-top: var(--aml-space-4);
-  padding-top: var(--aml-space-3);
-  border-top: 1px solid var(--aml-muted);
+.close:hover {
+  background: var(--aml-highlight);
+  color: var(--aml-text);
 }
 
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--aml-space-2);
+}
+
+/* The step number and its name, in the quiet caps every section heading wears. */
 .step h3 {
-  margin: 0 0 var(--aml-space-2);
-  font-size: var(--aml-size-md);
-  color: var(--aml-primary);
+  margin: 0;
+  font-size: var(--aml-size-xs);
+  font-weight: var(--aml-weight-semi);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--aml-text-3);
+}
+
+.step p {
+  margin: 0;
 }
 
 .muted {
@@ -83,12 +113,19 @@
   color: var(--aml-accent);
 }
 
-.row {
+/* A state, and what you can do about it: filled rather than boxed. */
+.tile {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: var(--aml-space-3);
-  padding: var(--aml-space-1) 0;
+  padding: var(--aml-space-2) var(--aml-space-3);
+  border-radius: var(--aml-radius);
+  background: var(--aml-highlight);
+}
+
+.tile + .tile {
+  margin-top: var(--aml-space-1);
 }
 
 .form {
@@ -100,47 +137,63 @@
 .form label {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  font-size: var(--aml-size-sm);
-  color: var(--aml-text-2);
+  gap: var(--aml-space-1);
+  font-size: var(--aml-size-xs);
+  color: var(--aml-text-3);
 }
 
 .form input {
   font: inherit;
   font-size: var(--aml-size-md);
-  padding: 6px 8px;
+  height: var(--aml-row);
+  padding: 0 var(--aml-space-2);
   border: 0;
   border-radius: var(--aml-radius-sm);
-  background: var(--aml-bg);
+  background: var(--aml-highlight);
   color: var(--aml-text);
 }
 
 .two {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--aml-space-3);
+  gap: var(--aml-space-2);
 }
 
 .primary,
 .secondary {
+  flex: none;
   font: inherit;
   font-size: var(--aml-size-sm);
-  padding: 5px 12px;
+  height: var(--aml-row);
+  padding: 0 var(--aml-space-3);
+  border: 0;
   border-radius: var(--aml-radius);
-  border: 1px solid var(--aml-primary);
   cursor: default;
   white-space: nowrap;
+  transition:
+    background var(--aml-dur-1) var(--aml-ease),
+    color var(--aml-dur-1) var(--aml-ease);
 }
 
 .primary {
   background: var(--aml-primary);
+  /* The pair `pnpm contrast` checks for a filled button (ADR-013). */
   color: var(--aml-bg);
   align-self: flex-start;
 }
 
+.primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--aml-primary) 88%, var(--aml-text));
+}
+
 .secondary {
-  background: transparent;
+  background: var(--aml-surface);
   color: var(--aml-primary);
+  box-shadow: var(--aml-shadow-1);
+}
+
+.secondary:hover:not(:disabled) {
+  background: var(--aml-highlight);
 }
 
 .primary:disabled,
@@ -148,40 +201,77 @@
   opacity: 0.5;
 }
 
+/* This computer's identity: a label, the ID itself, and the way to copy it. */
 .idBox {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--aml-space-2);
-  margin-top: var(--aml-space-2);
+  padding: var(--aml-space-2) var(--aml-space-3);
+  border-radius: var(--aml-radius);
+  background: var(--aml-highlight);
+}
+
+.idLabel {
+  flex-basis: 100%;
+  font-size: var(--aml-size-xs);
+  color: var(--aml-text-3);
 }
 
 .deviceId {
+  flex: 1 1 auto;
+  min-width: 0;
   font-family: var(--aml-font-mono);
   font-size: var(--aml-size-xs);
+  line-height: 1.5;
   user-select: all;
   word-break: break-all;
+  color: var(--aml-text-2);
 }
 
 .list {
   list-style: none;
   margin: 0;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--aml-space-1);
+}
+
+.folder {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--aml-space-05);
+}
+
+.path {
+  font-size: var(--aml-size-xs);
+  color: var(--aml-text-3);
+  word-break: break-all;
 }
 
 .error {
-  margin-top: var(--aml-space-3);
+  margin: 0;
   padding: var(--aml-space-2) var(--aml-space-3);
-  border: 1px solid var(--aml-accent);
   border-radius: var(--aml-radius);
-  background: var(--aml-highlight);
+  background: color-mix(in srgb, var(--aml-accent) 16%, var(--aml-surface));
+  color: var(--aml-text);
+}
+
+.tail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--aml-space-2);
 }
 
 .footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: var(--aml-space-4);
+  gap: var(--aml-space-3);
+  padding-top: var(--aml-space-3);
+  border-top: 1px solid var(--aml-muted);
   font-size: var(--aml-size-sm);
 }
 
@@ -194,8 +284,12 @@
   cursor: default;
 }
 
+.link:hover {
+  text-decoration: underline;
+}
+
 .log {
-  margin-top: var(--aml-space-2);
+  margin: 0;
   max-height: 200px;
   overflow: auto;
   font-family: var(--aml-font-mono);

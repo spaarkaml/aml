@@ -131,8 +131,7 @@
   transform: rotate(-90deg);
 }
 
-/* Home. The Folio's name is kept for screen readers and stays out of the way on screen —
-   the icon is the affordance, and the trail is shorter for it (WP-3.10). */
+/* Home — and the Folio's name with it, now the trail has a line of its own (WP-3.12). */
 .home {
   display: inline-flex;
   align-items: center;
@@ -159,10 +158,9 @@
 }
 
 .homeName {
-  position: absolute;
-  width: 1px;
-  height: 1px;
+  max-width: 14ch;
+  margin-left: var(--aml-space-1);
   overflow: hidden;
-  clip-path: inset(50%);
   white-space: nowrap;
+  text-overflow: ellipsis;
 }

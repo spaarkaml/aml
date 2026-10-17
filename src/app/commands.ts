@@ -8,6 +8,7 @@ import { useDailyStore } from "@/features/daily/store";
 import { BLOCK_ITEMS } from "@/features/editor/blocks";
 import { getActiveEditor } from "@/features/editor/editorRef";
 import { insertFootnote } from "@/features/editor/footnotes";
+import { reformatNote } from "@/features/editor/reformat";
 import { useEditorStore } from "@/features/editor/store";
 import { useBrowserStore } from "@/features/folio/browserStore";
 import { activeDir, useFolioStore } from "@/features/folio/store";
@@ -178,6 +179,12 @@ const TAB_COMMANDS: Command[] = [
       const p = activeTab();
       if (p) void useFolioStore.getState().trash(p);
     },
+  },
+  {
+    id: "note.reformat",
+    title: "Reformat Note from Markdown",
+    group: "Note",
+    run: () => reformatNote(),
   },
   {
     id: "note.reveal",

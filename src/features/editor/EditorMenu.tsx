@@ -2,6 +2,7 @@ import { useDiagramStore } from "@/features/diagram/store";
 import { ContextMenu, type MenuItem } from "@/features/folio/ContextMenu";
 import { useHistoryStore } from "@/features/history/store";
 import { useEditorMenuStore } from "./contextMenu";
+import { reformatNote } from "./reformat";
 import { useEditorStore } from "./store";
 
 /**
@@ -21,6 +22,8 @@ export function EditorMenu() {
     label: "Note History…",
     run: () => void useHistoryStore.getState().show(),
   };
+  // Pasted markdown arrives as plain paragraphs; this is the way to make it formatting again.
+  const reformat: MenuItem = { label: "Reformat from markdown", run: () => void reformatNote() };
   const items: MenuItem[] = isSvg
     ? [
         {
@@ -37,5 +40,7 @@ export function EditorMenu() {
         },
       ];
 
-  return <ContextMenu x={menu.x} y={menu.y} items={[...items, history]} onClose={close} />;
+  return (
+    <ContextMenu x={menu.x} y={menu.y} items={[...items, reformat, history]} onClose={close} />
+  );
 }

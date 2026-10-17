@@ -4,7 +4,6 @@ import { commandRegistry, formatShortcut } from "@/features/commands/registry";
 import { useLayoutStore } from "@/features/layout/store";
 import { useProjectStore } from "@/features/project/store";
 import { useSettingsStore } from "@/features/settings/store";
-import { Breadcrumb } from "@/features/tabs/Breadcrumb";
 import { TabStrip } from "@/features/tabs/TabStrip";
 import { SHORTCUTS } from "../commands";
 import { Icon } from "../icons";
@@ -51,9 +50,6 @@ export function TopBar() {
       >
         <Icon name="panelLeft" />
       </button>
-      <nav className={styles.crumbs} aria-label="Breadcrumb" data-testid="breadcrumb">
-        <Breadcrumb />
-      </nav>
       {project ? (
         <button
           type="button"

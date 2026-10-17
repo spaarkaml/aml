@@ -122,6 +122,7 @@ Roughly 80–95 AI sessions. Stages 2 and 3 can overlap; 6 and 7 can overlap.
 | 3.8 | **Syntax reveal** (Typora-style): show raw markers for the mark/block under the caret; toggleable |
 | 3.9 | Callouts/admonitions modelled as proper nodes (Obsidian `> [!note]` syntax) — retires those Raw nodes from import |
 | 3.11 | ~~**Highlighting**: mark a phrase in yellow, blue, green or orange~~ **done 2026-09-20, by request**. Written `==marked==` / `==marked=={blue}` — the syntax Obsidian and Pandoc already use, and punctuation rather than tags so a highlight costs no words. Marker button in the selection toolbar, ⌘⇧Y for yellow; an amendment to ADR-003 is proposed in the spec and waits on Bryce |
+| 3.12 | ~~**Reformatting, note titles, and the two bars**: a command that turns pasted markdown into formatting; an `Untitled` note named from its own `#` title; the NAS sync sheet rebuilt to ADR-013; the breadcrumb moved out of the top bar so the tabs hold still~~ **done 2026-10-17, by request** |
 
 ### Quality Gate 3
 - [ ] A ≥ 1,500-word session in Focus + Typewriter; zero blockers logged

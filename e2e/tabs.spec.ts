@@ -93,3 +93,21 @@ test("the Home crumb shows the Overview without closing anything, and Back retur
   await expect(page.getByTestId("note-editor")).toContainText("Quick thoughts.");
   await expect(page.getByTestId("home")).not.toHaveAttribute("aria-current", "page");
 });
+
+test("switching tabs never moves the tabs: the trail has its own line", async ({ page }) => {
+  await openNote(page, "Inbox");
+  await page.getByTestId("folio-tree").getByText("chapters").click();
+  await openNote(page, "03 Influence networks");
+
+  const first = page.getByRole("tab").first();
+  const deep = await first.boundingBox();
+  // Two notes whose trails are nothing like the same length: `Writing › Inbox` against
+  // `Writing › Thesis › chapters › 03 Influence networks`.
+  await page.getByRole("tab").filter({ hasText: "Inbox" }).click();
+  await expect(page.getByTestId("breadcrumb")).toHaveText(/^Writing\s*Inbox$/);
+  expect(await first.boundingBox()).toEqual(deep);
+
+  // And the trail is below the tabs, not beside them.
+  const crumbs = await page.getByTestId("breadcrumb").boundingBox();
+  expect(crumbs?.y ?? 0).toBeGreaterThan((deep?.y ?? 0) + (deep?.height ?? 0));
+});
