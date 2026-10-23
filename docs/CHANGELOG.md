@@ -22,6 +22,7 @@ All notable changes. Format: one entry per work package.
 - **The sync engine is watched.** If it stops while sync is on, AML starts it again, backing
   off if it will not come up. It used to stay stopped until you noticed.
 - Sharing a folder with a second computer no longer drops the first.
+- The graph's zoom test waits for the camera to settle, so a slow machine no longer fails a build over an animation that was still running.
 
 ## 0.5.3 — 2026-10-17
 

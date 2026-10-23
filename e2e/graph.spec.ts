@@ -95,10 +95,15 @@ test("the zoom controls move the view, and Show everything brings the whole grap
   await page.keyboard.press(`${mod}+Shift+G`);
   await expect(page.getByTestId("graph-canvas")).toBeVisible();
   const before = await spread();
+  // The camera eases to a new zoom rather than jumping, so these poll: reading the spread on
+  // the frame after the click catches the animation half-way and is the slower the machine
+  // the more likely it is to fail.
   await page.getByRole("button", { name: "Zoom out" }).click();
-  expect(await spread()).toBeLessThan(before * 0.9);
+  await expect.poll(spread, { message: "the view zoomed out" }).toBeLessThan(before * 0.9);
   await page.getByTestId("graph-fit").click();
-  expect(Math.abs((await spread()) - before)).toBeLessThan(2);
+  await expect
+    .poll(async () => Math.abs((await spread()) - before), { message: "the whole graph is back" })
+    .toBeLessThan(2);
   // Still a working picture after all that: a click opens the note.
   const at = await dotAt(page, "Inbox.md");
   await page.mouse.click(at.x, at.y);
