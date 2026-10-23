@@ -952,6 +952,7 @@ const sync = {
     connected: boolean;
     address: string;
     lastSeen: string | null;
+    lastConnectionSeconds: number | null;
     paused: boolean;
   }>,
   folders: [] as Array<{
@@ -1326,6 +1327,7 @@ export function installDevMocks(): void {
             connected: true,
             address: "192.168.1.20:22000",
             lastSeen: new Date().toISOString(),
+            lastConnectionSeconds: 0,
             paused: false,
           },
         ];
@@ -1341,6 +1343,9 @@ export function installDevMocks(): void {
         return syncStatus();
       }
       case "sync_remove_device":
+        // Syncthing drops a removed device from every folder it was in — which is how a Folio
+        // ends up shared with nothing after a Forget and re-add (WP-4.7).
+        for (const f of sync.folders) f.devices = f.devices.filter((d) => d !== a.deviceId);
         sync.devices = [];
         sync.pending = [];
         return syncStatus();
@@ -1360,7 +1365,15 @@ export function installDevMocks(): void {
           error: null,
         });
         return syncStatus();
-      case "sync_share_folder":
+      case "sync_share_folder": {
+        // Merging, as `set_folder` does: a folder already at this path gains the device.
+        const existing = sync.folders.find((f) => f.path === String(a.path));
+        if (existing) {
+          if (!existing.devices.includes(String(a.deviceId))) {
+            existing.devices.push(String(a.deviceId));
+          }
+          return syncStatus();
+        }
         sync.folders.push({
           id: "writing",
           label: String(a.label ?? "Writing"),
@@ -1375,6 +1388,7 @@ export function installDevMocks(): void {
           error: null,
         });
         return syncStatus();
+      }
       case "sync_is_synced_path":
         return sync.folders.some((f) => String(a.path).startsWith(f.path));
       case "sync_log_tail":

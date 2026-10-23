@@ -4,6 +4,25 @@ All notable changes. Format: one entry per work package.
 
 ## Unreleased
 
+## 0.5.4 — 2026-10-23
+
+### WP-4.7 — Sync that repairs itself (2026-10-23)
+- **A Folio can no longer stop syncing quietly.** AML now records what it has shared with the
+  NAS and puts the share back if anything removes it — checked when sync starts and every
+  half minute after. The fault that prompted this: forgetting the NAS device strips it from
+  every folder it was in, and re-adding it does not put it back, so the Folio was being held
+  by Syncthing and shown to nobody.
+- **The sync sheet says what is actually wrong.** A folder no other computer can see reads
+  *shared with nothing* instead of being called synced, and the **Share this Folio with the
+  NAS** button is on screen to fix it — it used to be hidden exactly when it was needed,
+  because "synced" was decided by the folder's path alone.
+- **"Not connected" has been split into the things it can mean**: nothing shared with the
+  NAS yet; shared, but the NAS has not accepted this computer; or paired and dropping after a
+  few seconds, which is what two computers with no folder in common do.
+- **The sync engine is watched.** If it stops while sync is on, AML starts it again, backing
+  off if it will not come up. It used to stay stopped until you noticed.
+- Sharing a folder with a second computer no longer drops the first.
+
 ## 0.5.3 — 2026-10-17
 
 ### WP-3.12 — Reformatting, note titles, and the two bars (2026-10-17)

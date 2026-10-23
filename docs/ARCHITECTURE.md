@@ -347,6 +347,13 @@ All results are `{status:"ok",data}|{status:"error",error:E}`; `FolioError` is `
 - The UI polls `sync_status` every 5 s while a Folio or the sync screen is open.
 - **`.stignore` is AML's**, written into the Folio root and upgraded in place by `folio::upgrade_stignore` when it is byte-for-byte one AML wrote before (a hand-edited one is the user's and is left alone). Comments in it are `//`, not `#`, and every pattern carries **`(?d)`** — without that Syncthing will not delete a directory that still holds an ignored file, and since macOS leaves a `.DS_Store` in every folder Finder has opened, a folder deleted on the other machine could never be removed and sat in the queue for ever at 95%.
 
+### Sync that repairs itself (WP-4.7)
+- **Intent, kept apart from state.** `aml-shares.json` in the sidecar's home (never in the Folio) records folder id → device ids: what AML has shared with whom. Syncthing's config is the state; this is the intent, and `Syncthing::reconcile` repairs the difference between them — at engine start and at most every `RECONCILE_EVERY` (30 s) from the status poll.
+- **Reconcile only ever adds**, only shares AML recorded, and only devices still in the config. `remove_device` forgets that device's shares in the same call (forgetting the NAS is deliberate, and Syncthing drops a removed device from every folder it was in — which is how a Folio ends up held by Syncthing and visible to nobody). A folder that is no longer in the config is left alone rather than re-created. On first run it adopts whatever the live config already shares, so the protection is not limited to shares made after the update.
+- **`set_folder` merges.** The config API's PUT writes the whole folder, so sharing with a second device used to drop the first; the existing device list is read back and unioned.
+- **The sheet distinguishes a path from a share** (`features/sync/store.ts`): `isShared` asks whether a peer can see the folder, not whether a folder exists at that path — the old test hid the Share button exactly when it was needed. `describeDevice` turns one "not connected yet" into the three states it was hiding, using `lastConnectionSeconds` (Syncthing's `lastConnectionDurationS`): a pairing that holds for a few seconds and drops is two devices with no folder in common.
+- **Watchdog.** `sync_status` asks `due_for_restart` while it already holds the lock and, if so, starts the engine from a background thread (`start` blocks up to 20 s). `note_restart` backs off 5 s, 15 s, 60 s, then 5 min; a success still waits 5 s so an engine that dies on start cannot spin.
+
 ## Updates (WP-8.1 – 8.2)
 
 - **Releasing:** `node scripts/version.mjs <v>` writes the version into `package.json`,

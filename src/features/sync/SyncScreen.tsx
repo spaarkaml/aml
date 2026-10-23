@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Icon } from "@/app/icons";
 import { useFolioStore } from "@/features/folio/store";
 import styles from "./SyncScreen.module.css";
-import { seenAgo, startSyncPolling, syncedFolderFor, useSyncStore } from "./store";
+import { describeDevice, isShared, startSyncPolling, syncedFolderFor, useSyncStore } from "./store";
 
 /**
  * One-time pairing with the NAS and ongoing sync overview (ADR-005). Opened from the Welcome
@@ -57,6 +57,9 @@ export function SyncScreen() {
   const running = status?.running ?? false;
   const nas = status?.devices[0] ?? null;
   const folioFolder = syncedFolderFor(status, folio?.root ?? null);
+  // A folder at the right path is not the same thing as a folder the NAS can see. Before
+  // WP-4.7 this screen conflated the two and hid the Share button exactly when it was needed.
+  const sharedWithNas = isShared(folioFolder, nas?.id);
 
   const copyId = async () => {
     if (!status?.myId) return;
@@ -157,14 +160,7 @@ export function SyncScreen() {
           {nas ? (
             <div className={styles.tile}>
               <span className={nas.connected ? styles.ok : styles.warn} data-testid="nas-state">
-                {nas.name} ·{" "}
-                {nas.paused
-                  ? "paused"
-                  : nas.connected
-                    ? `connected (${nas.address})`
-                    : nas.lastSeen
-                      ? `not connected · last seen ${seenAgo(nas.lastSeen)}`
-                      : "not connected yet"}
+                {nas.name} · {describeDevice(nas, status?.folders ?? [])}
               </span>
               <button
                 type="button"
@@ -249,11 +245,19 @@ export function SyncScreen() {
                     <span>
                       <strong>{f.label}</strong> <span className={styles.path}>{f.path}</span>
                     </span>
-                    <span className={f.error || f.failures.length ? styles.warn : styles.muted}>
+                    <span
+                      className={
+                        f.error || f.failures.length || f.devices.length === 0
+                          ? styles.warn
+                          : styles.muted
+                      }
+                    >
                       {f.error ??
-                        (f.paused
-                          ? "paused"
-                          : `${f.state}${(f.completion ?? 100) < 100 ? ` · ${Math.floor(f.completion ?? 0)}%` : ""}${f.needItems > 0 ? ` · ${f.needItems} items to go` : ""}`)}
+                        (f.devices.length === 0
+                          ? "shared with nothing — no other computer can see it"
+                          : f.paused
+                            ? "paused"
+                            : `${f.state}${(f.completion ?? 100) < 100 ? ` · ${Math.floor(f.completion ?? 0)}%` : ""}${f.needItems > 0 ? ` · ${f.needItems} items to go` : ""}`)}
                     </span>
                     {f.failures.length ? (
                       <ul className={styles.failures} data-testid="sync-failures">
@@ -281,10 +285,12 @@ export function SyncScreen() {
               ))}
             </ul>
           ) : null}
-          {folio && nas && !folioFolder ? (
+          {folio && nas && !sharedWithNas ? (
             <div className={styles.tile}>
               <span className={styles.muted}>
-                “{folio.name}” is not synced yet. Share it with the NAS, then accept it there.
+                {folioFolder
+                  ? `“${folio.name}” is not shared with ${nas.name} — that is why nothing is syncing.`
+                  : `“${folio.name}” is not synced yet. Share it with the NAS, then accept it there.`}
               </span>
               <button
                 type="button"

@@ -48,10 +48,43 @@ pub fn sync_status(app: AppHandle, state: State<AppState>) -> Result<SyncStatus>
             error: None,
         });
     }
-    with_sync(&app, &state, |s| {
+    let (st, due) = with_sync(&app, &state, |s| {
         let enabled = s.settings().enabled;
-        Ok(s.status(enabled))
+        let st = s.status(enabled);
+        // Asked while the lock is already held, so the poll costs nothing extra.
+        let due = s.due_for_restart(enabled);
+        Ok((st, due))
+    })?;
+    // The engine is meant to be running and is not: bring it back without blocking this poll
+    // (`start` waits up to 20 s for Syncthing to answer). WP-4.7.
+    if due {
+        let handle = app.clone();
+        std::thread::spawn(move || restart(&handle));
+    }
+    Ok(st)
+}
+
+/// Watchdog restart, off the polling thread. Mirrors `autostart`, but records the attempt so
+/// a sidecar that will not come up backs off instead of being started every two seconds.
+fn restart(app: &AppHandle) {
+    let state: State<AppState> = app.state();
+    if state.sync_starting.swap(true, Ordering::Relaxed) {
+        return; // a start is already in flight
+    }
+    let r = with_sync(app, &state, |s| {
+        s.start()?;
+        Ok(())
+    });
+    with_sync(app, &state, |s| {
+        s.note_restart(r.is_ok());
+        Ok(())
     })
+    .ok();
+    state.sync_starting.store(false, Ordering::Relaxed);
+    match r {
+        Ok(()) => log::info!("sync: the engine was not running and has been restarted"),
+        Err(e) => log::warn!("sync: restart failed: {e}"),
+    }
 }
 
 /// Starts the sidecar now and remembers to start it on every launch.

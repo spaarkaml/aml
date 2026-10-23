@@ -3,6 +3,7 @@
 //! (add the NAS as a device, accept or offer a folder, read status). Syncthing keeps its own
 //! config and database in the per-device app-data directory, never inside a Folio.
 
+use std::collections::BTreeMap;
 use std::fs;
 use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};
@@ -21,6 +22,11 @@ use crate::folio::{write_atomic, FolioError, Result};
 pub const GUI_PORT: u16 = 41384;
 const API_KEY_FILE: &str = "aml-apikey";
 const SETTINGS_FILE: &str = "sync-settings.json";
+/// What AML has shared with whom, folder id → device ids. Kept beside Syncthing's own config
+/// rather than inside it: it is AML's record of intent, and `reconcile` re-asserts it (WP-4.7).
+const SHARES_FILE: &str = "aml-shares.json";
+/// How often the status poll re-asserts AML's shares (WP-4.7).
+const RECONCILE_EVERY: Duration = Duration::from_secs(30);
 /// The `.stignore` AML writes into every synced Folio.
 ///
 /// Two things here are not decoration. Comments in a Syncthing ignore file start with `//`,
@@ -71,6 +77,10 @@ pub struct SyncDevice {
     pub address: String,
     /// When Syncthing last heard from this device (RFC 3339); `None` if it never has.
     pub last_seen: Option<String>,
+    /// How long the last connection to this device lasted. A pairing that holds for a few
+    /// seconds and drops is the signature of two devices with no folder in common — which
+    /// reads identically to "cannot reach it" unless this is on screen (WP-4.7).
+    pub last_connection_seconds: f64,
     pub paused: bool,
 }
 
@@ -135,6 +145,21 @@ pub struct Syncthing {
     api_key: String,
     child: Option<Child>,
     agent: ureq::Agent,
+    /// Not before this instant may the watchdog try to start the engine again.
+    restart_after: Option<Instant>,
+    restart_failures: u32,
+    /// When `reconcile` last ran, so the status poll can call it without hammering the API.
+    reconciled_at: Option<Instant>,
+}
+
+/// The device IDs a folder object from the config API lists, upper-cased.
+fn device_ids_of(folder: &Value) -> Vec<String> {
+    folder["devices"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter_map(|d| d["deviceID"].as_str().map(str::to_uppercase))
+        .collect()
 }
 
 fn io(e: impl std::fmt::Display) -> FolioError {
@@ -164,6 +189,9 @@ impl Syncthing {
             api_key,
             child: None,
             agent,
+            restart_after: None,
+            restart_failures: 0,
+            reconciled_at: None,
         })
     }
 
@@ -177,6 +205,46 @@ impl Syncthing {
     pub fn save_settings(&self, s: &SyncSettings) -> Result<()> {
         let text = serde_json::to_string_pretty(s).map_err(io)?;
         write_atomic(&self.home.join(SETTINGS_FILE), text.as_bytes())
+    }
+
+    /// What AML has shared with whom: folder id → device ids. Missing or unreadable means
+    /// "nothing recorded", never an error — this is a repair aid, not a source of truth.
+    pub fn shares(&self) -> BTreeMap<String, Vec<String>> {
+        fs::read_to_string(self.home.join(SHARES_FILE))
+            .ok()
+            .and_then(|t| serde_json::from_str(&t).ok())
+            .unwrap_or_default()
+    }
+
+    fn save_shares(&self, shares: &BTreeMap<String, Vec<String>>) -> Result<()> {
+        let text = serde_json::to_string_pretty(shares).map_err(io)?;
+        write_atomic(&self.home.join(SHARES_FILE), text.as_bytes())
+    }
+
+    /// Records that `folder` is meant to be shared with `devices`, so `reconcile` can put the
+    /// share back if anything removes it.
+    fn remember_share(&self, folder: &str, devices: &[String]) -> Result<()> {
+        let mut shares = self.shares();
+        let entry = shares.entry(folder.to_string()).or_default();
+        for d in devices {
+            let d = d.to_uppercase();
+            if !entry.contains(&d) {
+                entry.push(d);
+            }
+        }
+        self.save_shares(&shares)
+    }
+
+    /// Forgets a device everywhere. Removing the NAS is a deliberate act, so the shares that
+    /// named it must go too — otherwise `reconcile` would helpfully pair it again.
+    fn forget_device(&self, device: &str) -> Result<()> {
+        let device = device.to_uppercase();
+        let mut shares = self.shares();
+        for devices in shares.values_mut() {
+            devices.retain(|d| *d != device);
+        }
+        shares.retain(|_, devices| !devices.is_empty());
+        self.save_shares(&shares)
     }
 
     pub fn gui_url(&self) -> String {
@@ -259,6 +327,9 @@ impl Syncthing {
         while Instant::now() < deadline {
             if self.ping().is_ok() {
                 self.apply_defaults()?;
+                if let Err(e) = self.reconcile() {
+                    log::warn!("sync reconcile failed at start-up: {e}");
+                }
                 return Ok(());
             }
             if let Some(c) = &mut self.child {
@@ -396,6 +467,9 @@ impl Syncthing {
     }
 
     pub fn remove_device(&self, id: &str) -> Result<()> {
+        // Syncthing drops a deleted device from every folder it was in, so the record of what
+        // AML shared with it has to go at the same time or `reconcile` would restore it.
+        self.forget_device(id)?;
         self.send("DELETE", &format!("/rest/config/devices/{id}"), None)
     }
 
@@ -406,10 +480,22 @@ impl Syncthing {
         if !ignore.exists() {
             write_atomic(&ignore, STIGNORE.as_bytes())?;
         }
-        let devs: Vec<Value> = devices
-            .iter()
-            .map(|d| json!({ "deviceID": d.to_uppercase() }))
-            .collect();
+        // Merge, never replace. A PUT writes the whole folder, so sharing with a second
+        // device used to drop the first — and a folder is useless to a peer it no longer
+        // lists. The existing devices are read back and kept (WP-4.7).
+        let mut ids: Vec<String> = self
+            .get(&format!("/rest/config/folders/{id}"))
+            .ok()
+            .map(|f| device_ids_of(&f))
+            .unwrap_or_default();
+        for d in devices {
+            let d = d.to_uppercase();
+            if !ids.contains(&d) {
+                ids.push(d);
+            }
+        }
+        let devs: Vec<Value> = ids.iter().map(|d| json!({ "deviceID": d })).collect();
+        self.remember_share(id, devices)?;
         self.send(
             "PUT",
             &format!("/rest/config/folders/{id}"),
@@ -426,6 +512,114 @@ impl Syncthing {
                 "versioning": { "type": "trashcan", "params": { "cleanoutDays": "30" } }
             })),
         )
+    }
+
+    /// Puts back anything that has gone missing from Syncthing's own config since AML set it
+    /// up: a folder that no longer lists a device AML shared it with (WP-4.7).
+    ///
+    /// Only shares AML recorded are re-asserted, and only ever by adding — a device the user
+    /// removed is forgotten at the same time it is removed, and nothing here takes a share
+    /// away. Returns the folders it had to repair.
+    pub fn reconcile(&mut self) -> Result<Vec<String>> {
+        self.reconciled_at = Some(Instant::now());
+        let my_id = self
+            .get("/rest/system/status")
+            .ok()
+            .and_then(|v| v["myID"].as_str().map(str::to_uppercase));
+        let known: Vec<String> = self
+            .get("/rest/config/devices")
+            .ok()
+            .map(|d| {
+                d.as_array()
+                    .into_iter()
+                    .flatten()
+                    .filter_map(|x| x["deviceID"].as_str().map(str::to_uppercase))
+                    .collect()
+            })
+            .unwrap_or_default();
+        // Adopt what is already there. An install from before WP-4.7 has no record of its
+        // shares, so the first run takes the live config as the intent — otherwise the repair
+        // would only ever protect folders shared after the update.
+        let mut shares = self.shares();
+        if let Ok(folders) = self.get("/rest/config/folders") {
+            let mut adopted = false;
+            for f in folders.as_array().into_iter().flatten() {
+                let Some(id) = f["id"].as_str() else { continue };
+                if shares.contains_key(id) {
+                    continue;
+                }
+                let peers: Vec<String> = device_ids_of(f)
+                    .into_iter()
+                    .filter(|d| Some(d.as_str()) != my_id.as_deref())
+                    .collect();
+                if !peers.is_empty() {
+                    shares.insert(id.to_string(), peers);
+                    adopted = true;
+                }
+            }
+            if adopted {
+                self.save_shares(&shares)?;
+            }
+        }
+
+        let mut repaired = Vec::new();
+        for (folder, wanted) in shares {
+            // A folder that is no longer there was removed deliberately; re-creating one from
+            // a remembered share would be putting words in the user's mouth.
+            let Ok(current) = self.get(&format!("/rest/config/folders/{folder}")) else {
+                continue;
+            };
+            let mut ids = device_ids_of(&current);
+            let missing: Vec<String> = wanted
+                .iter()
+                .map(|d| d.to_uppercase())
+                .filter(|d| !ids.contains(d) && known.contains(d))
+                .collect();
+            if missing.is_empty() {
+                continue;
+            }
+            ids.extend(missing);
+            let devs: Vec<Value> = ids.iter().map(|d| json!({ "deviceID": d })).collect();
+            self.send(
+                "PATCH",
+                &format!("/rest/config/folders/{folder}"),
+                Some(&json!({ "devices": devs })),
+            )?;
+            log::info!(
+                "sync: re-shared folder {folder} with {} device(s)",
+                ids.len()
+            );
+            repaired.push(folder);
+        }
+        Ok(repaired)
+    }
+
+    /// True when the engine should be running and is not, and the back-off has elapsed. The
+    /// caller restarts off the polling thread: `start` blocks for as long as Syncthing takes
+    /// to answer, and the status bar must not stop while it does.
+    pub fn due_for_restart(&mut self, enabled: bool) -> bool {
+        if !enabled || self.is_running() {
+            return false;
+        }
+        self.restart_after.is_none_or(|t| Instant::now() >= t)
+    }
+
+    /// Records how a watchdog restart went. Failures back off 5 s, 15 s, 60 s, then 5 min; a
+    /// success still waits 5 s, so an engine that dies on start cannot spin.
+    pub fn note_restart(&mut self, ok: bool) {
+        let wait = if ok {
+            self.restart_failures = 0;
+            5
+        } else {
+            self.restart_failures = self.restart_failures.saturating_add(1);
+            match self.restart_failures {
+                1 => 5,
+                2 => 15,
+                3 => 60,
+                _ => 300,
+            }
+        };
+        self.restart_after = Some(Instant::now() + Duration::from_secs(wait));
     }
 
     pub fn status(&mut self, enabled: bool) -> SyncStatus {
@@ -445,6 +639,16 @@ impl Syncthing {
             return st;
         }
         st.running = true;
+        // Cheap enough at this interval, and it is the only thing standing between a share
+        // that has gone missing and a Folio that silently stops syncing.
+        if self
+            .reconciled_at
+            .is_none_or(|t| t.elapsed() >= RECONCILE_EVERY)
+        {
+            if let Err(e) = self.reconcile() {
+                log::warn!("sync reconcile failed: {e}");
+            }
+        }
         match self.fill_status(&mut st) {
             Ok(()) => {}
             Err(e) => st.error = Some(e.to_string()),
@@ -473,6 +677,9 @@ impl Syncthing {
                 connected: c["connected"].as_bool().unwrap_or(false),
                 address: c["address"].as_str().unwrap_or_default().to_string(),
                 last_seen: last_seen(&seen[&id]["lastSeen"]),
+                last_connection_seconds: seen[&id]["lastConnectionDurationS"]
+                    .as_f64()
+                    .unwrap_or(0.0),
                 paused: d["paused"].as_bool().unwrap_or(false),
                 id,
             });
@@ -669,6 +876,26 @@ mod tests {
         let st = s.status(true);
         assert_eq!(st.folders.len(), 1);
         assert_eq!(st.folders[0].devices.len(), 1);
+
+        // WP-4.7: whatever takes the share away — Syncthing's own UI, a removed and re-added
+        // device — the next reconcile puts it back.
+        s.send(
+            "PATCH",
+            "/rest/config/folders/folio",
+            Some(&json!({ "devices": [] })),
+        )
+        .unwrap();
+        assert!(s.status(true).folders[0].devices.is_empty());
+        let repaired = s.reconcile().unwrap();
+        assert_eq!(repaired, vec!["folio".to_string()]);
+        assert_eq!(s.status(true).folders[0].devices.len(), 1);
+
+        // Forgetting the device is deliberate, so the share is forgotten with it.
+        let nas = st.devices[0].id.clone();
+        s.remove_device(&nas).unwrap();
+        assert!(s.shares().is_empty());
+        assert!(s.reconcile().unwrap().is_empty());
+
         s.stop();
         assert!(!s.is_running());
     }
@@ -683,6 +910,72 @@ mod tests {
         assert!(!a.settings().enabled);
         a.save_settings(&SyncSettings { enabled: true }).unwrap();
         assert!(b.settings().enabled);
+    }
+
+    #[test]
+    fn shares_are_remembered_and_forgotten_with_the_device() {
+        let dir = tempfile::tempdir().unwrap();
+        let s = Syncthing::new(dir.path()).unwrap();
+        assert!(s.shares().is_empty());
+
+        s.remember_share("folio", &["aaa".into(), "bbb".into()])
+            .unwrap();
+        s.remember_share("folio", &["bbb".into()]).unwrap();
+        assert_eq!(
+            s.shares()["folio"],
+            vec!["AAA".to_string(), "BBB".to_string()]
+        );
+
+        // Read back through a second handle: this has to survive a restart of the app.
+        let other = Syncthing::new(dir.path()).unwrap();
+        assert_eq!(other.shares()["folio"].len(), 2);
+
+        s.forget_device("aaa").unwrap();
+        assert_eq!(s.shares()["folio"], vec!["BBB".to_string()]);
+        s.forget_device("BBB").unwrap();
+        assert!(s.shares().is_empty(), "an empty share is not kept");
+    }
+
+    #[test]
+    fn a_folders_existing_devices_are_read_back_for_the_merge() {
+        let folder = json!({
+            "id": "folio",
+            "devices": [{ "deviceID": "aaa" }, { "deviceID": "BBB" }]
+        });
+        assert_eq!(
+            device_ids_of(&folder),
+            vec!["AAA".to_string(), "BBB".to_string()]
+        );
+        assert!(device_ids_of(&json!({ "id": "folio" })).is_empty());
+    }
+
+    #[test]
+    fn the_watchdog_backs_off_and_resets() {
+        let dir = tempfile::tempdir().unwrap();
+        let mut s = Syncthing::new(dir.path()).unwrap();
+        assert!(s.restart_after.is_none());
+        for (failures, least) in [(1u32, 5u64), (2, 15), (3, 60), (4, 300), (5, 300)] {
+            s.note_restart(false);
+            assert_eq!(s.restart_failures, failures);
+            let wait = s.restart_after.unwrap() - Instant::now();
+            assert!(
+                wait.as_secs() + 1 >= least && wait.as_secs() <= least,
+                "failure {failures}: waited {wait:?}, expected about {least}s"
+            );
+        }
+        s.note_restart(true);
+        assert_eq!(s.restart_failures, 0, "a success clears the count");
+        assert!(
+            s.restart_after.is_some(),
+            "but still waits before trying again"
+        );
+    }
+
+    #[test]
+    fn a_disabled_engine_is_never_restarted() {
+        let dir = tempfile::tempdir().unwrap();
+        let mut s = Syncthing::new(dir.path()).unwrap();
+        assert!(!s.due_for_restart(false));
     }
 
     #[test]

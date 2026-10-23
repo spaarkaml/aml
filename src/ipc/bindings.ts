@@ -636,6 +636,12 @@ export type SyncDevice = {
 	address: string,
 	/**  When Syncthing last heard from this device (RFC 3339); `None` if it never has. */
 	lastSeen: string | null,
+	/**
+	 *  How long the last connection to this device lasted. A pairing that holds for a few
+	 *  seconds and drops is the signature of two devices with no folder in common — which
+	 *  reads identically to "cannot reach it" unless this is on screen (WP-4.7).
+	 */
+	lastConnectionSeconds: number | null,
 	paused: boolean,
 };
 

@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import type { SyncDevice, SyncFolder, SyncStatus } from "@/ipc";
 import {
+  describeDevice,
   describeSync,
+  isShared,
   OFFLINE_AFTER_MS,
   STALLED_AFTER_MS,
   seenAgo,
@@ -20,6 +22,7 @@ function device(over: Partial<SyncDevice> = {}): SyncDevice {
     connected: true,
     address: "tcp://10.0.0.9:22000",
     lastSeen: null,
+    lastConnectionSeconds: 0,
     paused: false,
     ...over,
   };
@@ -169,5 +172,72 @@ describe("sync health (WP-4.3)", () => {
     expect(seenAgo("2026-09-14T09:59:30Z", t0)).toBe("just now");
     expect(seenAgo("2026-09-14T09:48:00Z", t0)).toBe("12 min ago");
     expect(seenAgo("2026-09-13T09:00:00Z", t0)).toBe("yesterday");
+  });
+});
+
+describe("isShared", () => {
+  it("knows a folder nobody can see from one the NAS has", () => {
+    expect(isShared(folder())).toBe(true);
+    expect(isShared(folder({ devices: [] }))).toBe(false);
+    expect(isShared(null)).toBe(false);
+  });
+
+  it("can ask about one device in particular", () => {
+    expect(isShared(folder(), NAS)).toBe(true);
+    expect(isShared(folder(), "SOMEONE-ELSE")).toBe(false);
+  });
+});
+
+describe("describeDevice", () => {
+  it("says what a connected device is connected to", () => {
+    expect(describeDevice(device(), [folder()])).toContain("connected (tcp://10.0.0.9:22000)");
+  });
+
+  it("does not call a device that shares nothing a working pairing, connected or not", () => {
+    expect(describeDevice(device(), [folder({ devices: [] })])).toContain(
+      "no folder is shared with it",
+    );
+  });
+
+  it("names the real fault when a pairing has nothing shared with it", () => {
+    const d = device({ connected: false, lastSeen: "2026-10-18T02:58:05Z" });
+    expect(describeDevice(d, [folder({ devices: [] })])).toContain("no folder is shared with it");
+  });
+
+  it("calls out a connection that keeps dropping, with how long it held", () => {
+    const d = device({
+      connected: false,
+      lastSeen: "2026-10-18T02:58:05Z",
+      lastConnectionSeconds: 19.7,
+    });
+    expect(describeDevice(d, [folder()])).toContain("connects and drops after 20s");
+  });
+
+  it("says the NAS has not accepted us when it has never been seen", () => {
+    const d = device({ connected: false, lastSeen: null });
+    expect(describeDevice(d, [folder()])).toContain("waiting for the NAS to accept");
+  });
+
+  it("is plain about a long absence", () => {
+    const d = device({
+      connected: false,
+      lastSeen: "2026-10-01T02:58:05Z",
+      lastConnectionSeconds: 3600,
+    });
+    expect(describeDevice(d, [folder()])).toContain("not connected · last seen");
+  });
+
+  it("reports a paused device as paused, whatever else is true", () => {
+    expect(describeDevice(device({ paused: true }), [])).toBe("paused");
+  });
+});
+
+describe("describeSync", () => {
+  it("separates a Folio shared with nobody from having no NAS at all", () => {
+    const unshared = status({ folders: [folder({ devices: [] })] });
+    expect(describeSync(unshared, ROOT)).toBe("Not shared");
+    expect(describeSync(status({ devices: [], folders: [folder({ devices: [] })] }), ROOT)).toBe(
+      "No NAS paired",
+    );
   });
 });

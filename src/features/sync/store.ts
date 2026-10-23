@@ -1,7 +1,7 @@
 import { open as openDialog } from "@tauri-apps/plugin-dialog";
 import { create } from "zustand";
 import { describeFolioError } from "@/features/folio/errors";
-import { commands, type SyncStatus } from "@/ipc";
+import { commands, type SyncDevice, type SyncFolder, type SyncStatus } from "@/ipc";
 
 export const POLL_MS = 5000;
 
@@ -234,6 +234,47 @@ export function syncedFolderFor(status: SyncStatus | null, path: string | null) 
 }
 
 /**
+ * True when `folder` is shared with at least one peer. A folder Syncthing holds but no device
+ * can see is not synced in any sense that matters — and before WP-4.7 the sync sheet called it
+ * synced because a folder with that path existed, which hid the one button that would fix it.
+ */
+export function isShared(folder: SyncFolder | null, deviceId?: string): boolean {
+  if (!folder) return false;
+  return deviceId ? folder.devices.includes(deviceId) : folder.devices.length > 0;
+}
+
+/** A connection that drops this quickly never carried any data. */
+const BRIEF_CONNECTION_S = 60;
+
+/**
+ * Why a paired device is not connected, in the words that say what to do about it. All three
+ * of these used to read "not connected yet", which is true of every one of them and useful
+ * about none (WP-4.7).
+ */
+export function describeDevice(device: SyncDevice, folders: SyncFolder[]): string {
+  if (device.paused) return "paused";
+  const shares = folders.some((f) => f.devices.includes(device.id));
+  if (device.connected) {
+    // Connected and sharing nothing is not a working pairing: Syncthing compares folder lists,
+    // finds none in common and hangs up a few seconds later.
+    return shares
+      ? `connected (${device.address})`
+      : "connected, but no folder is shared with it — nothing to sync";
+  }
+  const held = device.lastConnectionSeconds ?? 0;
+  if (!shares) {
+    return "paired, but no folder is shared with it — nothing to sync, so it hangs up";
+  }
+  if (!device.lastSeen) {
+    return "not connected yet — waiting for the NAS to accept this computer";
+  }
+  if (held > 0 && held < BRIEF_CONNECTION_S) {
+    return `connects and drops after ${Math.round(held)}s · last seen ${seenAgo(device.lastSeen)}`;
+  }
+  return `not connected · last seen ${seenAgo(device.lastSeen)}`;
+}
+
+/**
  * Short label for the status bar. Connecting to a NAS has several distinct waits — the sidecar
  * booting, the device being found, the folder catching up — and they used to collapse into one
  * "NAS offline", which reads as a failure while everything is in fact working.
@@ -255,7 +296,8 @@ export function describeSync(
   if (folder.error) return "Sync error";
   if (folder.paused) return "Sync paused";
   const peers = status.devices.filter((d) => folder.devices.includes(d.id));
-  if (peers.length === 0) return "No NAS paired";
+  // Paired but unshared is its own state: the NAS is there, this Folio just is not going to it.
+  if (peers.length === 0) return status.devices.length > 0 ? "Not shared" : "No NAS paired";
   if (peers.every((d) => d.paused)) return "Sync paused";
   if (!peers.some((d) => d.connected)) {
     const waited = disconnectedSince === null ? 0 : now - disconnectedSince;

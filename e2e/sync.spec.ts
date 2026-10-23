@@ -50,3 +50,34 @@ test("an open Folio can be shared with the NAS; status bar shows progress", asyn
   await expect(screen).toHaveCount(0);
   await expect(page.getByTestId("sync-state")).toHaveText("Syncing 42%");
 });
+
+test("forgetting the NAS unshares the Folio, and the sheet says so and offers the repair", async ({
+  page,
+}) => {
+  await page.getByRole("button", { name: "Open Folio…" }).click();
+  await page.keyboard.press(process.platform === "darwin" ? "Meta+K" : "Control+K");
+  await page.getByTestId("palette-input").fill("nas sync");
+  await page.keyboard.press("Enter");
+  const screen = page.getByTestId("sync-screen");
+  await screen.getByTestId("sync-enable").click();
+  await screen.getByTestId("nas-device-id").fill(NAS_ID);
+  await screen.getByTestId("nas-add").click();
+  await screen.getByTestId("share-folio").click();
+  await expect(screen.getByTestId("synced-folders")).toContainText("syncing");
+  await expect(screen.getByTestId("share-folio")).toHaveCount(0);
+
+  // Exactly what broke the real pairing: Forget strips the device from the folder, and
+  // re-adding it does not put it back (WP-4.7).
+  await screen.getByRole("button", { name: "Forget" }).click();
+  await screen.getByTestId("nas-device-id").fill(NAS_ID);
+  await screen.getByTestId("nas-add").click();
+
+  // The sheet used to call this folder synced, because a folder with that path existed.
+  await expect(screen.getByTestId("synced-folders")).toContainText("shared with nothing");
+  await expect(screen.getByTestId("nas-state")).toContainText("no folder is shared with it");
+
+  // And the way out is on screen rather than in Syncthing's own UI.
+  await screen.getByTestId("share-folio").click();
+  await expect(screen.getByTestId("synced-folders")).not.toContainText("shared with nothing");
+  await expect(screen.getByTestId("share-folio")).toHaveCount(0);
+});
